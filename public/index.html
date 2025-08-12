@@ -3,22 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEST - Al Jameel MES</title>
+    <title>Al Jameel MES - Manufacturing Excellence</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background: purple;
-            color: yellow;
-            font-size: 50px;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #a32034 0%, #d5a333 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+        }
+        
+        .container {
             text-align: center;
-            padding: 50px;
-            font-family: Arial;
+            max-width: 90%;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-transform: uppercase; /* This makes it all caps */
+        }
+        
+        p {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        
+        .workspace-text {
+            font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+            opacity: 0.95;
+            margin: 1.5rem 0;
+            font-weight: 500;
+            color: #d5a333; /* Gold color to make it stand out */
+        }
+        
+        .status {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🚨 TEST PAGE 🚨</h1>
-    <p>AL JAMEEL MES</p>
-    <p>Select Your Work Space</p>
-    <p>If you can see this purple page, updates are working!</p>
+    <div class="container">
+        <h1>Al Jameel MES</h1> <!-- Will show as "AL JAMEEL MES" -->
+        <p>Manufacturing Execution System</p>
+        <p class="workspace-text">Select Your Work Space</p> <!-- Your new text in gold -->
+        <p>Pistachio • Walnut • Cardamom</p>
+        <div class="status">✅ GitHub Pages Setup Complete</div>
+    </div>
 </body>
 </html>
