@@ -1,74 +1,66 @@
+<!-- public/index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Al Jameel MES - Manufacturing Excellence</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #a32034 0%, #d5a333 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-        }
-        
-        .container {
-            text-align: center;
-            max-width: 90%;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        h1 {
-            font-size: clamp(1.5rem, 5vw, 3rem);
-            margin-bottom: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        p {
-            font-size: clamp(1rem, 3vw, 1.25rem);
-            opacity: 0.9;
-            line-height: 1.6;
-            margin-bottom: 0.5rem;
-        }
-        
-        .status {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            margin-top: 1rem;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                margin: 1rem;
-                padding: 1.5rem;
-            }
-        }
-    </style>
+    <meta name="description" content="Al Jameel International - Manufacturing Execution Suite">
+    <meta name="theme-color" content="#a32034">
+    
+    <!-- PWA Meta -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="src/styles.css" as="style">
+    <link rel="preload" href="src/app.js" as="script" type="module">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="src/styles.css">
+    
+    <title>Al Jameel MES</title>
 </head>
-<body>
-    <div class="container">
-        <h1>Al Jameel MES</h1>
-        <p>Manufacturing Execution System</p>
-        <p>Select Your Work Space</p>
-        <p>Pistachio • Walnut • Cardamom</p>
-        <div class="status">✅ GitHub Pages Setup Complete</div>
+<body class="bg-light-gray text-dark-charcoal">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen" aria-hidden="true">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+        </div>
+        <p class="loading-text" data-i18n="loading">Loading...</p>
     </div>
+    <!-- App Container -->
+    <div id="app" class="app-container" role="main">
+        <!-- Navigation will be injected here -->
+        <nav id="navbar" class="navbar" role="navigation" aria-label="Main navigation"></nav>
+        
+        <!-- Main Content Area -->
+        <main id="main-content" class="main-content" role="main" aria-live="polite">
+            <!-- Page content will be dynamically loaded here -->
+        </main>
+        
+        <!-- Modal Container -->
+        <div id="modal-container" class="modal-container" role="dialog" aria-hidden="true"></div>
+        
+        <!-- Toast Container -->
+        <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+    </div>
+    <!-- Scripts -->
+    <script type="module" src="src/app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
