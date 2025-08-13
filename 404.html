@@ -1,0 +1,12 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Not found — Redirecting</title>
+<script>
+  var parts = window.location.pathname.split('/').slice(0,2).join('/');
+  window.location.replace(parts + "/public/");
+</script>
+<p>If you are not redirected, <a id="l" href="#">click here</a>.</p>
+<script>
+  var parts = window.location.pathname.split('/').slice(0,2).join('/');
+  document.getElementById('l').href = parts + "/public/";
+</script>
