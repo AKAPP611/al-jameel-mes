@@ -1,0 +1,5 @@
+[
+  { "key": "big_bag", "name": "Big Bag", "nominal_kg": 998.7 },
+  { "key": "carton",  "name": "Carton", "nominal_kg": 11.34 },
+  { "key": "bag25",   "name": "Bag 25 kg", "nominal_kg": 25 }
+]
