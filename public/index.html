@@ -1,64 +1,45 @@
-import { Card } from '../components/card.js';
-import { Button } from '../components/button.js';
-import { KpiTile } from '../components/kpi-tile.js';
-import { Progress } from '../components/progress.js';
-import { goTo, getText } from '../app.js';
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Al Jameel MES</title>
+    <meta name="theme-color" content="#a32034" />
+    <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23a32034'/%3E%3Cpath d='M18 41c9-6 19-6 28 0' stroke='%23d5a333' stroke-width='4' fill='none'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div class="bg-hero" aria-hidden="true"></div>
 
-export function FactorySelectView(mount, { t }) {
-  mount.innerHTML = `
-    <section class="grid" aria-labelledby="sectionTitle">
-      <div class="row" style="justify-content:space-between; align-items:end;">
-        <div>
-          <h2 id="sectionTitle" class="section">${t('selectFactory')}</h2>
-          <p style="margin:0;color:#6b7280">Tap a factory to view today’s performance.</p>
+    <a class="skip-link" href="#app">Skip to content</a>
+
+    <header class="app-header" role="banner">
+      <div class="container header-row">
+        <div class="brand-lockup">
+          <div class="logo" aria-hidden="true">
+            <span class="dot"></span><span class="ring"></span>
+          </div>
+          <h1 class="brand">Al Jameel MES</h1>
+        </div>
+        <nav class="lang-switch" aria-label="Language">
+          <button class="pill" data-lang="en" aria-pressed="true">EN</button>
+          <button class="pill" data-lang="ar">العربية</button>
+          <button class="pill" data-lang="hi">हिन्दी</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="app" class="container" role="main" tabindex="-1"></main>
+
+    <footer class="app-footer" role="contentinfo">
+      <div class="container footer-row">
+        <span id="todayDate" aria-live="polite"></span>
+        <div class="footer-actions">
+          <button id="dirToggle" class="ghost" aria-label="Toggle text direction">↔ LTR/RTL</button>
         </div>
       </div>
-      <div id="factoryGrid" class="grid grid-3" role="list"></div>
-    </section>
-  `;
+    </footer>
 
-  Promise.all([
-    fetch('./src/data/mock/factories.json').then(r=>r.json()),
-    fetch('./src/data/mock/production_today.json').then(r=>r.json())
-  ]).then(([factories, prod])=>{
-    const grid = mount.querySelector('#factoryGrid');
-    factories.forEach(f=>{
-      const p = prod[f.key] || { actualKg:0, targetKg:0, efficiency:0, rejectRate:0 };
-      const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
-      const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1,p.targetKg)) * 100));
-
-      const emoji = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
-
-      const cardEl = Card({
-        title: `${emoji} ${f.name}`,
-        subtitle: `${getText('today')}: ${p.actualKg.toLocaleString()} kg`,
-        content: `
-          <div class="grid grid-3" aria-label="Key performance indicators">
-            ${KpiTile({ label: getText('efficiency'), value: `${p.efficiency}%`, state: effClass })}
-            ${KpiTile({ label: getText('rejectRate'), value: `${p.rejectRate}%`, state: p.rejectRate<2 ? 'ok' : (p.rejectRate<5?'warn':'bad') })}
-            <div class="kpi" role="group" aria-label="Target progress">
-              <div class="label">Target Progress</div>
-              <div><strong>${progressPct}%</strong> &middot; ${p.actualKg.toLocaleString()} / ${p.targetKg.toLocaleString()} kg</div>
-              ${Progress({ value: progressPct })}
-            </div>
-          </div>
-        `,
-        footer: Button({
-          text: getText('view'),
-          attrs: { 'data-factory': f.key, class: 'cta btn', 'aria-label': `Open ${f.name} dashboard` }
-        })
-      });
-      cardEl.setAttribute('role','listitem');
-      grid.appendChild(cardEl);
-    });
-
-    grid.addEventListener('click', (e)=>{
-      const btn = e.target.closest('[data-factory]');
-      if (!btn) return;
-      const factory = btn.getAttribute('data-factory');
-      goTo('#/dashboard', { factory });
-    });
-  }).catch(()=>{
-    mount.innerHTML = `<div class="card"><p>Failed to load mock data. Check file paths.</p></div>`;
-  });
-}
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
