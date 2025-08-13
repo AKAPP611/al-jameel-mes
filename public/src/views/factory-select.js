@@ -1,5 +1,3 @@
-<h2 id="sectionTitle" class="section">Select Work Space</h2>
-
 import { Card } from '../components/card.js';
 import { Button } from '../components/button.js';
 import { KpiTile } from '../components/kpi-tile.js';
