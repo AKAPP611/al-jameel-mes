@@ -2,9 +2,9 @@
 import { FactorySelectView } from './views/factory-select.js';
 
 const i18n = {
-  en: { factories: "Factories", today: "Today", efficiency: "Efficiency", rejectRate: "Reject Rate", view: "View", selectFactory: "Select a Factory" },
-  ar: { factories: "المصانع", today: "اليوم", efficiency: "الكفاءة", rejectRate: "نسبة الرفض", view: "عرض", selectFactory: "اختر مصنعًا" },
-  hi: { factories: "कारख़ाने", today: "आज", efficiency: "दक्षता", rejectRate: "रिजेक्ट दर", view: "देखें", selectFactory: "फ़ैक्टरी चुनें" }
+  en: { factories: "Factories", today: "Today", efficiency: "Efficiency", rejectRate: "Reject Rate", view: "View", selectFactory: "Select Work Space" },
+  ar: { factories: "المصانع", today: "اليوم", efficiency: "الكفاءة", rejectRate: "نسبة الرفض", view: "عرض", selectFactory: "اختر مساحة العمل" },
+  hi: { factories: "कारख़ाने", today: "आज", efficiency: "दक्षता", rejectRate: "रिजेक्ट दर", view: "देखें", selectFactory: "वर्क स्पेस चुनें" }
 };
 let lang = localStorage.getItem('lang') || 'en';
 applyLang(lang);
