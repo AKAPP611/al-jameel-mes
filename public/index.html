@@ -1,66 +1,34 @@
-<!-- public/index.html -->
-<!DOCTYPE html>
-<html lang="en" dir="ltr" data-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Al Jameel International - Manufacturing Execution Suite">
-    <meta name="theme-color" content="#a32034">
-    
-    <!-- PWA Meta -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="assets/icons/favicon.ico">
-    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-    
-    <!-- Preload Critical Resources -->
-    <link rel="preload" href="src/styles.css" as="style">
-    <link rel="preload" href="src/app.js" as="script" type="module">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="src/styles.css">
-    
-    <title>Al Jameel MES</title>
-</head>
-<body class="bg-light-gray text-dark-charcoal">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen" aria-hidden="true">
-        <div class="loading-spinner">
-            <div class="spinner-ring"></div>
-        </div>
-        <p class="loading-text" data-i18n="loading">Loading...</p>
-    </div>
-    <!-- App Container -->
-    <div id="app" class="app-container" role="main">
-        <!-- Navigation will be injected here -->
-        <nav id="navbar" class="navbar" role="navigation" aria-label="Main navigation"></nav>
-        
-        <!-- Main Content Area -->
-        <main id="main-content" class="main-content" role="main" aria-live="polite">
-            <!-- Page content will be dynamically loaded here -->
-        </main>
-        
-        <!-- Modal Container -->
-        <div id="modal-container" class="modal-container" role="dialog" aria-hidden="true"></div>
-        
-        <!-- Toast Container -->
-        <div id="toast-container" class="toast-container" aria-live="assertive"></div>
-    </div>
-    <!-- Scripts -->
-    <script type="module" src="src/app.js"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
-    </script>
-</body>
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Al Jameel MES — It works</title>
+    <meta name="theme-color" content="#a32034" />
+    <style>
+      :root {
+        --primary: #a32034;
+        --accent: #d5a333;
+        --text: #2f2a28;
+        --bg: #f3f4f6;
+        --surface: #ffffff;
+      }
+      * { box-sizing: border-box; }
+      body { margin:0; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, sans-serif; background: var(--bg); color: var(--text); }
+      .wrap { min-height: 100vh; display:grid; place-items:center; padding:24px; }
+      .card { background:var(--surface); border-radius:16px; padding:24px; box-shadow: 0 4px 20px rgba(0,0,0,.06); max-width:560px; width:100%; }
+      h1 { margin:0 0 8px; }
+      a.btn { display:inline-block; padding:14px 18px; background:var(--primary); color:#fff; border-radius:12px; text-decoration:none; font-weight:600; margin-top:12px; min-height:44px; }
+      a.btn:focus { outline:3px solid #000; outline-offset:2px; }
+    </style>
+  </head>
+  <body>
+    <main class="wrap" role="main">
+      <section class="card" aria-label="Setup confirmation">
+        <h1>Al Jameel MES</h1>
+        <p>Setup successful. Next: we’ll replace this page with the UX screens.</p>
+        <a class="btn" href="./">Open App</a>
+      </section>
+    </main>
+  </body>
 </html>
