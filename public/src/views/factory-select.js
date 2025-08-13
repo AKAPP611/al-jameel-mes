@@ -1,7 +1,7 @@
 // SAFE FALLBACK VIEW: no imports, inline components, built-in mock data.
 // Renders "Select Work Space" cards even if other modules are missing.
 
-import { goTo, getText } from '../app.js';
+import { goTo, t as getText } from '../app.js';
 
 // Minimal inline components
 function KpiTile({ label, value, state='ok' }) {
