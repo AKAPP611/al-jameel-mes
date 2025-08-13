@@ -55,18 +55,20 @@ const FALLBACK_PROD = {
 export function FactorySelectView(mount) {
   // Shell with skeletons (so it's never blank)
   mount.innerHTML = `
-    <section class="grid" aria-labelledby="sectionTitle">
-      <div>
-        <h2 id="sectionTitle" class="section">${getText('selectFactory')}</h2>
-        <p class="section-sub">Pick a workspace to view today’s performance.</p>
-      </div>
-      <div id="factoryGrid" class="grid grid-3" role="list">
-        <div class="skel skel-card"></div>
-        <div class="skel skel-card"></div>
-        <div class="skel skel-card"></div>
-      </div>
-    </section>
-  `;
+  <section class="grid" aria-labelledby="sectionTitle">
+    <div style="text-align:center">
+      <img src="./only logo.ico" alt="Al Jameel Logo"
+           style="width:64px; height:64px; margin-bottom:0.5rem;">
+      <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
+      <p class="section-sub">Pick a workspace to view today’s performance.</p>
+    </div>
+    <div id="factoryGrid" class="grid grid-3" role="list">
+      <div class="skel skel-card"></div>
+      <div class="skel skel-card"></div>
+      <div class="skel skel-card"></div>
+    </div>
+  </section>
+`;
 
   // Try to load JSON; fall back to built-in data on any error
   Promise.allSettled([
