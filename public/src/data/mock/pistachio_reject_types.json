@@ -1,0 +1,11 @@
+[
+  { "key": "non_split", "name": "Non-Split (Closed)", "color": "#e11d48" },
+  { "key": "light_stain", "name": "Light Stain", "color": "#f59e0b" },
+  { "key": "adhering_hull", "name": "Adhering Hull", "color": "#e5e7eb" },
+  { "key": "dark_stain", "name": "Dark Stain", "color": "#111827" },
+  { "key": "shell_split_pre1", "name": "Shell & Split (Pre-clean 1)", "color": "#1e3a8a" },
+  { "key": "undersize_kernel_pre2", "name": "Undersize 30/64 & Kernel (Pre-clean 2)", "color": "#9ca3af" },
+  { "key": "loose_shell", "name": "Loose Shell", "color": "#ea580c" },
+  { "key": "loose_kernel", "name": "Loose Kernel", "color": "#16a34a" },
+  { "key": "dust", "name": "Dust", "color": "#9f9f9f" }
+]
