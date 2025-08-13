@@ -1,4 +1,3 @@
-// Minimal hash router + i18n + dir toggle
 import { FactorySelectView } from './views/factory-select.js';
 
 const i18n = {
