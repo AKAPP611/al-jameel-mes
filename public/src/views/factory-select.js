@@ -18,13 +18,15 @@ const FALLBACK_PROD = {
 export function FactorySelectView(mount, { t }) {
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
-      <div class="row" style="justify-content:space-between; align-items:end;">
-        <div>
-          <h2 id="sectionTitle" class="section">${t('selectFactory')}</h2>
-          <p style="margin:0;color:#6b7280">Tap a factory to view today’s performance.</p>
-        </div>
+      <div>
+        <h2 id="sectionTitle" class="section">${t('selectFactory')}</h2>
+        <p class="section-sub">Pick a workspace to view today’s performance.</p>
       </div>
-      <div id="factoryGrid" class="grid grid-3" role="list"></div>
+      <div id="factoryGrid" class="grid grid-3" role="list">
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+      </div>
     </section>
   `;
 
@@ -64,7 +66,7 @@ function renderCards(grid, factories, prod){
       `,
       footer: Button({
         text: getText('view'),
-        attrs: { 'data-factory': f.key, class: 'cta btn', 'aria-label': `Open ${f.name} dashboard` }
+        attrs: { 'data-factory': f.key, class: 'cta btn', 'aria-label': `Open ${f.name} workspace` }
       })
     });
     cardEl.setAttribute('role','listitem');
