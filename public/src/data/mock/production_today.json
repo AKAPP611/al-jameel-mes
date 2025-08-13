@@ -1,0 +1,5 @@
+{
+  "Pistachio": { "actualKg": 5600, "targetKg": 6000, "efficiency": 94, "rejectRate": 1.4 },
+  "Walnut":    { "actualKg": 7200, "targetKg": 7000, "efficiency": 97, "rejectRate": 2.1 },
+  "Cardamom":  { "actualKg": 3100, "targetKg": 4000, "efficiency": 78, "rejectRate": 0.9 }
+}
