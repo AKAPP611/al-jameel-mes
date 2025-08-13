@@ -129,11 +129,40 @@ export function getParams(){
   const q = (location.hash.split('?')[1] || '');
   return new URLSearchParams(q);
 }
+/* ============================
+   BACK BUTTON (shared)
+   ============================ */
+// NEW: create once and insert into header
+let __backBtn;
+function ensureBackButton() {
+  if (__backBtn) return __backBtn;
+  __backBtn = document.createElement('button');
+  __backBtn.id = 'backBtn';
+  __backBtn.className = 'ghost back-btn';
+  __backBtn.type = 'button';
+  __backBtn.textContent = '← Back';
+  __backBtn.setAttribute('aria-label', 'Go back');
+
+  __backBtn.addEventListener('click', () => {
+    // Prefer browser history; fall back to home
+    if (history.length > 1) { history.back(); }
+    else { goTo('#/'); }
+  });
+
+  const headerRow = document.querySelector('.header-row');
+  if (headerRow) headerRow.insertBefore(__backBtn, headerRow.firstChild);
+  return __backBtn;
+}
 
 function render() {
   const mount = document.getElementById('app');
   const hash = location.hash || '#/';
   const route = hash.split('?')[0];
+
+  // NEW: make sure back button exists, then toggle its visibility
+  const backBtn = ensureBackButton();
+  const isHome = (route === '#/' || route === '#/select');
+  backBtn.style.display = isHome ? 'none' : '';
 
   if (route === '#/' || route === '#/select') {
     FactorySelectView(mount, { t });
