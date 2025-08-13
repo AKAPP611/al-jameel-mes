@@ -1,9 +1,44 @@
-import { Card } from '../components/card.js';
-import { Button } from '../components/button.js';
-import { KpiTile } from '../components/kpi-tile.js';
-import { Progress } from '../components/progress.js';
+// SAFE FALLBACK VIEW: no imports, inline components, built-in mock data.
+// Renders "Select Work Space" cards even if other modules are missing.
+
 import { goTo, getText } from '../app.js';
 
+// Minimal inline components
+function KpiTile({ label, value, state='ok' }) {
+  return `
+    <div class="kpi ${state}" role="group" aria-label="${label}">
+      <div class="label">${label}</div>
+      <div class="value" aria-live="polite">${value}</div>
+    </div>
+  `;
+}
+function Progress({ value = 0 }) {
+  const clamped = Math.max(0, Math.min(100, Number(value) || 0));
+  return `
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${clamped}">
+      <span style="inline-size:${clamped}%"></span>
+    </div>
+  `;
+}
+function Card({ title, subtitle, content, footer }) {
+  return `
+    <article class="card factory-card" role="listitem">
+      <div>
+        <div class="title">${title}</div>
+        <div class="subtitle">${subtitle || ''}</div>
+      </div>
+      <div>${content || ''}</div>
+      <div>${footer || ''}</div>
+    </article>
+  `;
+}
+function Button({ text, attrs = {} }) {
+  const attrStr = Object.entries(attrs).map(([k,v]) => k==='class' ? '' : `${k}="${v}"`).join(' ');
+  const cls = attrs.class ? attrs.class : 'btn';
+  return `<button type="button" class="${cls}" ${attrStr} style="min-height:44px">${text}</button>`;
+}
+
+// Built-in fallback data (used if fetch fails)
 const FALLBACK_FACTORIES = [
   { key:"Pistachio", name:"Pistachio" },
   { key:"Walnut", name:"Walnut" },
@@ -15,11 +50,12 @@ const FALLBACK_PROD = {
   Cardamom:{ actualKg:3100, targetKg:4000, efficiency:78, rejectRate:0.9 }
 };
 
-export function FactorySelectView(mount, { t }) {
+export function FactorySelectView(mount) {
+  // Shell with skeletons (so it's never blank)
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
       <div>
-        <h2 id="sectionTitle" class="section">${t('selectFactory')}</h2>
+        <h2 id="sectionTitle" class="section">${getText('selectFactory')}</h2>
         <p class="section-sub">Pick a workspace to view today’s performance.</p>
       </div>
       <div id="factoryGrid" class="grid grid-3" role="list">
@@ -30,12 +66,13 @@ export function FactorySelectView(mount, { t }) {
     </section>
   `;
 
+  // Try to load JSON; fall back to built-in data on any error
   Promise.allSettled([
-    fetch('./src/data/mock/factories.json').then(r=>r.json()),
-    fetch('./src/data/mock/production_today.json').then(r=>r.json())
+    fetch('./src/data/mock/factories.json').then(r=>r.ok?r.json():Promise.reject()),
+    fetch('./src/data/mock/production_today.json').then(r=>r.ok?r.json():Promise.reject())
   ]).then(([fRes, pRes])=>{
-    const factories = (fRes.status==='fulfilled' ? fRes.value : FALLBACK_FACTORIES);
-    const prod = (pRes.status==='fulfilled' ? pRes.value : FALLBACK_PROD);
+    const factories = fRes.status==='fulfilled' ? fRes.value : FALLBACK_FACTORIES;
+    const prod = pRes.status==='fulfilled' ? pRes.value : FALLBACK_PROD;
     renderCards(mount.querySelector('#factoryGrid'), factories, prod);
   }).catch(()=>{
     renderCards(mount.querySelector('#factoryGrid'), FALLBACK_FACTORIES, FALLBACK_PROD);
@@ -43,14 +80,13 @@ export function FactorySelectView(mount, { t }) {
 }
 
 function renderCards(grid, factories, prod){
-  grid.innerHTML = '';
-  factories.forEach(f=>{
+  const cards = factories.map(f=>{
     const p = prod[f.key] || { actualKg:0, targetKg:0, efficiency:0, rejectRate:0 };
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1,p.targetKg)) * 100));
     const emoji = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
 
-    const cardEl = Card({
+    return Card({
       title: `${emoji} ${f.name}`,
       subtitle: `${getText('today')}: ${p.actualKg.toLocaleString()} kg`,
       content: `
@@ -69,14 +105,19 @@ function renderCards(grid, factories, prod){
         attrs: { 'data-factory': f.key, class: 'cta btn', 'aria-label': `Open ${f.name} workspace` }
       })
     });
-    cardEl.setAttribute('role','listitem');
-    grid.appendChild(cardEl);
-  });
+  }).join('');
+
+  grid.innerHTML = cards;
 
   grid.addEventListener('click', (e)=>{
     const btn = e.target.closest('[data-factory]');
     if (!btn) return;
     const factory = btn.getAttribute('data-factory');
-    goTo('#/dashboard', { factory });
+    // For now, route pistachio to the new workspace when you’re ready
+    if (factory === 'Pistachio') {
+      goTo('#/pistachio', { factory: 'Pistachio' });
+    } else {
+      goTo('#/dashboard', { factory }); // placeholder
+    }
   });
 }
