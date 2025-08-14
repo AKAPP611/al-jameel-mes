@@ -138,3 +138,30 @@ p.section-sub{margin:0 0 12px; color:var(--muted)}
 /* ===== RTL ===== */
 html[dir="rtl"] .header-row, html[dir="rtl"] .footer-row{flex-direction:row-reverse}
 html[dir="rtl"]{direction:rtl}
+/* Force readable text in sections */
+.container,
+.section,
+.section *:not(.nav-btn):not(.print-btn) {
+  color: var(--text) !important;
+}
+.section label,
+.section .label {
+  color: #444 !important;
+}
+.section input,
+.section select,
+.section textarea {
+  color: var(--text) !important;
+  background: #fff;
+}
+.section input::placeholder,
+.section textarea::placeholder {
+  color: #9ca3af;
+}
+.reject-section,
+.materials-section,
+.output-section,
+.wastage-section {
+  color: var(--text) !important;
+}
+
