@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" href="data:," />
+<link rel="shortcut icon" href="data:," />
+
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Pistachio – Al Jameel MES</title>
@@ -330,6 +333,7 @@
 
 <!-- INVENTORY -->
 <section id="inventory" class="section">
+  <!-- Top counters (persisted stock snapshot if you use add/remove/adjust flow) -->
   <div class="stats-grid" style="margin-bottom:16px">
     <div class="stat-card"><div>Vacuum bags (10 kg)</div><div class="stat-value" id="inv_bags">0</div></div>
     <div class="stat-card"><div>Packing boxes</div><div class="stat-value" id="inv_boxes">0</div></div>
@@ -338,6 +342,7 @@
     <div class="stat-card"><div>Bags (25 kg)</div><div class="stat-value" id="inv_bag25">0</div></div>
   </div>
 
+  <!-- Manual stock movements / adjustments -->
   <div class="materials-section">
     <div class="form-grid materials-grid">
       <div class="form-group">
@@ -374,6 +379,7 @@
     </div>
   </div>
 
+  <!-- Log of manual stock movements -->
   <div class="table-container">
     <table id="invTable">
       <thead>
@@ -383,6 +389,39 @@
       </thead>
       <tbody><!-- rows injected --></tbody>
     </table>
+  </div>
+
+  <!-- Summary tables computed from Submitted Production + Adjustments -->
+  <div class="output-section" style="margin-top:24px">
+    <h3 style="margin:0 0 10px">Finished Goods (from submitted production)</h3>
+    <div class="table-container">
+      <table id="invFinished">
+        <thead>
+          <tr><th>Brand</th><th>Size</th><th>Bags (10kg)</th><th>Kg</th></tr>
+        </thead>
+        <tbody><!-- rows injected --></tbody>
+      </table>
+    </div>
+
+    <h3 style="margin:18px 0 10px">Materials Usage Totals</h3>
+    <div class="table-container">
+      <table id="invMaterials">
+        <thead>
+          <tr><th>Vacuum bags used</th><th>Boxes used</th><th>Vacuum bags wasted</th><th>Boxes wasted</th></tr>
+        </thead>
+        <tbody><!-- rows injected --></tbody>
+      </table>
+    </div>
+
+    <h3 style="margin:18px 0 10px">Rejects Total</h3>
+    <div class="table-container">
+      <table id="invRejects">
+        <thead>
+          <tr><th>Total Rejects (kg)</th></tr>
+        </thead>
+        <tbody><!-- rows injected --></tbody>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -425,18 +464,19 @@ document.addEventListener('change', (e)=>{
 });
 
 function saveProduction(){
-  const recs = JSON.parse(localStorage.getItem(LS_REC) || '[]');
+  const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
   const payload = buildPayload('draft');
   recs.push(payload);
-  localStorage.setItem(LS_REC, JSON.stringify(recs));
+
+  localStorage.setItem(LS_REC_KEY, JSON.stringify(recs));
   alert('Draft saved.');
 }
 
 function submitProduction(){
-  const recs = JSON.parse(localStorage.getItem(LS_REC) || '[]');
+  const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
   const payload = buildPayload('submitted');
   recs.push(payload);
-  localStorage.setItem(LS_REC, JSON.stringify(recs));
+  localStorage.setItem(LS_REC_KEY, JSON.stringify(recs));
   alert('Submitted.');
   renderRecords();
 }
@@ -465,7 +505,7 @@ function buildPayload(status){
 
 function renderRecords(){
   const tbody = document.querySelector('#recordsTable tbody');
-  const recs = JSON.parse(localStorage.getItem(LS_REC) || '[]').slice(-100).reverse();
+  const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]').slice(-100).reverse();
   tbody.innerHTML = recs.map(r=>`
     <tr>
       <td>${new Date(r.ts).toLocaleString()}</td>
@@ -639,17 +679,12 @@ function bootDefaultSection() {
 window.addEventListener('load', bootDefaultSection);
 </script>
 <script>
-/* ===== Inventory snapshot from records + manual adjustments =====
-   Depends on:
-   - Records stored in localStorage under LS_REC ('pistachio_records')
-   - Each record payload built by buildPayload(status) in your page
-   - We aggregate only records with status === 'submitted'
-*/
-const LS_REC = 'pistachio_records';
+/* ===== Inventory snapshot from records + manual adjustments ===== */
+const LS_REC_KEY = 'pistachio_records';
 const LS_INV_ADJ = 'pistachio_inv_adjustments';
 
 function getRecords() {
-  const all = JSON.parse(localStorage.getItem(LS_REC) || '[]');
+  const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
   return all.filter(r => r && r.status === 'submitted');
 }
 
@@ -663,44 +698,231 @@ function addAdjustment(adj) {
   localStorage.setItem(LS_INV_ADJ, JSON.stringify(arr));
 }
 
-function clearInvAdjust() {
-  if (!confirm('Clear all manual adjustments?')) return;
-  localStorage.removeItem(LS_INV_ADJ);
-  renderInventory();
-}
-
-function openInvAdjust() {
-  document.getElementById('invAdjustModal').style.display = 'flex';
-}
-function closeInvAdjust() {
-  document.getElementById('invAdjustModal').style.display = 'none';
-}
 function saveInvAdjust() {
   const adj = {
-    brand: document.getElementById('adj_brand').value,
-    size: document.getElementById('adj_size').value,
-    bags: Number(document.getElementById('adj_bags').value || 0),
-    kg: Number(document.getElementById('adj_kg').value || 0),
-    mat_bags_used: Number(document.getElementById('adj_mat_bags_used').value || 0),
-    mat_boxes_used: Number(document.getElementById('adj_mat_boxes_used').value || 0),
-    mat_bags_waste: Number(document.getElementById('adj_mat_bags_waste').value || 0),
-    mat_boxes_waste: Number(document.getElementById('adj_mat_boxes_waste').value || 0),
-    rejectsKg: Number(document.getElementById('adj_rejects_kg').value || 0)
+    brand: document.getElementById('adj_brand')?.value || '',
+    size: document.getElementById('adj_size')?.value || '',
+    bags: Number(document.getElementById('adj_bags')?.value || 0),
+    kg: Number(document.getElementById('adj_kg')?.value || 0),
+    mat_bags_used: Number(document.getElementById('adj_mat_bags_used')?.value || 0),
+    mat_boxes_used: Number(document.getElementById('adj_mat_boxes_used')?.value || 0),
+    mat_bags_waste: Number(document.getElementById('adj_mat_bags_waste')?.value || 0),
+    mat_boxes_waste: Number(document.getElementById('adj_mat_boxes_waste')?.value || 0),
+    rejectsKg: Number(document.getElementById('adj_rejects_kg')?.value || 0)
   };
   addAdjustment(adj);
-  closeInvAdjust();
   renderInventory();
 }
 
-/* Compute inventory snapshot */
 function computeInventory() {
   const recs = getRecords();
-  const mapFG = {}; // key: brand|size -> {brand, size, bags, kg}
+  const mapFG = {};
   let matUsed = 0, boxUsed = 0, matWaste = 0, boxWaste = 0, rejectsKg = 0;
 
   recs.forEach(r => {
     const key = `${r.brand}|${r.size}`;
     if (!mapFG[key]) mapFG[key] = { brand: r.brand, size: r.size, bags: 0, kg: 0 };
+    mapFG[key].bags += Number(r.bags10 || 0);
+    mapFG[key].kg   += Number(r.finishedKg || 0);
+    matUsed  += Number(r.materials?.bags_used  || 0);
+    boxUsed  += Number(r.materials?.boxes_used || 0);
+    matWaste += Number(r.materials?.bags_waste || 0);
+    boxWaste += Number(r.materials?.boxes_waste|| 0);
+    rejectsKg += Number(r.rejectsKg || 0);
+  });
+
+  const adjs = getAdjustments();
+  adjs.forEach(a => {
+    const key = `${a.brand}|${a.size}`;
+    if (!mapFG[key]) mapFG[key] = { brand: a.brand, size: a.size, bags: 0, kg: 0 };
+    mapFG[key].bags += Number(a.bags || 0);
+    mapFG[key].kg   += Number(a.kg   || 0);
+    matUsed  += Number(a.mat_bags_used  || 0);
+    boxUsed  += Number(a.mat_boxes_used || 0);
+    matWaste += Number(a.mat_bags_waste || 0);
+    boxWaste += Number(a.mat_boxes_waste|| 0);
+    rejectsKg += Number(a.rejectsKg || 0);
+  });
+
+  return {
+    finished: Object.values(mapFG).sort((a,b)=> (a.brand+a.size).localeCompare(b.brand+b.size)),
+    materials: { matUsed, boxUsed, matWaste, boxWaste },
+    rejectsKg
+  };
+}
+
+function renderInventory() {
+  const snap = computeInventory();
+
+  document.querySelector('#invFinished tbody').innerHTML = snap.finished.length
+    ? snap.finished.map(r => `<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
+    : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
+
+  document.querySelector('#invMaterials tbody').innerHTML = `<tr>
+    <td>${snap.materials.matUsed}</td>
+    <td>${snap.materials.boxUsed}</td>
+    <td>${snap.materials.matWaste}</td>
+    <td>${snap.materials.boxWaste}</td>
+  </tr>`;
+
+  document.querySelector('#invRejects tbody').innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
+}
+
+window.invAddEntry = function () { saveInvAdjust(); };
+window.invExport = function () { exportInventoryCSV(); };
+window.invClearAll = function () {
+  if (!confirm('Clear all inventory data?')) return;
+  localStorage.removeItem(LS_INV_ADJ);
+  renderInventory();
+};
+
+const _origShowSection = window.showSection;
+window.showSection = function(id, btn){
+  if (typeof _origShowSection === 'function') _origShowSection(id, btn);
+  if (id === 'inventory') renderInventory();
+};
+
+window.addEventListener('load', renderInventory);
+</script>
+<script>
+/* ===== Inventory snapshot from records + manual adjustments =====
+   - Uses LS_REC_KEY ('pistachio_records') for Submitted Production
+   - Uses LS_INV_ADJ for manual adjustments that affect the summary tables
+   - Also provides a simple stock engine for your counters + log (invAddEntry)
+*/
+const LS_REC_KEY  = 'pistachio_records';
+const LS_INV_ADJ  = 'pistachio_inv_adjustments';
+const LS_INV_STOCK = 'pistachio_inv_stock';
+const LS_INV_LOG   = 'pistachio_inv_log';
+
+const ITEM_LABELS = {
+  vacuum_bags_10kg: 'Vacuum bags (10 kg)',
+  packing_boxes:    'Packing boxes',
+  big_bag_998:      'Big Bag (~998.7 kg)',
+  carton_11_34:     'Carton (11.34 kg)',
+  bag_25:           'Bag (25 kg)'
+};
+const COUNTER_ID = {
+  vacuum_bags_10kg: 'inv_bags',
+  packing_boxes:    'inv_boxes',
+  big_bag_998:      'inv_bigbags',
+  carton_11_34:     'inv_cartons',
+  bag_25:           'inv_bag25'
+};
+
+/* ---------- Production records (submitted only) ---------- */
+function getRecords() {
+  const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
+  return all.filter(r => r && r.status === 'submitted');
+}
+
+/* ---------- Manual adjustments (applied to summary tables) ---------- */
+function getAdjustments() {
+  return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]');
+}
+function addAdjustment(adj) {
+  const arr = getAdjustments();
+  arr.push({ ...adj, ts: new Date().toISOString() });
+  localStorage.setItem(LS_INV_ADJ, JSON.stringify(arr));
+}
+
+/* ---------- Simple stock engine for counters + log ---------- */
+function loadStock(){
+  return Object.assign({
+    vacuum_bags_10kg: 0, packing_boxes: 0, big_bag_998: 0, carton_11_34: 0, bag_25: 0
+  }, JSON.parse(localStorage.getItem(LS_INV_STOCK) || '{}'));
+}
+function saveStock(s){ localStorage.setItem(LS_INV_STOCK, JSON.stringify(s)); }
+
+function loadLog(){ return JSON.parse(localStorage.getItem(LS_INV_LOG) || '[]'); }
+function saveLog(l){ localStorage.setItem(LS_INV_LOG, JSON.stringify(l)); }
+
+function renderCounters(stock){
+  Object.keys(stock).forEach(k=>{
+    const el = document.getElementById(COUNTER_ID[k]);
+    if (el) el.textContent = stock[k];
+  });
+}
+function renderLog(log){
+  const tbody = document.querySelector('#invTable tbody');
+  if (!tbody) return;
+  if (!log.length){
+    tbody.innerHTML = '<tr><td colspan="6">No inventory entries yet.</td></tr>';
+    return;
+  }
+  const rows = [...log].reverse().map(e=>`
+    <tr>
+      <td>${new Date(e.ts).toLocaleString()}</td>
+      <td>${ITEM_LABELS[e.item] || e.item}</td>
+      <td>${e.action}</td>
+      <td>${e.qty}</td>
+      <td>${e.result}</td>
+      <td>${e.note || ''}</td>
+    </tr>`).join('');
+  tbody.innerHTML = rows;
+}
+function renderStockUI(){
+  renderCounters(loadStock());
+  renderLog(loadLog());
+}
+
+function applyAction(stock, item, action, qty){
+  const cur = Number(stock[item] || 0);
+  if (action === 'add')       stock[item] = cur + qty;
+  else if (action === 'remove') stock[item] = Math.max(0, cur - qty);
+  else if (action === 'adjust') stock[item] = Math.max(0, qty);
+  return stock[item];
+}
+
+/* Exposed handlers for your buttons */
+window.invAddEntry = function (){
+  const item = document.getElementById('inv_item')?.value;
+  const action = document.getElementById('inv_action')?.value;
+  const qty = Number(document.getElementById('inv_qty')?.value || 0);
+  const note = (document.getElementById('inv_note')?.value || '').trim();
+
+  if (!item || !action || !(qty >= 0)) { alert('Fill item, action, and a valid quantity.'); return; }
+  if ((action === 'add' || action === 'remove') && qty <= 0) { alert('Quantity must be > 0.'); return; }
+
+  const stock = loadStock();
+  const result = applyAction(stock, item, action, qty);
+  saveStock(stock);
+
+  const log = loadLog();
+  log.push({ ts: new Date().toISOString(), item, action, qty, result, note });
+  saveLog(log);
+
+  document.getElementById('inv_qty').value = 0;
+  renderStockUI();
+};
+window.invExport = function (){
+  const log = loadLog();
+  const lines = ['Time,Item,Action,Qty,Resulting Stock,Notes'];
+  log.forEach(e=>{
+    const t = new Date(e.ts).toISOString();
+    lines.push(`${t},"${ITEM_LABELS[e.item] || e.item}",${e.action},${e.qty},${e.result},"${(e.note||'').replace(/"/g,'""')}"`);
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `inventory_log_${Date.now()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+};
+window.invClearAll = function (){
+  if (!confirm('This will clear ALL inventory stock and log. Continue?')) return;
+  localStorage.removeItem(LS_INV_STOCK);
+  localStorage.removeItem(LS_INV_LOG);
+  renderStockUI();
+};
+
+/* ---------- Summary tables from Production + Adjustments ---------- */
+function computeInventory() {
+  const recs = getRecords();
+  const mapFG = {};
+  let matUsed = 0, boxUsed = 0, matWaste = 0, boxWaste = 0, rejectsKg = 0;
+
+  recs.forEach(r=>{
+    const key = `${r.brand}|${r.size}`;
+    if (!mapFG[key]) mapFG[key] = { brand:r.brand, size:r.size, bags:0, kg:0 };
     mapFG[key].bags += Number(r.bags10 || 0);
     mapFG[key].kg   += Number(r.finishedKg || 0);
 
@@ -712,11 +934,10 @@ function computeInventory() {
     rejectsKg += Number(r.rejectsKg || 0);
   });
 
-  // Apply adjustments
-  const adjs = getAdjustments();
-  adjs.forEach(a => {
+  // Apply manual adjustments to tables
+  getAdjustments().forEach(a=>{
     const key = `${a.brand}|${a.size}`;
-    if (!mapFG[key]) mapFG[key] = { brand: a.brand, size: a.size, bags: 0, kg: 0 };
+    if (!mapFG[key]) mapFG[key] = { brand:a.brand, size:a.size, bags:0, kg:0 };
     mapFG[key].bags += Number(a.bags || 0);
     mapFG[key].kg   += Number(a.kg   || 0);
 
@@ -728,75 +949,42 @@ function computeInventory() {
     rejectsKg += Number(a.rejectsKg || 0);
   });
 
-  const finished = Object.values(mapFG).sort((a,b)=> (a.brand+a.size).localeCompare(b.brand+b.size));
   return {
-    finished,
+    finished: Object.values(mapFG).sort((a,b)=> (a.brand+a.size).localeCompare(b.brand+b.size)),
     materials: { matUsed, boxUsed, matWaste, boxWaste },
     rejectsKg
   };
 }
 
-/* Render tables */
 function renderInventory() {
   const snap = computeInventory();
 
-  // Finished goods
+  // Finished
   const tb1 = document.querySelector('#invFinished tbody');
   tb1.innerHTML = snap.finished.length
-    ? snap.finished.map(r => `<tr>
-        <td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td>
-      </tr>`).join('')
+    ? snap.finished.map(r=>`<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
     : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
 
   // Materials
-  const tb2 = document.querySelector('#invMaterials tbody');
-  tb2.innerHTML = `<tr>
-    <td>${snap.materials.matUsed}</td>
-    <td>${snap.materials.boxUsed}</td>
-    <td>${snap.materials.matWaste}</td>
-    <td>${snap.materials.boxWaste}</td>
-  </tr>`;
+  document.querySelector('#invMaterials tbody').innerHTML = `
+    <tr>
+      <td>${snap.materials.matUsed}</td>
+      <td>${snap.materials.boxUsed}</td>
+      <td>${snap.materials.matWaste}</td>
+      <td>${snap.materials.boxWaste}</td>
+    </tr>`;
 
   // Rejects
-  const tb3 = document.querySelector('#invRejects tbody');
-  tb3.innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
+  document.querySelector('#invRejects tbody').innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
 }
 
-/* Export CSV */
-function exportInventoryCSV() {
-  const { finished, materials, rejectsKg } = computeInventory();
-  const lines = [];
-  lines.push('Section,Brand,Size,Bags(10kg),Kg');
-  if (finished.length) {
-    finished.forEach(r => lines.push(`Finished,${r.brand},${r.size},${r.bags},${r.kg}`));
-  } else {
-    lines.push('Finished,,,,');
-  }
-  lines.push('');
-  lines.push('Materials,Vacuum bags used,Boxes used,Vacuum bags wasted,Boxes wasted');
-  lines.push(`Materials,${materials.matUsed},${materials.boxUsed},${materials.matWaste},${materials.boxWaste}`);
-  lines.push('');
-  lines.push('Rejects,Total Rejects (kg)');
-  lines.push(`Rejects,${rejectsKg}`);
-
-  const csv = lines.join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `inventory_pistachio_${Date.now()}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/* Hook inventory rendering when you switch tabs */
+/* Hook summary render on tab switch + on load */
 const _origShowSection = window.showSection;
 window.showSection = function(id, btn){
   if (typeof _origShowSection === 'function') _origShowSection(id, btn);
-  if (id === 'inventory') renderInventory();
+  if (id === 'inventory') { renderStockUI(); renderInventory(); }
 };
-
-// Also render once on page load (in case Inventory is the first tab you open)
-window.addEventListener('load', renderInventory);
+window.addEventListener('load', function(){ renderStockUI(); /* don’t render tables until needed */ });
 </script>
 
 </body>
