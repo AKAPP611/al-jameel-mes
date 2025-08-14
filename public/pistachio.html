@@ -1,57 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Pistachio – Al Jameel MES</title>
+  <!-- neutral (empty) favicon to avoid 404 -->
   <link rel="icon" href="data:," />
   <link rel="shortcut icon" href="data:," />
 
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Pistachio – Al Jameel MES</title>
   <style>
-    /* two fixed columns for the 18–21 & 21–25 qty fields */
-.size-qty-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(220px, 1fr));
-  gap:15px;
-}
-@media (max-width:768px){
-  .size-qty-grid{ grid-template-columns:1fr; }
-}
-
-/* ensure the action buttons don't stretch vertically */
-.action-buttons{
-  display:flex; gap:10px; align-items:center;
-}
-.action-buttons .edit-btn{ height:44px; }
+    /* --- small layout helpers --- */
+    .size-qty-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(220px, 1fr));
+      gap:15px;
+    }
+    @media (max-width:768px){
+      .size-qty-grid{ grid-template-columns:1fr; }
+    }
+    .action-buttons{ display:flex; gap:10px; align-items:center; }
+    .action-buttons .edit-btn{ height:44px; }
 
     /* ============ Brand Tokens (Al Jameel) ============ */
     :root{
-      --brand-primary: #a32034;   /* Deep Red */
+      --brand-primary:#a32034;   /* Deep Red */
       --brand-primary-600:#8b1a2a;
       --brand-primary-700:#781624;
-      --brand-accent:  #d5a333;   /* Gold */
-      --text:          #2f2a28;   /* Dark Charcoal */
-      --bg:            #f3f4f6;   /* Light Gray */
-      --surface:       #ffffff;
-      --muted:         #6b7280;
-      --border:        #e5e7eb;
+      --brand-accent:#d5a333;    /* Gold */
+      --text:#2f2a28;            /* Dark Charcoal */
+      --bg:#f3f4f6;              /* Light Gray */
+      --surface:#ffffff;
+      --muted:#6b7280;
+      --border:#e5e7eb;
 
-      --success: #16a34a;
-      --danger:  #dc3545;
-      --warn:    #fff3cd;
-      --info:    #eef2ff;
+      --success:#16a34a;
+      --danger:#dc3545;
+      --warn:#fff3cd;
+      --info:#eef2ff;
     }
 
     *{margin:0; padding:0; box-sizing:border-box}
     body{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
 
     /* ======= Header / Nav ======= */
     .header{
-      background: var(--brand-primary);
+      background:var(--brand-primary);
       color:#fff;
       padding:20px;
       display:flex; justify-content:space-between; align-items:center;
@@ -67,13 +64,12 @@
     .nav-buttons{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap }
     .nav-btn{
       padding:10px 20px; background:var(--brand-primary); color:#fff;
-      border:none; border-radius:8px; cursor:pointer; font-size:16px;
-      min-height:44px;
+      border:none; border-radius:8px; cursor:pointer; font-size:16px; min-height:44px;
     }
     .nav-btn:hover{ background:var(--brand-primary-600) }
     .nav-btn.active{ background:var(--brand-primary-700) }
     .nav-btn.print-btn{
-      background: linear-gradient(135deg, var(--brand-accent), #e0b760);
+      background:linear-gradient(135deg, var(--brand-accent), #e0b760);
       color:#2f2a28; border:2px solid var(--brand-accent); font-weight:700;
       box-shadow:0 2px 4px rgba(213,163,51,.25);
     }
@@ -102,14 +98,6 @@
       box-shadow:0 0 0 2px rgba(213,163,51,.25);
     }
 
-    /* Prominent selects (box types) */
-    select#boxTypeUsed, select#boxTypeWasted{
-      background:#fff7e6; border:2px solid #f5e1a8; font-weight:600;
-    }
-    select#boxTypeUsed:focus, select#boxTypeWasted:focus{
-      background:#fff2cc; border-color:var(--brand-accent);
-    }
-
     button{
       padding:12px 24px; background:var(--brand-primary); color:#fff;
       border:none; border-radius:10px; cursor:pointer; font-size:16px; min-height:44px;
@@ -118,7 +106,6 @@
 
     .output-section{ background:#fafafa; padding:15px; border-radius:10px; margin:20px 0; border:1px solid var(--border) }
     .reject-section{ background:var(--warn); padding:15px; border-radius:10px; margin:20px 0; border:1px solid #ffe8a6 }
-    .wastage-section{ background:#fde2e4; padding:15px; border-radius:10px; margin:20px 0; border:1px solid #f8bfc4 }
     .materials-section{ background:#fff7e6; padding:15px; border-radius:10px; margin:20px 0; border:1px solid #f5e1a8 }
 
     .table-container{ overflow-x:auto; margin-top:20px; padding-bottom:10px; -webkit-overflow-scrolling:touch }
@@ -128,41 +115,15 @@
 
     .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-bottom:30px }
     .stat-card{
-      background:linear-gradient(0deg, #fff, #fff);
+      background:linear-gradient(0deg,#fff,#fff);
       padding:20px; border-radius:12px; text-align:center;
       border:2px solid var(--brand-accent);
     }
     .stat-value{ font-size:2em; font-weight:800; color:var(--brand-primary) }
 
-    .action-buttons{ display:flex; gap:10px }
-    .edit-btn{ background:#ff9800 }
-    .delete-btn{ background:#dc3545 }
-
     .total-box{ background:#fff7e6; padding:10px; margin-top:10px; border-radius:8px; font-weight:700; border:1px solid #f5e1a8 }
 
     .warning-box{ background:#fff3cd; border:1px solid #ffeeba; color:#7a5d00; padding:15px; border-radius:10px; margin-bottom:20px }
-
-    /* Print theme to brand */
-    .print-container{ display:none; position:relative }
-    .print-container::before{
-      content:"CONFIDENTIAL"; position:fixed; top:50%; left:50%;
-      transform:translate(-50%,-50%) rotate(-45deg);
-      font-size:80px; color:rgba(163,32,52,.04); font-weight:800; z-index:0; pointer-events:none;
-    }
-    .print-header{
-      text-align:center; background:linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-600) 100%);
-      color:#fff; padding:20px 15px; margin:0 0 30px 0; border-radius:0 0 20px 20px; position:relative; z-index:1; width:100%;
-    }
-    .print-header h1{ color:#fff; font-size:28px; margin:0 0 10px 0; text-shadow:2px 2px 4px rgba(0,0,0,.2) }
-    .print-header .subtitle{ color:#ffe9b3; font-size:13px; margin:5px 0 }
-    .print-section{ margin-bottom:30px; position:relative; z-index:1 }
-    .print-section h2{ color:var(--brand-primary); font-size:20px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:5px }
-    .print-stat-card{ background:linear-gradient(135deg,#f5f5f5 0%, #fff7e6 100%); padding:15px; border-radius:8px; text-align:center; border:1px solid #f5e1a8; box-shadow:0 2px 4px rgba(0,0,0,.06) }
-    .print-stat-card h3{ color:var(--brand-primary); font-size:14px; margin-bottom:10px }
-    .print-stat-card .value{ font-size:24px; font-weight:800; color:var(--brand-primary-700) }
-    .print-table{ width:100%; border-collapse:collapse; font-size:12px }
-    .print-table th{ background:var(--brand-primary); color:#fff; padding:8px; text-align:left }
-    .print-table td{ padding:6px 8px; border-bottom:1px solid #ddd }
 
     /* Mobile polish */
     @media (max-width:768px){
@@ -175,11 +136,6 @@
     @media (max-width:480px){
       .stats-grid{ grid-template-columns:1fr }
       .form-grid.materials-grid{ grid-template-columns:1fr }
-    }
-    @media print{
-      .print-header{ padding:15px 10px !important; margin:0 !important }
-      .print-header h1{ font-size:24px !important }
-      .print-header .subtitle{ font-size:12px !important }
     }
   </style>
 </head>
@@ -269,7 +225,7 @@
           </select>
         </div>
 
-        <div class="form-group" id="sizeGroup">
+        <div class="form-group">
           <label>Size</label>
           <select id="size">
             <option>18-21</option>
@@ -302,30 +258,12 @@
             <input id="mat_boxes_used" type="number" min="0" step="1" value="0" />
           </div>
           <div class="form-group">
-            <label>Box type used</label>
-            <select id="boxTypeUsed">
-              <option value="">Select type</option>
-              <option value="standard">Standard</option>
-              <option value="premium">Premium</option>
-              <option value="export">Export</option>
-            </select>
-          </div>
-          <div class="form-group">
             <label>Vacuum bags wasted</label>
             <input id="mat_bags_waste" type="number" min="0" step="1" value="0" />
           </div>
           <div class="form-group">
             <label>Packing boxes wasted</label>
             <input id="mat_boxes_waste" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="form-group">
-            <label>Box type wasted</label>
-            <select id="boxTypeWasted">
-              <option value="">Select type</option>
-              <option value="standard">Standard</option>
-              <option value="premium">Premium</option>
-              <option value="export">Export</option>
-            </select>
           </div>
         </div>
       </div>
@@ -472,529 +410,72 @@
         <p>Materials usage summary coming soon…</p>
       </div>
     </section>
-
-    <!-- (end .container / #mainApp content) -->
   </div>
 </div>
 
 <!-- Print Container -->
 <div class="print-container" id="printReport"></div>
 
+<!-- ===== CORE CONSTANTS ===== -->
 <script>
-/* ==== CONSOLIDATED JAVASCRIPT - ALL FUNCTIONS DEFINED ONCE ==== */
+  const LS_REC_KEY   = 'pistachio_records';          // production records
+</script>
 
-/* === STORAGE KEYS === */
-const LS_REC_KEY = 'pistachio_records';
-const LS_INV_STOCK = 'pistachio_inv_stock';
-const LS_INV_LOG = 'pistachio_inv_log';
-const LS_INV_ADJ = 'pistachio_inv_adjustments';
+<!-- ===== SECTION A: Login ===== -->
+<script>
+  const USERS = { admin:'admin123', operator:'op123' };
 
-/* === LOGIN SYSTEM === */
-const USERS = { admin: 'admin123', operator: 'op123' };
-
-function showLogin() {
-  const log = document.getElementById('loginScreen');
-  const app = document.getElementById('mainApp');
-  if (log) log.style.display = 'flex';
-  if (app) app.style.display = 'none';
-}
-
-function showApp(username) {
-  const log = document.getElementById('loginScreen');
-  const app = document.getElementById('mainApp');
-  if (log) log.style.display = 'none';
-  if (app) app.style.display = 'block';
-  const userDisplay = document.getElementById('userDisplay');
-  if (userDisplay) userDisplay.textContent = username;
-}
-
-function handleLogin(e) {
-  e.preventDefault();
-  const u = document.getElementById('loginUsername')?.value?.trim() || '';
-  const p = document.getElementById('loginPassword')?.value || '';
-  if (!u || !p) { alert('Enter username and password.'); return; }
-  const ok = USERS[u] && USERS[u] === p;
-  if (!ok) { alert('Invalid username or password.'); return; }
-  localStorage.setItem('mes_user', u);
-  showApp(u);
-}
-
-function logout() { 
-  localStorage.removeItem('mes_user'); 
-  showLogin(); 
-}
-
-/* === NAVIGATION === */
-window.showSection = function (id, btn) {
-  document.querySelectorAll('.section').forEach(sec => {
-    sec.classList.toggle('active', sec.id === id);
+  window.addEventListener('load', function () {
+    const savedUser = localStorage.getItem('mes_user');
+    if (savedUser && USERS[savedUser]) { showApp(savedUser); } else { showLogin(); }
   });
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  window.scrollTo({ top: 0 });
-  
-  // Render inventory when switching to it
-  if (id === 'inventory') { 
-    renderStockUI(); 
-    renderInventory(); 
+
+  function showLogin(){
+    const log = document.getElementById('loginScreen');
+    const app = document.getElementById('mainApp');
+    if (log) log.style.display = 'flex';
+    if (app) app.style.display = 'none';
   }
-};
-
-window.showProductionSelection = function () { 
-  window.print(); 
-};
-
-/* === PRODUCTION HELPERS === */
-function readNum(id) { 
-  const el = document.getElementById(id); 
-  return Number(el?.value || 0); 
-}
-
-function sumRejects() {
-  const keys = ['non_split','light_stain','adhering_hull','dark_stain',
-                'shell_split_pre1','undersize_kernel_pre2','loose_shell','loose_kernel','dust'];
-  return keys.reduce((s, k) => s + readNum('rej_' + k), 0);
-}
-
-/* === UPDATE UI FUNCTIONS === */
-function updateOutputLabels() {
-  const runType = document.getElementById('runType')?.value || 'huller';
-  const brand = document.getElementById('brand')?.value || 'Golden Hill';
-
-  // Dynamic labels for the two size fields
-  const l1821 = document.getElementById('label_1821');
-  const l2125 = document.getElementById('label_2125');
-
-  if (runType === 'huller') {
-    if (l1821) l1821.textContent = `18–21 ${brand}`;
-    if (l2125) l2125.textContent = `21–25 ${brand}`;
-  } else {
-    if (l1821) l1821.textContent = `18–21`;
-    if (l2125) l2125.textContent = `21–25`;
+  function showApp(username){
+    const log = document.getElementById('loginScreen');
+    const app = document.getElementById('mainApp');
+    if (log) log.style.display = 'none';
+    if (app) app.style.display = 'block';
+    const userDisplay = document.getElementById('userDisplay');
+    if (userDisplay) userDisplay.textContent = username;
   }
+  function handleLogin(e){
+    e.preventDefault();
+    const u = document.getElementById('loginUsername')?.value?.trim() || '';
+    const p = document.getElementById('loginPassword')?.value || '';
+    if (!u || !p) { alert('Enter username and password.'); return; }
+    const ok = USERS[u] && USERS[u] === p;
+    if (!ok) { alert('Invalid username or password.'); return; }
+    localStorage.setItem('mes_user', u);
+    showApp(u);
+  }
+  function logout(){ localStorage.removeItem('mes_user'); showLogin(); }
+</script>
 
-  // Show/hide Size dropdown - hide for Huller, show for Repack
-  const sizeGroup = document.getElementById('sizeGroup');
-  if (sizeGroup) sizeGroup.style.display = (runType === 'huller') ? 'none' : 'block';
-
-  // Rejects only for Huller Run
-  const rejectBlock = document.getElementById('rejectBlock');
-  if (rejectBlock) rejectBlock.style.display = (runType === 'huller') ? 'block' : 'none';
-  
-  updateSummary();
-}
-
-function updateSummary() {
-  const bags2125 = readNum('fg_2125_bags');
-  const bags1821 = readNum('fg_1821_bags');
-  const totalBags = bags2125 + bags1821;
-  const finishedKg = totalBags * 10;
-
-  const isHuller = (document.getElementById('runType')?.value === 'huller');
-  const rejectsKg = isHuller ? sumRejects() : 0;
-
-  const inputKg = finishedKg + rejectsKg || 0;
-  const eff = inputKg ? Math.round((finishedKg / inputKg) * 100) : 0;
-  const rejRate = inputKg ? Math.round((rejectsKg / inputKg) * 1000) / 10 : 0;
-
-  const el = document.getElementById('calcSummary');
-  if (el) el.textContent = 
-    `Finished: ${finishedKg} kg · Total Rejects: ${rejectsKg} kg · Efficiency: ${eff}% · Reject Rate: ${rejRate}%`;
-}
-
-/* === RECORD MANAGEMENT === */
-function buildPayload(status) {
-  const brand = document.getElementById('brand').value;
-  const size = document.getElementById('size')?.value || '';
-  const run = document.getElementById('runType').value;
-
-  const bags2125 = readNum('fg_2125_bags');
-  const bags1821 = readNum('fg_1821_bags');
-  const totalBags = bags2125 + bags1821;
-  const finishedKg = totalBags * 10;
-  const rejectsKg = (run === 'huller') ? sumRejects() : 0;
-
-  return {
-    ts: new Date().toISOString(),
-    run, brand, size,
-    sizes: { '21-25': bags2125, '18-21': bags1821 },
-    bags10: totalBags,
-    finishedKg,
-    materials: {
-      bags_used: readNum('mat_bags_used'),
-      boxes_used: readNum('mat_boxes_used'),
-      bags_waste: readNum('mat_bags_waste'),
-      boxes_waste: readNum('mat_boxes_waste'),
-      box_type: document.getElementById('boxTypeUsed')?.value || '',
-      box_type_waste: document.getElementById('boxTypeWasted')?.value || ''
-    },
-    rejectsKg,
-    status
-  };
-}
-
-function submitProduction() {
-  const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
-  const payload = buildPayload('submitted');
-  recs.push(payload);
-  localStorage.setItem(LS_REC_KEY, JSON.stringify(recs));
-
-  updateStockFromSubmission(payload);
-  
-  alert('Submitted.');
-  renderRecords();
-  updateSummary();
-  updateDashboard();
-}
-
-function renderRecords() {
-  const tbody = document.querySelector('#recordsTable tbody');
-  if (!tbody) return;
-  
-  const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]').slice(-100).reverse();
-  tbody.innerHTML = recs.map(r => `
-    <tr>
-      <td>${new Date(r.ts).toLocaleString()}</td>
-      <td>${r.run}</td>
-      <td>${r.brand}</td>
-      <td>${r.size || '-'}</td>
-      <td>${r.bags10}</td>
-      <td>${r.materials.bags_used}</td>
-      <td>${r.materials.boxes_used}</td>
-      <td>${r.rejectsKg}</td>
-      <td>${r.status}</td>
-    </tr>
-  `).join('');
-}
-
-/* === INVENTORY MANAGEMENT === */
-const ITEM_LABELS = {
-  vacuum_bags_10kg: 'Vacuum bags (10 kg)',
-  packing_boxes: 'Packing boxes',
-  big_bag_998: 'Big Bag (~998.7 kg)',
-  carton_11_34: 'Carton (11.34 kg)',
-  bag_25: 'Bag (25 kg)'
-};
-
-const COUNTER_ID = {
-  vacuum_bags_10kg: 'inv_bags',
-  packing_boxes: 'inv_boxes',
-  big_bag_998: 'inv_bigbags',
-  carton_11_34: 'inv_cartons',
-  bag_25: 'inv_bag25'
-};
-
-function loadStock() {
-  return Object.assign({
-    vacuum_bags_10kg: 0,
-    packing_boxes: 0,
-    big_bag_998: 0,
-    carton_11_34: 0,
-    bag_25: 0
-  }, JSON.parse(localStorage.getItem(LS_INV_STOCK) || '{}'));
-}
-
-function saveStock(s) { 
-  localStorage.setItem(LS_INV_STOCK, JSON.stringify(s)); 
-}
-
-function pushInvLog(entry) {
-  const log = JSON.parse(localStorage.getItem(LS_INV_LOG) || '[]');
-  log.push(entry);
-  localStorage.setItem(LS_INV_LOG, JSON.stringify(log));
-}
-
-function loadLog() { 
-  return JSON.parse(localStorage.getItem(LS_INV_LOG) || '[]'); 
-}
-
-function saveLog(l) { 
-  localStorage.setItem(LS_INV_LOG, JSON.stringify(l)); 
-}
-
-function updateStockFromSubmission(rec) {
-  const stock = loadStock();
-  const bagsToSub = Number(rec.materials?.bags_used || 0) + Number(rec.materials?.bags_waste || 0);
-  const boxesToSub = Number(rec.materials?.boxes_used || 0) + Number(rec.materials?.boxes_waste || 0);
-
-  stock.vacuum_bags_10kg = Math.max(0, Number(stock.vacuum_bags_10kg || 0) - bagsToSub);
-  stock.packing_boxes = Math.max(0, Number(stock.packing_boxes || 0) - boxesToSub);
-
-  saveStock(stock);
-
-  if (bagsToSub) {
-    pushInvLog({ 
-      ts: new Date().toISOString(), 
-      item: 'vacuum_bags_10kg', 
-      action: 'remove', 
-      qty: bagsToSub, 
-      result: stock.vacuum_bags_10kg, 
-      note: 'Auto: Production submit' 
+<!-- ===== SECTION B: Navigation ===== -->
+<script>
+  window.showSection = function (id, btn) {
+    document.querySelectorAll('.section').forEach(sec => {
+      sec.classList.toggle('active', sec.id === id);
     });
-  }
-  if (boxesToSub) {
-    pushInvLog({ 
-      ts: new Date().toISOString(), 
-      item: 'packing_boxes', 
-      action: 'remove', 
-      qty: boxesToSub, 
-      result: stock.packing_boxes, 
-      note: 'Auto: Production submit' 
-    });
-  }
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
 
-  if (typeof renderStockUI === 'function') renderStockUI();
-}
+    // Inventory lazy render
+    if (id === 'inventory') { renderStockUI(); renderInventory(); }
 
-function renderCounters(stock) {
-  Object.keys(stock).forEach(k => {
-    const el = document.getElementById(COUNTER_ID[k]);
-    if (el) el.textContent = stock[k];
-  });
-}
-
-function renderLog(log) {
-  const tbody = document.querySelector('#invTable tbody');
-  if (!tbody) return;
-  
-  if (!log.length) {
-    tbody.innerHTML = '<tr><td colspan="6">No inventory entries yet.</td></tr>';
-    return;
-  }
-  
-  const rows = [...log].reverse().map(e => `
-    <tr>
-      <td>${new Date(e.ts).toLocaleString()}</td>
-      <td>${ITEM_LABELS[e.item] || e.item}</td>
-      <td>${e.action}</td>
-      <td>${e.qty}</td>
-      <td>${e.result}</td>
-      <td>${e.note || ''}</td>
-    </tr>`).join('');
-  tbody.innerHTML = rows;
-}
-
-function renderStockUI() {
-  renderCounters(loadStock());
-  renderLog(loadLog());
-}
-
-function applyAction(stock, item, action, qty) {
-  const cur = Number(stock[item] || 0);
-  if (action === 'add') stock[item] = cur + qty;
-  else if (action === 'remove') stock[item] = Math.max(0, cur - qty);
-  else if (action === 'adjust') stock[item] = Math.max(0, qty);
-  return stock[item];
-}
-
-/* Inventory button handlers */
-window.invAddEntry = function () {
-  const item = document.getElementById('inv_item')?.value;
-  const action = document.getElementById('inv_action')?.value;
-  const qty = Number(document.getElementById('inv_qty')?.value || 0);
-  const note = (document.getElementById('inv_note')?.value || '').trim();
-
-  if (!item || !action || !(qty >= 0)) { 
-    alert('Fill item, action, and a valid quantity.'); 
-    return; 
-  }
-  if ((action === 'add' || action === 'remove') && qty <= 0) { 
-    alert('Quantity must be > 0.'); 
-    return; 
-  }
-
-  const stock = loadStock();
-  const result = applyAction(stock, item, action, qty);
-  saveStock(stock);
-
-  const log = loadLog();
-  log.push({ 
-    ts: new Date().toISOString(), 
-    item, 
-    action, 
-    qty, 
-    result, 
-    note 
-  });
-  saveLog(log);
-
-  document.getElementById('inv_qty').value = 0;
-  document.getElementById('inv_note').value = '';
-  renderStockUI();
-};
-
-window.invExport = function () {
-  const log = loadLog();
-  const lines = ['Time,Item,Action,Qty,Resulting Stock,Notes'];
-  log.forEach(e => {
-    const t = new Date(e.ts).toISOString();
-    lines.push(`${t},"${ITEM_LABELS[e.item] || e.item}",${e.action},${e.qty},${e.result},"${(e.note || '').replace(/"/g, '""')}"`);
-  });
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); 
-  a.href = url; 
-  a.download = `inventory_log_${Date.now()}.csv`; 
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
-window.invClearAll = function () {
-  if (!confirm('This will clear ALL inventory stock and log. Continue?')) return;
-  localStorage.removeItem(LS_INV_STOCK);
-  localStorage.removeItem(LS_INV_LOG);
-  renderStockUI();
-};
-
-/* === INVENTORY SUMMARY TABLES === */
-function getRecords() {
-  const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
-  return all.filter(r => r && r.status === 'submitted');
-}
-
-function getAdjustments() {
-  return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]');
-}
-
-function computeInventory() {
-  const recs = getRecords();
-  const mapFG = {};
-  let matUsed = 0, boxUsed = 0, matWaste = 0, boxWaste = 0, rejectsKg = 0;
-
-  recs.forEach(r => {
-    // Handle both size formats
-    if (r.sizes) {
-      // New format with sizes object
-      Object.entries(r.sizes).forEach(([sizeName, bags]) => {
-        const key = `${r.brand}|${sizeName}`;
-        if (!mapFG[key]) mapFG[key] = { brand: r.brand, size: sizeName, bags: 0, kg: 0 };
-        mapFG[key].bags += Number(bags || 0);
-        mapFG[key].kg += Number(bags || 0) * 10;
-      });
-    } else {
-      // Old format with single size
-      const key = `${r.brand}|${r.size}`;
-      if (!mapFG[key]) mapFG[key] = { brand: r.brand, size: r.size, bags: 0, kg: 0 };
-      mapFG[key].bags += Number(r.bags10 || 0);
-      mapFG[key].kg += Number(r.finishedKg || 0);
-    }
-
-    matUsed += Number(r.materials?.bags_used || 0);
-    boxUsed += Number(r.materials?.boxes_used || 0);
-    matWaste += Number(r.materials?.bags_waste || 0);
-    boxWaste += Number(r.materials?.boxes_waste || 0);
-    rejectsKg += Number(r.rejectsKg || 0);
-  });
-
-  getAdjustments().forEach(a => {
-    const key = `${a.brand}|${a.size}`;
-    if (!mapFG[key]) mapFG[key] = { brand: a.brand, size: a.size, bags: 0, kg: 0 };
-    mapFG[key].bags += Number(a.bags || 0);
-    mapFG[key].kg += Number(a.kg || 0);
-
-    matUsed += Number(a.mat_bags_used || 0);
-    boxUsed += Number(a.mat_boxes_used || 0);
-    matWaste += Number(a.mat_bags_waste || 0);
-    boxWaste += Number(a.mat_boxes_waste || 0);
-    rejectsKg += Number(a.rejectsKg || 0);
-  });
-
-  return {
-    finished: Object.values(mapFG).sort((a, b) => (a.brand + a.size).localeCompare(b.brand + b.size)),
-    materials: { matUsed, boxUsed, matWaste, boxWaste },
-    rejectsKg
+    window.scrollTo({ top: 0 });
   };
-}
+  window.showProductionSelection = function(){ window.print(); };
 
-function renderInventory() {
-  const snap = computeInventory();
-
-  const tb1 = document.querySelector('#invFinished tbody');
-  if (tb1) {
-    tb1.innerHTML = snap.finished.length
-      ? snap.finished.map(r => `<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
-      : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
-  }
-
-  const tb2 = document.querySelector('#invMaterials tbody');
-  if (tb2) {
-    tb2.innerHTML = `
-      <tr>
-        <td>${snap.materials.matUsed}</td>
-        <td>${snap.materials.boxUsed}</td>
-        <td>${snap.materials.matWaste}</td>
-        <td>${snap.materials.boxWaste}</td>
-      </tr>`;
-  }
-
-  const tb3 = document.querySelector('#invRejects tbody');
-  if (tb3) {
-    tb3.innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
-  }
-}
-
-/* === DASHBOARD KPIs === */
-function updateDashboard() {
-  const recs = getRecords();
-  let totalFinished = 0;
-  let totalRejects = 0;
-  
-  recs.forEach(r => {
-    totalFinished += Number(r.finishedKg || 0);
-    totalRejects += Number(r.rejectsKg || 0);
-  });
-  
-  const totalInput = totalFinished + totalRejects;
-  const efficiency = totalInput ? Math.round((totalFinished / totalInput) * 100) : 0;
-  const rejectRate = totalInput ? Math.round((totalRejects / totalInput) * 1000) / 10 : 0;
-  
-  const kpiFinished = document.getElementById('kpiFinished');
-  const kpiEff = document.getElementById('kpiEff');
-  const kpiReject = document.getElementById('kpiReject');
-  
-  if (kpiFinished) kpiFinished.textContent = totalFinished;
-  if (kpiEff) kpiEff.textContent = efficiency;
-  if (kpiReject) kpiReject.textContent = rejectRate;
-}
-
-/* === EVENT LISTENERS === */
-// Update summary on input changes
-['fg_2125_bags', 'fg_1821_bags',
- 'rej_non_split', 'rej_light_stain', 'rej_adhering_hull', 'rej_dark_stain',
- 'rej_shell_split_pre1', 'rej_undersize_kernel_pre2', 'rej_loose_shell', 'rej_loose_kernel', 'rej_dust'
-].forEach(id => {
-  document.addEventListener('input', e => { 
-    if (e.target.id === id) updateSummary(); 
-  });
-});
-
-// Update labels when run type or brand changes
-document.addEventListener('change', (e) => {
-  if (e.target && (e.target.id === 'runType' || e.target.id === 'brand')) { 
-    updateOutputLabels(); 
-  }
-});
-
-/* === INITIALIZATION === */
-window.addEventListener('load', function () {
-  // Check login
-  const savedUser = localStorage.getItem('mes_user');
-  if (savedUser && USERS[savedUser]) { 
-    showApp(savedUser); 
-  } else { 
-    showLogin(); 
-  }
-  
-  // Initialize UI
-  updateOutputLabels();
-  updateSummary();
-  renderRecords();
-  renderStockUI();
-  updateDashboard();
-  
-  // Set default active section
-  const alreadyActive = document.querySelector('.section.active');
-  if (!alreadyActive) {
+  function bootDefaultSection(){
+    const already = document.querySelector('.section.active');
+    if (already) return;
     const first = document.getElementById('dashboard') || document.querySelector('.section');
     if (first) {
       first.classList.add('active');
@@ -1002,7 +483,336 @@ window.addEventListener('load', function () {
       if (firstBtn) firstBtn.classList.add('active');
     }
   }
-});
+  window.addEventListener('load', bootDefaultSection);
+</script>
+
+<!-- ===== SECTION C: Summary math + payload + inventory subtraction ===== -->
+<script>
+  /* Helpers */
+  function readNum(id){ const el = document.getElementById(id); return Number(el?.value||0); }
+  function sumRejects(){
+    const keys = ['non_split','light_stain','adhering_hull','dark_stain','shell_split_pre1','undersize_kernel_pre2','loose_shell','loose_kernel','dust'];
+    return keys.reduce((s,k)=> s + readNum('rej_'+k), 0);
+  }
+
+  /* Dynamic labels + visibility */
+  function updateOutputLabels(){
+    const runType = document.getElementById('runType')?.value || 'huller';
+    const brand   = document.getElementById('brand')?.value || 'Golden Hill';
+
+    // Hide Size for Huller; show for Repack
+    const sizeGroup = document.getElementById('size')?.closest('.form-group');
+    if (sizeGroup) sizeGroup.style.display = (runType === 'huller') ? 'none' : '';
+
+    // Rejects only for Huller
+    const rej = document.getElementById('rejectBlock');
+    if (rej) rej.style.display = (runType === 'huller') ? 'block' : 'none';
+
+    // Output field labels based on brand
+    const l1821 = document.getElementById('label_1821');
+    const l2125 = document.getElementById('label_2125');
+    if (l1821) l1821.textContent = `18–21 ${brand}`;
+    if (l2125) l2125.textContent = `21–25 ${brand}`;
+
+    updateSummary();
+  }
+
+  /* Summary calc */
+  function updateSummary(){
+    const bags2125 = readNum('fg_2125_bags');
+    const bags1821 = readNum('fg_1821_bags');
+    const totalBags = bags2125 + bags1821;
+    const finishedKg = totalBags * 10;
+
+    const isHuller = (document.getElementById('runType')?.value === 'huller');
+    const rejectsKg = isHuller ? sumRejects() : 0;
+
+    const inputKg = finishedKg + rejectsKg || 0;
+    const eff = inputKg ? Math.round((finishedKg / inputKg) * 100) : 0;
+    const rejRate = inputKg ? Math.round((rejectsKg / inputKg) * 1000)/10 : 0;
+
+    const el = document.getElementById('calcSummary');
+    if (el) el.textContent =
+      `Finished: ${finishedKg} kg · Total Rejects: ${rejectsKg} kg · Efficiency: ${eff}% · Reject Rate: ${rejRate}%`;
+  }
+
+  /* Recompute on input/change */
+  ['fg_2125_bags','fg_1821_bags',
+   'rej_non_split','rej_light_stain','rej_adhering_hull','rej_dark_stain',
+   'rej_shell_split_pre1','rej_undersize_kernel_pre2','rej_loose_shell','rej_loose_kernel','rej_dust'
+  ].forEach(id => document.addEventListener('input', e => { if(e.target.id===id) updateSummary(); }));
+  document.addEventListener('change', (e)=>{
+    if (e.target && (e.target.id === 'runType' || e.target.id === 'brand')) { updateOutputLabels(); }
+  });
+
+  /* Build record payload */
+  function buildPayload(status){
+    const brand = document.getElementById('brand').value;
+    const size  = document.getElementById('size')?.value || ''; // kept for compatibility (hidden for huller)
+    const run   = document.getElementById('runType').value;
+
+    const bags2125 = readNum('fg_2125_bags');
+    const bags1821 = readNum('fg_1821_bags');
+    const totalBags = bags2125 + bags1821;
+    const finishedKg = totalBags * 10;
+    const rejectsKg = (run === 'huller') ? sumRejects() : 0;
+
+    return {
+      ts: new Date().toISOString(),
+      run, brand, size,
+      sizes: { '21-25': bags2125, '18-21': bags1821 },
+      bags10: totalBags,
+      finishedKg,
+      materials: {
+        bags_used:  readNum('mat_bags_used'),
+        boxes_used: readNum('mat_boxes_used'),
+        bags_waste: readNum('mat_bags_waste'),
+        boxes_waste:readNum('mat_boxes_waste')
+      },
+      rejectsKg,
+      status
+    };
+  }
+
+  /* Records table */
+  function renderRecords(){
+    const tbody = document.querySelector('#recordsTable tbody');
+    const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]').slice(-100).reverse();
+    tbody.innerHTML = recs.map(r=>`
+      <tr>
+        <td>${new Date(r.ts).toLocaleString()}</td>
+        <td>${r.run}</td>
+        <td>${r.brand}</td>
+        <td>${r.size || '-'}</td>
+        <td>${r.bags10}</td>
+        <td>${r.materials.bags_used}</td>
+        <td>${r.materials.boxes_used}</td>
+        <td>${r.rejectsKg}</td>
+        <td>${r.status}</td>
+      </tr>
+    `).join('');
+  }
+
+  /* Inventory subtraction on submit (consumables) */
+  function updateStockFromSubmission(rec){
+    const stock = loadStock(); // from Inventory script
+    const bagsToSub  = Number(rec.materials?.bags_used  || 0) + Number(rec.materials?.bags_waste || 0);
+    const boxesToSub = Number(rec.materials?.boxes_used || 0) + Number(rec.materials?.boxes_waste|| 0);
+
+    stock.vacuum_bags_10kg = Math.max(0, Number(stock.vacuum_bags_10kg || 0) - bagsToSub);
+    stock.packing_boxes    = Math.max(0, Number(stock.packing_boxes    || 0) - boxesToSub);
+
+    saveStock(stock);
+
+    if (bagsToSub){ pushInvLog({ ts:new Date().toISOString(), item:'vacuum_bags_10kg', action:'remove', qty:bagsToSub, result:stock.vacuum_bags_10kg, note:'Auto: Production submit' }); }
+    if (boxesToSub){ pushInvLog({ ts:new Date().toISOString(), item:'packing_boxes', action:'remove', qty:boxesToSub, result:stock.packing_boxes, note:'Auto: Production submit' }); }
+
+    if (typeof renderStockUI === 'function') renderStockUI();
+  }
+
+  /* Submit */
+  function submitProduction(){
+    const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
+    const payload = buildPayload('submitted');
+    recs.push(payload);
+    localStorage.setItem(LS_REC_KEY, JSON.stringify(recs));
+
+    updateStockFromSubmission(payload);
+    alert('Submitted.');
+    renderRecords();
+    updateSummary();
+  }
+
+  /* Boot */
+  window.addEventListener('load', function(){
+    renderRecords();
+    updateOutputLabels();
+    updateSummary();
+  });
+</script>
+
+<!-- ===== SECTION D: Inventory (counters + log + summary tables) ===== -->
+<script>
+  const LS_INV_ADJ   = 'pistachio_inv_adjustments';
+  const LS_INV_STOCK = 'pistachio_inv_stock';
+  const LS_INV_LOG   = 'pistachio_inv_log';
+
+  const ITEM_LABELS = {
+    vacuum_bags_10kg:'Vacuum bags (10 kg)',
+    packing_boxes:'Packing boxes',
+    big_bag_998:'Big Bag (~998.7 kg)',
+    carton_11_34:'Carton (11.34 kg)',
+    bag_25:'Bag (25 kg)'
+  };
+  const COUNTER_ID = {
+    vacuum_bags_10kg:'inv_bags',
+    packing_boxes:'inv_boxes',
+    big_bag_998:'inv_bigbags',
+    carton_11_34:'inv_cartons',
+    bag_25:'inv_bag25'
+  };
+
+  /* Production records for summaries (submitted only) */
+  function getRecords() {
+    const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
+    return all.filter(r => r && r.status === 'submitted');
+  }
+
+  /* Manual adjustments (currently unused in UI, but kept for parity) */
+  function getAdjustments(){ return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]'); }
+  function addAdjustment(adj){
+    const arr = getAdjustments();
+    arr.push({ ...adj, ts:new Date().toISOString() });
+    localStorage.setItem(LS_INV_ADJ, JSON.stringify(arr));
+  }
+
+  /* Stock engine */
+  function loadStock(){
+    return Object.assign({
+      vacuum_bags_10kg:0, packing_boxes:0, big_bag_998:0, carton_11_34:0, bag_25:0
+    }, JSON.parse(localStorage.getItem(LS_INV_STOCK) || '{}'));
+  }
+  function saveStock(s){ localStorage.setItem(LS_INV_STOCK, JSON.stringify(s)); }
+
+  function loadLog(){ return JSON.parse(localStorage.getItem(LS_INV_LOG) || '[]'); }
+  function saveLog(l){ localStorage.setItem(LS_INV_LOG, JSON.stringify(l)); }
+  function pushInvLog(entry){ const log = loadLog(); log.push(entry); saveLog(log); }
+
+  function renderCounters(stock){
+    Object.keys(stock).forEach(k=>{
+      const el = document.getElementById(COUNTER_ID[k]);
+      if (el) el.textContent = stock[k];
+    });
+  }
+  function renderLog(log){
+    const tbody = document.querySelector('#invTable tbody');
+    if (!tbody) return;
+    if (!log.length){
+      tbody.innerHTML = '<tr><td colspan="6">No inventory entries yet.</td></tr>';
+      return;
+    }
+    const rows = [...log].reverse().map(e=>`
+      <tr>
+        <td>${new Date(e.ts).toLocaleString()}</td>
+        <td>${ITEM_LABELS[e.item] || e.item}</td>
+        <td>${e.action}</td>
+        <td>${e.qty}</td>
+        <td>${e.result}</td>
+        <td>${e.note || ''}</td>
+      </tr>`).join('');
+    tbody.innerHTML = rows;
+  }
+  function renderStockUI(){ renderCounters(loadStock()); renderLog(loadLog()); }
+
+  function applyAction(stock, item, action, qty){
+    const cur = Number(stock[item] || 0);
+    if (action === 'add') stock[item] = cur + qty;
+    else if (action === 'remove') stock[item] = Math.max(0, cur - qty);
+    else if (action === 'adjust') stock[item] = Math.max(0, qty);
+    return stock[item];
+  }
+
+  /* Buttons */
+  window.invAddEntry = function (){
+    const item = document.getElementById('inv_item')?.value;
+    const action = document.getElementById('inv_action')?.value;
+    const qty = Number(document.getElementById('inv_qty')?.value || 0);
+    const note = (document.getElementById('inv_note')?.value || '').trim();
+
+    if (!item || !action || !(qty >= 0)) { alert('Fill item, action, and a valid quantity.'); return; }
+    if ((action === 'add' || action === 'remove') && qty <= 0) { alert('Quantity must be > 0.'); return; }
+
+    const stock = loadStock();
+    const result = applyAction(stock, item, action, qty);
+    saveStock(stock);
+
+    const log = loadLog();
+    log.push({ ts:new Date().toISOString(), item, action, qty, result, note });
+    saveLog(log);
+
+    document.getElementById('inv_qty').value = 0;
+    renderStockUI();
+  };
+  window.invExport = function (){
+    const log = loadLog();
+    const lines = ['Time,Item,Action,Qty,Resulting Stock,Notes'];
+    log.forEach(e=>{
+      const t = new Date(e.ts).toISOString();
+      lines.push(`${t},"${ITEM_LABELS[e.item] || e.item}",${e.action},${e.qty},${e.result},"${(e.note||'').replace(/"/g,'""')}"`);
+    });
+    const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `inventory_log_${Date.now()}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
+  window.invClearAll = function (){
+    if (!confirm('This will clear ALL inventory stock and log. Continue?')) return;
+    localStorage.removeItem(LS_INV_STOCK);
+    localStorage.removeItem(LS_INV_LOG);
+    renderStockUI();
+  };
+
+  /* Summary tables from Production + Adjustments */
+  function computeInventory() {
+    const recs = getRecords();
+    const mapFG = {};
+    let matUsed = 0, boxUsed = 0, matWaste = 0, boxWaste = 0, rejectsKg = 0;
+
+    recs.forEach(r=>{
+      const key = `${r.brand}|${r.size}`;
+      if (!mapFG[key]) mapFG[key] = { brand:r.brand, size:r.size, bags:0, kg:0 };
+      mapFG[key].bags += Number(r.bags10 || 0);
+      mapFG[key].kg   += Number(r.finishedKg || 0);
+
+      matUsed  += Number(r.materials?.bags_used  || 0);
+      boxUsed  += Number(r.materials?.boxes_used || 0);
+      matWaste += Number(r.materials?.bags_waste || 0);
+      boxWaste += Number(r.materials?.boxes_waste|| 0);
+
+      rejectsKg += Number(r.rejectsKg || 0);
+    });
+
+    getAdjustments().forEach(a=>{
+      const key = `${a.brand}|${a.size}`;
+      if (!mapFG[key]) mapFG[key] = { brand:a.brand, size:a.size, bags:0, kg:0 };
+      mapFG[key].bags += Number(a.bags || 0);
+      mapFG[key].kg   += Number(a.kg   || 0);
+
+      matUsed  += Number(a.mat_bags_used  || 0);
+      boxUsed  += Number(a.mat_boxes_used || 0);
+      matWaste += Number(a.mat_bags_waste || 0);
+      boxWaste += Number(a.mat_boxes_waste|| 0);
+
+      rejectsKg += Number(a.rejectsKg || 0);
+    });
+
+    return {
+      finished: Object.values(mapFG).sort((a,b)=> (a.brand+a.size).localeCompare(b.brand+b.size)),
+      materials: { matUsed, boxUsed, matWaste, boxWaste },
+      rejectsKg
+    };
+  }
+  function renderInventory() {
+    const snap = computeInventory();
+
+    const tb1 = document.querySelector('#invFinished tbody');
+    tb1.innerHTML = snap.finished.length
+      ? snap.finished.map(r=>`<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
+      : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
+
+    document.querySelector('#invMaterials tbody').innerHTML = `
+      <tr>
+        <td>${snap.materials.matUsed}</td>
+        <td>${snap.materials.boxUsed}</td>
+        <td>${snap.materials.matWaste}</td>
+        <td>${snap.materials.boxWaste}</td>
+      </tr>`;
+
+    document.querySelector('#invRejects tbody').innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
+  }
+
+  // Initial counters/log only (summary tables render when inventory tab opens)
+  window.addEventListener('load', function(){ renderStockUI(); });
 </script>
 
 </body>
