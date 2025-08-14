@@ -261,11 +261,17 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label>Final Goods — Qty (10 kg bags)</label>
-          <input id="bags10" type="number" min="0" step="1" value="0" />
-        </div>
-      </div>
+        <!-- FINAL GOODS — two sizes; labels change with brand + run type -->
+<div class="form-group">
+  <label><span id="label_2125">21–25 Extra</span> — Qty (10 kg bags)</label>
+  <input id="fg_2125_bags" type="number" min="0" step="1" value="0" />
+</div>
+
+<div class="form-group">
+  <label><span id="label_1821">18–21 Extra</span> — Qty (10 kg bags)</label>
+  <input id="fg_1821_bags" type="number" min="0" step="1" value="0" />
+</div>
+
 
       <div class="materials-section">
         <div class="form-grid materials-grid">
@@ -304,9 +310,9 @@
       </div>
 
       <div class="action-buttons">
-        <button type="button" onclick="saveProduction()">Save Draft</button>
-        <button type="button" class="edit-btn" onclick="submitProduction()">Submit</button>
-      </div>
+  <button type="button" class="edit-btn" onclick="submitProduction()">Submit</button>
+</div>
+
 
       <div class="output-section">
         <div class="total-box" id="calcSummary">
@@ -440,71 +446,160 @@
 <div class="print-container" id="printReport"></div>
 
 <script>
-/* ==== Production: localStorage + KPIs & Records ==== */
+/* ==== Minimal localStorage flow so KPIs & Records work ==== */
 const LS_REC_KEY = 'pistachio_records';
 
+/* Stock engine (for inventory counters and log) */
+const LS_INV_STOCK = 'pistachio_inv_stock';
+const LS_INV_LOG   = 'pistachio_inv_log';
+
+function loadStock(){
+  return Object.assign({
+    vacuum_bags_10kg: 0,       // plastic bags
+    packing_boxes:    0,
+    big_bag_998:      0,
+    carton_11_34:     0,
+    bag_25:           0
+  }, JSON.parse(localStorage.getItem(LS_INV_STOCK) || '{}'));
+}
+function saveStock(s){ localStorage.setItem(LS_INV_STOCK, JSON.stringify(s)); }
+function pushInvLog(entry){
+  const log = JSON.parse(localStorage.getItem(LS_INV_LOG) || '[]');
+  log.push(entry);
+  localStorage.setItem(LS_INV_LOG, JSON.stringify(log));
+}
+
+/* --- Dynamic labels for size outputs --- */
+function updateOutputLabels(){
+  const run = document.getElementById('runType')?.value || 'huller';
+  const brand = document.getElementById('brand')?.value || 'Extra';
+  const l2125 = document.getElementById('label_2125');
+  const l1821 = document.getElementById('label_1821');
+
+  // If Huller run: show brand-specific labels, else generic
+  if (run === 'huller'){
+    if (l2125) l2125.textContent = `21–25 ${brand}`;
+    if (l1821) l1821.textContent = `18–21 ${brand}`;
+  } else {
+    if (l2125) l2125.textContent = `21–25`;
+    if (l1821) l1821.textContent = `18–21`;
+  }
+
+  // Only Huller generates rejects and uses size outputs
+  const rejectBlock = document.getElementById('rejectBlock');
+  if (rejectBlock) rejectBlock.style.display = (run === 'huller') ? 'block' : 'none';
+  updateSummary();
+}
+
+/* --- Helpers for reading inputs --- */
 function readNum(id){ const el = document.getElementById(id); return Number(el?.value||0); }
 function sumRejects(){
   const keys = ['non_split','light_stain','adhering_hull','dark_stain','shell_split_pre1','undersize_kernel_pre2','loose_shell','loose_kernel','dust'];
   return keys.reduce((s,k)=> s + readNum('rej_'+k), 0);
 }
+
+/* --- Summary calc uses the two size fields --- */
 function updateSummary(){
-  const bags = readNum('bags10');
-  const finishedKg = bags * 10;
-  const rejectsKg = document.getElementById('rejectBlock').style.display === 'none' ? 0 : sumRejects();
+  const bags2125 = readNum('fg_2125_bags');
+  const bags1821 = readNum('fg_1821_bags');
+  const totalBags = bags2125 + bags1821;
+  const finishedKg = totalBags * 10;
+
+  const isHuller = (document.getElementById('runType')?.value === 'huller');
+  const rejectsKg = isHuller ? sumRejects() : 0;
+
   const inputKg = finishedKg + rejectsKg || 0;
   const eff = inputKg ? Math.round((finishedKg / inputKg) * 100) : 0;
   const rejRate = inputKg ? Math.round((rejectsKg / inputKg) * 1000)/10 : 0;
-  document.getElementById('calcSummary').textContent =
+
+  const el = document.getElementById('calcSummary');
+  if (el) el.textContent =
     `Finished: ${finishedKg} kg · Total Rejects: ${rejectsKg} kg · Efficiency: ${eff}% · Reject Rate: ${rejRate}%`;
 }
-['bags10','rej_non_split','rej_light_stain','rej_adhering_hull','rej_dark_stain','rej_shell_split_pre1','rej_undersize_kernel_pre2','rej_loose_shell','rej_loose_kernel','rej_dust']
-  .forEach(id => document.addEventListener('input', e => { if(e.target.id===id) updateSummary(); }));
 
+/* Recompute on relevant inputs */
+['fg_2125_bags','fg_1821_bags',
+ 'rej_non_split','rej_light_stain','rej_adhering_hull','rej_dark_stain',
+ 'rej_shell_split_pre1','rej_undersize_kernel_pre2','rej_loose_shell','rej_loose_kernel','rej_dust'
+].forEach(id => document.addEventListener('input', e => { if(e.target.id===id) updateSummary(); }));
 document.addEventListener('change', (e)=>{
-  if (e.target && e.target.id === 'runType') {
-    const repack = e.target.value === 'repack';
-    document.getElementById('rejectBlock').style.display = repack ? 'none' : 'block';
-    updateSummary();
-  }
+  if (e.target && (e.target.id === 'runType' || e.target.id === 'brand')) { updateOutputLabels(); }
 });
 
-function saveProduction(){
-  const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
-  const payload = buildPayload('draft');
-  recs.push(payload);
-  localStorage.setItem(LS_REC_KEY, JSON.stringify(recs));
-  alert('Draft saved.');
+/* --- Build record payload --- */
+function buildPayload(status){
+  const brand = document.getElementById('brand').value;
+  const size  = document.getElementById('size').value; // kept for compatibility
+  const run   = document.getElementById('runType').value;
+
+  const bags2125 = readNum('fg_2125_bags');
+  const bags1821 = readNum('fg_1821_bags');
+  const totalBags = bags2125 + bags1821;
+  const finishedKg = totalBags * 10;
+  const rejectsKg = (run === 'huller') ? sumRejects() : 0;
+
+  return {
+    ts: new Date().toISOString(),
+    run, brand, size,
+    sizes: {
+      '21-25': bags2125,
+      '18-21': bags1821
+    },
+    bags10: totalBags,
+    finishedKg,
+    materials: {
+      bags_used:  readNum('mat_bags_used'),
+      boxes_used: readNum('mat_boxes_used'),
+      bags_waste: readNum('mat_bags_waste'),
+      boxes_waste:readNum('mat_boxes_waste'),
+      box_type:   document.getElementById('boxTypeUsed')?.value || '',
+      box_type_waste: document.getElementById('boxTypeWasted')?.value || ''
+    },
+    rejectsKg,
+    status
+  };
 }
+
+/* --- Inventory subtraction on SUBMIT --- */
+function updateStockFromSubmission(rec){
+  // Subtract used + wasted consumables from stock
+  const stock = loadStock();
+  const bagsToSub  = Number(rec.materials?.bags_used  || 0) + Number(rec.materials?.bags_waste || 0);
+  const boxesToSub = Number(rec.materials?.boxes_used || 0) + Number(rec.materials?.boxes_waste|| 0);
+
+  stock.vacuum_bags_10kg = Math.max(0, Number(stock.vacuum_bags_10kg || 0) - bagsToSub);
+  stock.packing_boxes    = Math.max(0, Number(stock.packing_boxes    || 0) - boxesToSub);
+
+  saveStock(stock);
+
+  // Log entries (optional but nice to have)
+  if (bagsToSub){
+    pushInvLog({ ts:new Date().toISOString(), item:'vacuum_bags_10kg', action:'remove', qty:bagsToSub, result:stock.vacuum_bags_10kg, note:'Auto: Production submit' });
+  }
+  if (boxesToSub){
+    pushInvLog({ ts:new Date().toISOString(), item:'packing_boxes', action:'remove', qty:boxesToSub, result:stock.packing_boxes, note:'Auto: Production submit' });
+  }
+
+  // If your Inventory tab is open, refresh the counters
+  if (typeof renderStockUI === 'function') renderStockUI();
+}
+
+/* --- Save record helpers --- */
 function submitProduction(){
   const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
   const payload = buildPayload('submitted');
   recs.push(payload);
   localStorage.setItem(LS_REC_KEY, JSON.stringify(recs));
+
+  // ↓↓↓ inventory subtraction here
+  updateStockFromSubmission(payload);
+
   alert('Submitted.');
   renderRecords();
+  updateSummary(); // refresh KPIs text
 }
-function buildPayload(status){
-  const bags = readNum('bags10');
-  const finishedKg = bags * 10;
-  const rejectsKg = document.getElementById('rejectBlock').style.display === 'none' ? 0 : sumRejects();
-  return {
-    ts: new Date().toISOString(),
-    run: document.getElementById('runType').value,
-    brand: document.getElementById('brand').value,
-    size: document.getElementById('size').value,
-    bags10: bags,
-    materials: {
-      bags_used: readNum('mat_bags_used'),
-      boxes_used: readNum('mat_boxes_used'),
-      bags_waste: readNum('mat_bags_waste'),
-      boxes_waste: readNum('mat_boxes_waste')
-    },
-    rejectsKg,
-    finishedKg,
-    status
-  };
-}
+
+/* --- Records table --- */
 function renderRecords(){
   const tbody = document.querySelector('#recordsTable tbody');
   const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]').slice(-100).reverse();
@@ -522,7 +617,12 @@ function renderRecords(){
     </tr>
   `).join('');
 }
-window.addEventListener('load', renderRecords);
+
+window.addEventListener('load', function(){
+  renderRecords();
+  updateOutputLabels();   // set initial “Extra/Golden” labels
+  updateSummary();        // initialize summary
+});
 </script>
 
 <script>
