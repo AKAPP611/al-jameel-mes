@@ -8,6 +8,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Pistachio – Al Jameel MES</title>
   <style>
+    /* two fixed columns for the 18–21 & 21–25 qty fields */
+.size-qty-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(220px, 1fr));
+  gap:15px;
+}
+@media (max-width:768px){
+  .size-qty-grid{ grid-template-columns:1fr; }
+}
+
+/* ensure the action buttons don't stretch vertically */
+.action-buttons{
+  display:flex; gap:10px; align-items:center;
+}
+.action-buttons .edit-btn{ height:44px; }
+
     /* ============ Brand Tokens (Al Jameel) ============ */
     :root{
       --brand-primary: #a32034;   /* Deep Red */
@@ -262,15 +278,18 @@
         </div>
 
         <!-- FINAL GOODS — two sizes; labels change with brand + run type -->
-<div class="form-group">
-  <label><span id="label_2125">21–25 Extra</span> — Qty (10 kg bags)</label>
-  <input id="fg_2125_bags" type="number" min="0" step="1" value="0" />
+<div class="size-qty-grid">
+  <div class="form-group">
+    <label><span id="label_1821">18–21</span> — Qty (10 kg bags)</label>
+    <input id="fg_1821_bags" type="number" min="0" step="1" value="0" />
+  </div>
+
+  <div class="form-group">
+    <label><span id="label_2125">21–25</span> — Qty (10 kg bags)</label>
+    <input id="fg_2125_bags" type="number" min="0" step="1" value="0" />
+  </div>
 </div>
 
-<div class="form-group">
-  <label><span id="label_1821">18–21 Extra</span> — Qty (10 kg bags)</label>
-  <input id="fg_1821_bags" type="number" min="0" step="1" value="0" />
-</div>
 
 
       <div class="materials-section">
@@ -470,27 +489,32 @@ function pushInvLog(entry){
 }
 
 /* --- Dynamic labels for size outputs --- */
+<script>
 function updateOutputLabels(){
-  const run = document.getElementById('runType')?.value || 'huller';
+  const run   = document.getElementById('runType')?.value || 'huller';
   const brand = document.getElementById('brand')?.value || 'Extra';
-  const l2125 = document.getElementById('label_2125');
-  const l1821 = document.getElementById('label_1821');
 
-  // If Huller run: show brand-specific labels, else generic
+  // dynamic labels for the two size fields
+  const l1821 = document.getElementById('label_1821');
+  const l2125 = document.getElementById('label_2125');
+
   if (run === 'huller'){
-    if (l2125) l2125.textContent = `21–25 ${brand}`;
     if (l1821) l1821.textContent = `18–21 ${brand}`;
+    if (l2125) l2125.textContent = `21–25 ${brand}`;
   } else {
-    if (l2125) l2125.textContent = `21–25`;
     if (l1821) l1821.textContent = `18–21`;
+    if (l2125) l2125.textContent = `21–25`;
   }
 
-  // Only Huller generates rejects and uses size outputs
+  // Show/hide the Size dropdown (you asked to remove it for Huller Run)
+  const sizeGroup = document.getElementById('sizeGroup');
+  if (sizeGroup) sizeGroup.style.display = (run === 'huller') ? 'none' : 'block';
+
+  // Rejects only for Huller Run
   const rejectBlock = document.getElementById('rejectBlock');
   if (rejectBlock) rejectBlock.style.display = (run === 'huller') ? 'block' : 'none';
-  updateSummary();
 }
-
+</script>
 /* --- Helpers for reading inputs --- */
 function readNum(id){ const el = document.getElementById(id); return Number(el?.value||0); }
 function sumRejects(){
