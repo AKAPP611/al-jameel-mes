@@ -22,9 +22,7 @@ function Progress({ value = 0 }) {
   `;
 }
 
-/**
- * Card with a full-card anchor (better for touch). Pass an href to make entire card tappable.
- */
+/** Card with a full-card anchor (better for touch). Pass an href to make entire card tappable. */
 function Card({ title, subtitle, content, href = '#/' }) {
   return `
     <article class="card factory-card" role="listitem">
@@ -54,21 +52,24 @@ const FALLBACK_PROD = {
 
 export function FactorySelectView(mount) {
   // Shell with skeletons (so it's never blank)
+  // TIP: If your logo file name has a space, use only%20logo.ico; else rename to logo.ico and use ./logo.ico
+  const logoSrc = './logo.ico'; // or './only%20logo.ico' if you kept the space
+
   mount.innerHTML = `
-  <section class="grid" aria-labelledby="sectionTitle">
-    <div style="text-align:center">
-      <img src="./only logo.ico" alt="Al Jameel Logo"
-           style="width:64px; height:64px; margin-bottom:0.5rem;">
-      <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
-      <p class="section-sub">Pick a workspace to view today’s performance.</p>
-    </div>
-    <div id="factoryGrid" class="grid grid-3" role="list">
-      <div class="skel skel-card"></div>
-      <div class="skel skel-card"></div>
-      <div class="skel skel-card"></div>
-    </div>
-  </section>
-`;
+    <section class="grid" aria-labelledby="sectionTitle">
+      <div style="text-align:center">
+        <img src="${logoSrc}" alt="Al Jameel Logo"
+             style="width:64px; height:64px; margin-bottom:0.5rem;">
+        <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
+        <p class="section-sub">Pick a workspace to view today’s performance.</p>
+      </div>
+      <div id="factoryGrid" class="grid grid-3" role="list">
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
+      </div>
+    </section>
+  `;
 
   // Try to load JSON; fall back to built-in data on any error
   Promise.allSettled([
@@ -90,9 +91,9 @@ function renderCards(grid, factories, prod) {
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
     const emoji       = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
 
-    // Route pistachio to its workspace; others can point to a placeholder/dashboard for now
+    // Pistachio opens your standalone interface
     const href = f.key === 'Pistachio'
-      ? `#/pistachio?factory=${encodeURIComponent(f.key)}`
+      ? './pistachio.html'
       : `#/dashboard?factory=${encodeURIComponent(f.key)}`;
 
     return Card({
@@ -114,6 +115,5 @@ function renderCards(grid, factories, prod) {
   }).join('');
 
   grid.innerHTML = cards;
-
   // No JS click handler needed — anchors handle navigation (more reliable on mobile).
 }
