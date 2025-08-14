@@ -2,170 +2,170 @@
 <html lang="en">
 <head>
   <link rel="icon" href="data:," />
-<link rel="shortcut icon" href="data:," />
+  <link rel="shortcut icon" href="data:," />
 
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Pistachio – Al Jameel MES</title>
-<style>
-  /* ============ Brand Tokens (Al Jameel) ============ */
-  :root{
-    --brand-primary: #a32034;   /* Deep Red */
-    --brand-primary-600:#8b1a2a;
-    --brand-primary-700:#781624;
-    --brand-accent:  #d5a333;   /* Gold */
-    --text:          #2f2a28;   /* Dark Charcoal */
-    --bg:            #f3f4f6;   /* Light Gray */
-    --surface:       #ffffff;
-    --muted:         #6b7280;
-    --border:        #e5e7eb;
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Pistachio – Al Jameel MES</title>
+  <style>
+    /* ============ Brand Tokens (Al Jameel) ============ */
+    :root{
+      --brand-primary: #a32034;   /* Deep Red */
+      --brand-primary-600:#8b1a2a;
+      --brand-primary-700:#781624;
+      --brand-accent:  #d5a333;   /* Gold */
+      --text:          #2f2a28;   /* Dark Charcoal */
+      --bg:            #f3f4f6;   /* Light Gray */
+      --surface:       #ffffff;
+      --muted:         #6b7280;
+      --border:        #e5e7eb;
 
-    --success: #16a34a;
-    --danger:  #dc3545;
-    --warn:    #fff3cd;
-    --info:    #eef2ff;
-  }
+      --success: #16a34a;
+      --danger:  #dc3545;
+      --warn:    #fff3cd;
+      --info:    #eef2ff;
+    }
 
-  *{margin:0; padding:0; box-sizing:border-box}
-  body{
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-  }
+    *{margin:0; padding:0; box-sizing:border-box}
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
 
-  /* ======= Header / Nav ======= */
-  .header{
-    background: var(--brand-primary);
-    color:#fff;
-    padding:20px;
-    display:flex; justify-content:space-between; align-items:center;
-  }
-  .header h1{ font-size:20px; letter-spacing:.2px }
-  .header a.back{
-    color:#fff; text-decoration:none; background:rgba(255,255,255,.12);
-    padding:8px 12px; border-radius:10px; margin-right:10px;
-  }
+    /* ======= Header / Nav ======= */
+    .header{
+      background: var(--brand-primary);
+      color:#fff;
+      padding:20px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .header h1{ font-size:20px; letter-spacing:.2px }
+    .header a.back{
+      color:#fff; text-decoration:none; background:rgba(255,255,255,.12);
+      padding:8px 12px; border-radius:10px; margin-right:10px;
+    }
 
-  .container{ max-width:1200px; margin:0 auto; padding:20px }
+    .container{ max-width:1200px; margin:0 auto; padding:20px }
 
-  .nav-buttons{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap }
-  .nav-btn{
-    padding:10px 20px; background:var(--brand-primary); color:#fff;
-    border:none; border-radius:8px; cursor:pointer; font-size:16px;
-    min-height:44px;
-  }
-  .nav-btn:hover{ background:var(--brand-primary-600) }
-  .nav-btn.active{ background:var(--brand-primary-700) }
-  .nav-btn.print-btn{
-    background: linear-gradient(135deg, var(--brand-accent), #e0b760);
-    color:#2f2a28; border:2px solid var(--brand-accent); font-weight:700;
-    box-shadow:0 2px 4px rgba(213,163,51,.25);
-  }
-  .nav-btn.print-btn:hover{
-    filter:brightness(.95);
-    transform:translateY(-1px);
-    box-shadow:0 4px 8px rgba(213,163,51,.35);
-  }
+    .nav-buttons{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap }
+    .nav-btn{
+      padding:10px 20px; background:var(--brand-primary); color:#fff;
+      border:none; border-radius:8px; cursor:pointer; font-size:16px;
+      min-height:44px;
+    }
+    .nav-btn:hover{ background:var(--brand-primary-600) }
+    .nav-btn.active{ background:var(--brand-primary-700) }
+    .nav-btn.print-btn{
+      background: linear-gradient(135deg, var(--brand-accent), #e0b760);
+      color:#2f2a28; border:2px solid var(--brand-accent); font-weight:700;
+      box-shadow:0 2px 4px rgba(213,163,51,.25);
+    }
+    .nav-btn.print-btn:hover{
+      filter:brightness(.95);
+      transform:translateY(-1px);
+      box-shadow:0 4px 8px rgba(213,163,51,.35);
+    }
 
-  /* ======= Sections / Cards ======= */
-  .section{ display:none; background:var(--surface); padding:20px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,.06) }
-  .section.active{ display:block }
+    /* ======= Sections / Cards ======= */
+    .section{ display:none; background:var(--surface); padding:20px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,.06) }
+    .section.active{ display:block }
 
-  .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px; margin-bottom:20px }
-  .form-grid.materials-grid{ grid-template-columns:repeat(auto-fit,minmax(180px,1fr)) }
+    .form-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px; margin-bottom:20px }
+    .form-grid.materials-grid{ grid-template-columns:repeat(auto-fit,minmax(180px,1fr)) }
 
-  .form-group{ display:flex; flex-direction:column }
-  label{ margin-bottom:6px; font-weight:700; color:#444 }
+    .form-group{ display:flex; flex-direction:column }
+    label{ margin-bottom:6px; font-weight:700; color:#444 }
 
-  input, select{
-    padding:10px; border:1px solid var(--border); border-radius:10px;
-    font-size:16px; background:#fff;
-  }
-  select:focus, input:focus{
-    outline:none; border-color:var(--brand-accent);
-    box-shadow:0 0 0 2px rgba(213,163,51,.25);
-  }
+    input, select{
+      padding:10px; border:1px solid var(--border); border-radius:10px;
+      font-size:16px; background:#fff;
+    }
+    select:focus, input:focus{
+      outline:none; border-color:var(--brand-accent);
+      box-shadow:0 0 0 2px rgba(213,163,51,.25);
+    }
 
-  /* Prominent selects (box types) */
-  select#boxTypeUsed, select#boxTypeWasted{
-    background:#fff7e6; border:2px solid #f5e1a8; font-weight:600;
-  }
-  select#boxTypeUsed:focus, select#boxTypeWasted:focus{
-    background:#fff2cc; border-color:var(--brand-accent);
-  }
+    /* Prominent selects (box types) */
+    select#boxTypeUsed, select#boxTypeWasted{
+      background:#fff7e6; border:2px solid #f5e1a8; font-weight:600;
+    }
+    select#boxTypeUsed:focus, select#boxTypeWasted:focus{
+      background:#fff2cc; border-color:var(--brand-accent);
+    }
 
-  button{
-    padding:12px 24px; background:var(--brand-primary); color:#fff;
-    border:none; border-radius:10px; cursor:pointer; font-size:16px; min-height:44px;
-  }
-  button:hover{ background:var(--brand-primary-600) }
+    button{
+      padding:12px 24px; background:var(--brand-primary); color:#fff;
+      border:none; border-radius:10px; cursor:pointer; font-size:16px; min-height:44px;
+    }
+    button:hover{ background:var(--brand-primary-600) }
 
-  .output-section{ background:#fafafa; padding:15px; border-radius:10px; margin:20px 0; border:1px solid var(--border) }
-  .reject-section{ background:var(--warn); padding:15px; border-radius:10px; margin:20px 0; border:1px solid #ffe8a6 }
-  .wastage-section{ background:#fde2e4; padding:15px; border-radius:10px; margin:20px 0; border:1px solid #f8bfc4 }
-  .materials-section{ background:#fff7e6; padding:15px; border-radius:10px; margin:20px 0; border:1px solid #f5e1a8 }
+    .output-section{ background:#fafafa; padding:15px; border-radius:10px; margin:20px 0; border:1px solid var(--border) }
+    .reject-section{ background:var(--warn); padding:15px; border-radius:10px; margin:20px 0; border:1px solid #ffe8a6 }
+    .wastage-section{ background:#fde2e4; padding:15px; border-radius:10px; margin:20px 0; border:1px solid #f8bfc4 }
+    .materials-section{ background:#fff7e6; padding:15px; border-radius:10px; margin:20px 0; border:1px solid #f5e1a8 }
 
-  .table-container{ overflow-x:auto; margin-top:20px; padding-bottom:10px; -webkit-overflow-scrolling:touch }
-  table{ width:100%; border-collapse:collapse; min-width:500px }
-  th, td{ padding:12px; text-align:left; border-bottom:1px solid var(--border) }
-  th{ background:var(--brand-primary); color:#fff }
+    .table-container{ overflow-x:auto; margin-top:20px; padding-bottom:10px; -webkit-overflow-scrolling:touch }
+    table{ width:100%; border-collapse:collapse; min-width:500px }
+    th, td{ padding:12px; text-align:left; border-bottom:1px solid var(--border) }
+    th{ background:var(--brand-primary); color:#fff }
 
-  .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-bottom:30px }
-  .stat-card{
-    background:linear-gradient(0deg, #fff, #fff);
-    padding:20px; border-radius:12px; text-align:center;
-    border:2px solid var(--brand-accent);
-  }
-  .stat-value{ font-size:2em; font-weight:800; color:var(--brand-primary) }
+    .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-bottom:30px }
+    .stat-card{
+      background:linear-gradient(0deg, #fff, #fff);
+      padding:20px; border-radius:12px; text-align:center;
+      border:2px solid var(--brand-accent);
+    }
+    .stat-value{ font-size:2em; font-weight:800; color:var(--brand-primary) }
 
-  .action-buttons{ display:flex; gap:10px }
-  .edit-btn{ background:#ff9800 }
-  .delete-btn{ background:#dc3545 }
+    .action-buttons{ display:flex; gap:10px }
+    .edit-btn{ background:#ff9800 }
+    .delete-btn{ background:#dc3545 }
 
-  .total-box{ background:#fff7e6; padding:10px; margin-top:10px; border-radius:8px; font-weight:700; border:1px solid #f5e1a8 }
+    .total-box{ background:#fff7e6; padding:10px; margin-top:10px; border-radius:8px; font-weight:700; border:1px solid #f5e1a8 }
 
-  .warning-box{ background:#fff3cd; border:1px solid #ffeeba; color:#7a5d00; padding:15px; border-radius:10px; margin-bottom:20px }
+    .warning-box{ background:#fff3cd; border:1px solid #ffeeba; color:#7a5d00; padding:15px; border-radius:10px; margin-bottom:20px }
 
-  /* Print theme to brand */
-  .print-container{ display:none; position:relative }
-  .print-container::before{
-    content:"CONFIDENTIAL"; position:fixed; top:50%; left:50%;
-    transform:translate(-50%,-50%) rotate(-45deg);
-    font-size:80px; color:rgba(163,32,52,.04); font-weight:800; z-index:0; pointer-events:none;
-  }
-  .print-header{
-    text-align:center; background:linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-600) 100%);
-    color:#fff; padding:20px 15px; margin:0 0 30px 0; border-radius:0 0 20px 20px; position:relative; z-index:1; width:100%;
-  }
-  .print-header h1{ color:#fff; font-size:28px; margin:0 0 10px 0; text-shadow:2px 2px 4px rgba(0,0,0,.2) }
-  .print-header .subtitle{ color:#ffe9b3; font-size:13px; margin:5px 0 }
-  .print-section{ margin-bottom:30px; position:relative; z-index:1 }
-  .print-section h2{ color:var(--brand-primary); font-size:20px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:5px }
-  .print-stat-card{ background:linear-gradient(135deg,#f5f5f5 0%, #fff7e6 100%); padding:15px; border-radius:8px; text-align:center; border:1px solid #f5e1a8; box-shadow:0 2px 4px rgba(0,0,0,.06) }
-  .print-stat-card h3{ color:var(--brand-primary); font-size:14px; margin-bottom:10px }
-  .print-stat-card .value{ font-size:24px; font-weight:800; color:var(--brand-primary-700) }
-  .print-table{ width:100%; border-collapse:collapse; font-size:12px }
-  .print-table th{ background:var(--brand-primary); color:#fff; padding:8px; text-align:left }
-  .print-table td{ padding:6px 8px; border-bottom:1px solid #ddd }
+    /* Print theme to brand */
+    .print-container{ display:none; position:relative }
+    .print-container::before{
+      content:"CONFIDENTIAL"; position:fixed; top:50%; left:50%;
+      transform:translate(-50%,-50%) rotate(-45deg);
+      font-size:80px; color:rgba(163,32,52,.04); font-weight:800; z-index:0; pointer-events:none;
+    }
+    .print-header{
+      text-align:center; background:linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-600) 100%);
+      color:#fff; padding:20px 15px; margin:0 0 30px 0; border-radius:0 0 20px 20px; position:relative; z-index:1; width:100%;
+    }
+    .print-header h1{ color:#fff; font-size:28px; margin:0 0 10px 0; text-shadow:2px 2px 4px rgba(0,0,0,.2) }
+    .print-header .subtitle{ color:#ffe9b3; font-size:13px; margin:5px 0 }
+    .print-section{ margin-bottom:30px; position:relative; z-index:1 }
+    .print-section h2{ color:var(--brand-primary); font-size:20px; margin-bottom:15px; border-bottom:2px solid #e0e0e0; padding-bottom:5px }
+    .print-stat-card{ background:linear-gradient(135deg,#f5f5f5 0%, #fff7e6 100%); padding:15px; border-radius:8px; text-align:center; border:1px solid #f5e1a8; box-shadow:0 2px 4px rgba(0,0,0,.06) }
+    .print-stat-card h3{ color:var(--brand-primary); font-size:14px; margin-bottom:10px }
+    .print-stat-card .value{ font-size:24px; font-weight:800; color:var(--brand-primary-700) }
+    .print-table{ width:100%; border-collapse:collapse; font-size:12px }
+    .print-table th{ background:var(--brand-primary); color:#fff; padding:8px; text-align:left }
+    .print-table td{ padding:6px 8px; border-bottom:1px solid #ddd }
 
-  /* Mobile polish */
-  @media (max-width:768px){
-    .form-grid{ grid-template-columns:1fr }
-    .form-grid.materials-grid{ grid-template-columns:repeat(2,1fr) }
-    .stats-grid{ grid-template-columns:repeat(2,1fr) }
-    .nav-btn{ flex:1 1 calc(50% - 5px); min-width:120px }
-    .nav-btn.print-btn{ flex:1 1 100%; margin-top:10px }
-  }
-  @media (max-width:480px){
-    .stats-grid{ grid-template-columns:1fr }
-    .form-grid.materials-grid{ grid-template-columns:1fr }
-  }
-  @media print{
-    .print-header{ padding:15px 10px !important; margin:0 !important }
-    .print-header h1{ font-size:24px !important }
-    .print-header .subtitle{ font-size:12px !important }
-  }
-</style>
+    /* Mobile polish */
+    @media (max-width:768px){
+      .form-grid{ grid-template-columns:1fr }
+      .form-grid.materials-grid{ grid-template-columns:repeat(2,1fr) }
+      .stats-grid{ grid-template-columns:repeat(2,1fr) }
+      .nav-btn{ flex:1 1 calc(50% - 5px); min-width:120px }
+      .nav-btn.print-btn{ flex:1 1 100%; margin-top:10px }
+    }
+    @media (max-width:480px){
+      .stats-grid{ grid-template-columns:1fr }
+      .form-grid.materials-grid{ grid-template-columns:1fr }
+    }
+    @media print{
+      .print-header{ padding:15px 10px !important; margin:0 !important }
+      .print-header h1{ font-size:24px !important }
+      .print-header .subtitle{ font-size:12px !important }
+    }
+  </style>
 </head>
 <body>
 
@@ -174,8 +174,8 @@
   <div style="background:#fff; padding:40px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.08); width:100%; max-width:400px;">
     <h2 style="text-align:center; color:var(--brand-primary); margin-bottom:20px;">Pistachio Production Login</h2>
     <form onsubmit="handleLogin(event)">
-      <div class="form-group"><label>Username</label><input id="loginUsername" type="text" required></div>
-      <div class="form-group"><label>Password</label><input id="loginPassword" type="password" required></div>
+      <div class="form-group"><label>Username</label><input id="loginUsername" type="text" required autocomplete="username"></div>
+      <div class="form-group"><label>Password</label><input id="loginPassword" type="password" required autocomplete="current-password"></div>
       <button type="submit" style="width:100%; margin-top:10px;">Login</button>
     </form>
     <div style="margin-top:20px; padding:12px; background:#fafafa; border-radius:10px; border:1px solid var(--border);">
@@ -210,232 +210,238 @@
     </div>
 
     <!-- DASHBOARD -->
-<section id="dashboard" class="section active">
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div>Total Finished (kg)</div>
-      <div class="stat-value" id="kpiFinished">0</div>
-    </div>
-    <div class="stat-card">
-      <div>Efficiency (%)</div>
-      <div class="stat-value" id="kpiEff">0</div>
-    </div>
-    <div class="stat-card">
-      <div>Reject Rate (%)</div>
-      <div class="stat-value" id="kpiReject">0</div>
-    </div>
-  </div>
-  <div class="output-section">
-    <p>This is your Pistachio dashboard. KPIs update when you add records in <strong>New Production</strong>.</p>
-  </div>
-</section>
-
-<!-- NEW PRODUCTION -->
-<section id="production" class="section">
-  <div class="warning-box">
-    Enter shift outputs for Golden Hill / Extra (sizes 18–21 / 21–25). Repacking mode records no rejects.
-  </div>
-
-  <div class="form-grid">
-    <div class="form-group">
-      <label>Run Type</label>
-      <select id="runType">
-        <option value="huller">Huller Run</option>
-        <option value="repack">Repacking Only</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Brand</label>
-      <select id="brand">
-        <option>Golden Hill</option>
-        <option>Extra</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Size</label>
-      <select id="size">
-        <option>18-21</option>
-        <option>21-25</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Final Goods — Qty (10 kg bags)</label>
-      <input id="bags10" type="number" min="0" step="1" value="0" />
-    </div>
-  </div>
-
-  <div class="materials-section">
-    <div class="form-grid materials-grid">
-      <div class="form-group">
-        <label>Vacuum bags used</label>
-        <input id="mat_bags_used" type="number" min="0" step="1" value="0" />
+    <section id="dashboard" class="section active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Total Finished (kg)</div>
+          <div class="stat-value" id="kpiFinished">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Efficiency (%)</div>
+          <div class="stat-value" id="kpiEff">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Reject Rate (%)</div>
+          <div class="stat-value" id="kpiReject">0</div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Packing boxes used</label>
-        <input id="mat_boxes_used" type="number" min="0" step="1" value="0" />
+      <div class="output-section">
+        <p>This is your Pistachio dashboard. KPIs update when you add records in <strong>New Production</strong>.</p>
       </div>
-      <div class="form-group">
-        <label>Vacuum bags wasted</label>
-        <input id="mat_bags_waste" type="number" min="0" step="1" value="0" />
+    </section>
+
+    <!-- NEW PRODUCTION -->
+    <section id="production" class="section">
+      <div class="warning-box">
+        Enter shift outputs for Golden Hill / Extra (sizes 18–21 / 21–25). Repacking mode records no rejects.
       </div>
-      <div class="form-group">
-        <label>Packing boxes wasted</label>
-        <input id="mat_boxes_waste" type="number" min="0" step="1" value="0" />
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Run Type</label>
+          <select id="runType">
+            <option value="huller">Huller Run</option>
+            <option value="repack">Repacking Only</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Brand</label>
+          <select id="brand">
+            <option>Golden Hill</option>
+            <option>Extra</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Size</label>
+          <select id="size">
+            <option>18-21</option>
+            <option>21-25</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Final Goods — Qty (10 kg bags)</label>
+          <input id="bags10" type="number" min="0" step="1" value="0" />
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div id="rejectBlock" class="reject-section">
-    <p><strong>Rejects (kg)</strong> — only for Huller Run</p>
-    <div class="form-grid materials-grid">
-      <div class="form-group"><label>Non-Split (Closed)</label><input id="rej_non_split" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Light Stain</label><input id="rej_light_stain" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Adhering Hull</label><input id="rej_adhering_hull" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Dark Stain</label><input id="rej_dark_stain" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Shell & Split (Pre-clean 1)</label><input id="rej_shell_split_pre1" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Undersize 30/64 & Kernel (Pre-clean 2)</label><input id="rej_undersize_kernel_pre2" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Loose Shell</label><input id="rej_loose_shell" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Loose Kernel</label><input id="rej_loose_kernel" type="number" min="0" step="5" value="0"></div>
-      <div class="form-group"><label>Dust</label><input id="rej_dust" type="number" min="0" step="5" value="0"></div>
-    </div>
-  </div>
-
-  <div class="action-buttons">
-    <button type="button" onclick="saveProduction()">Save Draft</button>
-    <button type="button" class="edit-btn" onclick="submitProduction()">Submit</button>
-  </div>
-
-  <div class="output-section">
-    <div class="total-box" id="calcSummary">
-      Finished: 0 kg · Total Rejects: 0 kg · Efficiency: 0% · Reject Rate: 0%
-    </div>
-  </div>
-</section>
-
-<!-- RECORDS -->
-<section id="records" class="section">
-  <div class="table-container">
-    <table id="recordsTable">
-      <thead>
-        <tr>
-          <th>Time</th><th>Run</th><th>Brand</th><th>Size</th>
-          <th>Final Bags</th><th>Bags Used</th><th>Boxes Used</th>
-          <th>Total Rejects (kg)</th><th>Status</th>
-        </tr>
-      </thead>
-      <tbody><!-- rows injected --></tbody>
-    </table>
-  </div>
-</section>
-
-<!-- INVENTORY -->
-<section id="inventory" class="section">
-  <!-- Top counters (persisted stock snapshot if you use add/remove/adjust flow) -->
-  <div class="stats-grid" style="margin-bottom:16px">
-    <div class="stat-card"><div>Vacuum bags (10 kg)</div><div class="stat-value" id="inv_bags">0</div></div>
-    <div class="stat-card"><div>Packing boxes</div><div class="stat-value" id="inv_boxes">0</div></div>
-    <div class="stat-card"><div>Big Bags (~998.7 kg)</div><div class="stat-value" id="inv_bigbags">0</div></div>
-    <div class="stat-card"><div>Cartons (11.34 kg)</div><div class="stat-value" id="inv_cartons">0</div></div>
-    <div class="stat-card"><div>Bags (25 kg)</div><div class="stat-value" id="inv_bag25">0</div></div>
-  </div>
-
-  <!-- Manual stock movements / adjustments -->
-  <div class="materials-section">
-    <div class="form-grid materials-grid">
-      <div class="form-group">
-        <label>Item</label>
-        <select id="inv_item">
-          <option value="vacuum_bags_10kg">Vacuum bags (10 kg)</option>
-          <option value="packing_boxes">Packing boxes</option>
-          <option value="big_bag_998">Big Bag (~998.7 kg)</option>
-          <option value="carton_11_34">Carton (11.34 kg)</option>
-          <option value="bag_25">Bag (25 kg)</option>
-        </select>
+      <div class="materials-section">
+        <div class="form-grid materials-grid">
+          <div class="form-group">
+            <label>Vacuum bags used</label>
+            <input id="mat_bags_used" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Packing boxes used</label>
+            <input id="mat_boxes_used" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Vacuum bags wasted</label>
+            <input id="mat_bags_waste" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Packing boxes wasted</label>
+            <input id="mat_boxes_waste" type="number" min="0" step="1" value="0" />
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Action</label>
-        <select id="inv_action">
-          <option value="add">Add to stock</option>
-          <option value="remove">Remove from stock</option>
-          <option value="adjust">Set exact quantity</option>
-        </select>
+
+      <div id="rejectBlock" class="reject-section">
+        <p><strong>Rejects (kg)</strong> — only for Huller Run</p>
+        <div class="form-grid materials-grid">
+          <div class="form-group"><label>Non-Split (Closed)</label><input id="rej_non_split" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Light Stain</label><input id="rej_light_stain" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Adhering Hull</label><input id="rej_adhering_hull" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Dark Stain</label><input id="rej_dark_stain" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Shell & Split (Pre-clean 1)</label><input id="rej_shell_split_pre1" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Undersize 30/64 & Kernel (Pre-clean 2)</label><input id="rej_undersize_kernel_pre2" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Loose Shell</label><input id="rej_loose_shell" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Loose Kernel</label><input id="rej_loose_kernel" type="number" min="0" step="5" value="0"></div>
+          <div class="form-group"><label>Dust</label><input id="rej_dust" type="number" min="0" step="5" value="0"></div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Quantity</label>
-        <input id="inv_qty" type="number" min="0" step="1" value="0" />
+
+      <div class="action-buttons">
+        <button type="button" onclick="saveProduction()">Save Draft</button>
+        <button type="button" class="edit-btn" onclick="submitProduction()">Submit</button>
       </div>
-      <div class="form-group">
-        <label>Notes (optional)</label>
-        <input id="inv_note" type="text" placeholder="PO#, reason…" />
+
+      <div class="output-section">
+        <div class="total-box" id="calcSummary">
+          Finished: 0 kg · Total Rejects: 0 kg · Efficiency: 0% · Reject Rate: 0%
+        </div>
       </div>
-    </div>
-    <div class="row" style="gap:10px;margin-top:8px;flex-wrap:wrap">
-      <button type="button" onclick="invAddEntry()">Add Entry</button>
-      <button type="button" class="ghost" onclick="invExport()">Export CSV</button>
-      <button type="button" class="delete-btn" onclick="invClearAll()" style="margin-inline-start:auto">Clear All (danger)</button>
-    </div>
+    </section>
+
+    <!-- RECORDS -->
+    <section id="records" class="section">
+      <div class="table-container">
+        <table id="recordsTable">
+          <thead>
+            <tr>
+              <th>Time</th><th>Run</th><th>Brand</th><th>Size</th>
+              <th>Final Bags</th><th>Bags Used</th><th>Boxes Used</th>
+              <th>Total Rejects (kg)</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody><!-- rows injected --></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- INVENTORY -->
+    <section id="inventory" class="section">
+      <!-- Top counters -->
+      <div class="stats-grid" style="margin-bottom:16px">
+        <div class="stat-card"><div>Vacuum bags (10 kg)</div><div class="stat-value" id="inv_bags">0</div></div>
+        <div class="stat-card"><div>Packing boxes</div><div class="stat-value" id="inv_boxes">0</div></div>
+        <div class="stat-card"><div>Big Bags (~998.7 kg)</div><div class="stat-value" id="inv_bigbags">0</div></div>
+        <div class="stat-card"><div>Cartons (11.34 kg)</div><div class="stat-value" id="inv_cartons">0</div></div>
+        <div class="stat-card"><div>Bags (25 kg)</div><div class="stat-value" id="inv_bag25">0</div></div>
+      </div>
+
+      <!-- Manual stock movements -->
+      <div class="materials-section">
+        <div class="form-grid materials-grid">
+          <div class="form-group">
+            <label>Item</label>
+            <select id="inv_item">
+              <option value="vacuum_bags_10kg">Vacuum bags (10 kg)</option>
+              <option value="packing_boxes">Packing boxes</option>
+              <option value="big_bag_998">Big Bag (~998.7 kg)</option>
+              <option value="carton_11_34">Carton (11.34 kg)</option>
+              <option value="bag_25">Bag (25 kg)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Action</label>
+            <select id="inv_action">
+              <option value="add">Add to stock</option>
+              <option value="remove">Remove from stock</option>
+              <option value="adjust">Set exact quantity</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input id="inv_qty" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Notes (optional)</label>
+            <input id="inv_note" type="text" placeholder="PO#, reason…" />
+          </div>
+        </div>
+        <div class="row" style="gap:10px;margin-top:8px;flex-wrap:wrap">
+          <button type="button" onclick="invAddEntry()">Add Entry</button>
+          <button type="button" class="ghost" onclick="invExport()">Export CSV</button>
+          <button type="button" class="delete-btn" onclick="invClearAll()" style="margin-inline-start:auto">Clear All (danger)</button>
+        </div>
+      </div>
+
+      <!-- Log of manual stock movements -->
+      <div class="table-container">
+        <table id="invTable">
+          <thead>
+            <tr>
+              <th>Time</th><th>Item</th><th>Action</th><th>Qty</th><th>Resulting Stock</th><th>Notes</th>
+            </tr>
+          </thead>
+          <tbody><!-- rows injected --></tbody>
+        </table>
+      </div>
+
+      <!-- Summary tables from Submitted Production + Adjustments -->
+      <div class="output-section" style="margin-top:24px">
+        <h3 style="margin:0 0 10px">Finished Goods (from submitted production)</h3>
+        <div class="table-container">
+          <table id="invFinished">
+            <thead>
+              <tr><th>Brand</th><th>Size</th><th>Bags (10kg)</th><th>Kg</th></tr>
+            </thead>
+            <tbody><!-- rows injected --></tbody>
+          </table>
+        </div>
+
+        <h3 style="margin:18px 0 10px">Materials Usage Totals</h3>
+        <div class="table-container">
+          <table id="invMaterials">
+            <thead>
+              <tr><th>Vacuum bags used</th><th>Boxes used</th><th>Vacuum bags wasted</th><th>Boxes wasted</th></tr>
+            </thead>
+            <tbody><!-- rows injected --></tbody>
+          </table>
+        </div>
+
+        <h3 style="margin:18px 0 10px">Rejects Total</h3>
+        <div class="table-container">
+          <table id="invRejects">
+            <thead>
+              <tr><th>Total Rejects (kg)</th></tr>
+            </thead>
+            <tbody><!-- rows injected --></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATERIALS -->
+    <section id="materials" class="section">
+      <div class="output-section">
+        <p>Materials usage summary coming soon…</p>
+      </div>
+    </section>
+
+    <!-- (end .container / #mainApp content) -->
   </div>
+</div>
 
-  <!-- Log of manual stock movements -->
-  <div class="table-container">
-    <table id="invTable">
-      <thead>
-        <tr>
-          <th>Time</th><th>Item</th><th>Action</th><th>Qty</th><th>Resulting Stock</th><th>Notes</th>
-        </tr>
-      </thead>
-      <tbody><!-- rows injected --></tbody>
-    </table>
-  </div>
-
-  <!-- Summary tables computed from Submitted Production + Adjustments -->
-  <div class="output-section" style="margin-top:24px">
-    <h3 style="margin:0 0 10px">Finished Goods (from submitted production)</h3>
-    <div class="table-container">
-      <table id="invFinished">
-        <thead>
-          <tr><th>Brand</th><th>Size</th><th>Bags (10kg)</th><th>Kg</th></tr>
-        </thead>
-        <tbody><!-- rows injected --></tbody>
-      </table>
-    </div>
-
-    <h3 style="margin:18px 0 10px">Materials Usage Totals</h3>
-    <div class="table-container">
-      <table id="invMaterials">
-        <thead>
-          <tr><th>Vacuum bags used</th><th>Boxes used</th><th>Vacuum bags wasted</th><th>Boxes wasted</th></tr>
-        </thead>
-        <tbody><!-- rows injected --></tbody>
-      </table>
-    </div>
-
-    <h3 style="margin:18px 0 10px">Rejects Total</h3>
-    <div class="table-container">
-      <table id="invRejects">
-        <thead>
-          <tr><th>Total Rejects (kg)</th></tr>
-        </thead>
-        <tbody><!-- rows injected --></tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-
-<!-- MATERIALS -->
-<section id="materials" class="section">
-  <div class="output-section">
-    <p>Materials usage summary coming soon…</p>
-  </div>
-</section>
+<!-- Print Container -->
+<div class="print-container" id="printReport"></div>
 
 <script>
-/* ==== Minimal localStorage flow so KPIs & Records work ==== */
-const LS_REC = 'pistachio_records';
+/* ==== Production: localStorage + KPIs & Records ==== */
+const LS_REC_KEY = 'pistachio_records';
 
 function readNum(id){ const el = document.getElementById(id); return Number(el?.value||0); }
 function sumRejects(){
@@ -467,11 +473,9 @@ function saveProduction(){
   const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
   const payload = buildPayload('draft');
   recs.push(payload);
-
   localStorage.setItem(LS_REC_KEY, JSON.stringify(recs));
   alert('Draft saved.');
 }
-
 function submitProduction(){
   const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
   const payload = buildPayload('submitted');
@@ -480,7 +484,6 @@ function submitProduction(){
   alert('Submitted.');
   renderRecords();
 }
-
 function buildPayload(status){
   const bags = readNum('bags10');
   const finishedKg = bags * 10;
@@ -502,7 +505,6 @@ function buildPayload(status){
     status
   };
 }
-
 function renderRecords(){
   const tbody = document.querySelector('#recordsTable tbody');
   const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]').slice(-100).reverse();
@@ -523,48 +525,20 @@ function renderRecords(){
 window.addEventListener('load', renderRecords);
 </script>
 
-    <!-- I intentionally kept all computations / fields intact from your upload. -->
-  </div>
-</div>
-
-<!-- Print Container -->
-<div class="print-container" id="printReport"></div>
-
 <script>
-/* === Your original JavaScript logic, unchanged ===
-   paste the entire <script> from your app here. I did not alter any math;
-   only the CSS/branding above changed. */
-</script>
-<script>
-/** ===== SIMPLE LOGIN HANDLER (drop-in) =====
- * Demo users:
- *   admin / admin123
- *   operator / op123
- * Persists the session in localStorage so reload keeps you logged in.
- */
+/** ===== SIMPLE LOGIN HANDLER (drop-in) ===== */
+const USERS = { admin: 'admin123', operator: 'op123' };
 
-const USERS = {
-  admin: 'admin123',
-  operator: 'op123'
-};
-
-// Show the right screen on load (persisted session)
 window.addEventListener('load', function () {
   const savedUser = localStorage.getItem('mes_user');
-  if (savedUser && USERS[savedUser]) {
-    showApp(savedUser);
-  } else {
-    showLogin();
-  }
+  if (savedUser && USERS[savedUser]) { showApp(savedUser); } else { showLogin(); }
 });
-
 function showLogin() {
   const log = document.getElementById('loginScreen');
   const app = document.getElementById('mainApp');
   if (log) log.style.display = 'flex';
   if (app) app.style.display = 'none';
 }
-
 function showApp(username) {
   const log = document.getElementById('loginScreen');
   const app = document.getElementById('mainApp');
@@ -573,225 +547,47 @@ function showApp(username) {
   const userDisplay = document.getElementById('userDisplay');
   if (userDisplay) userDisplay.textContent = username;
 }
-
-// Called by the form: <form onsubmit="handleLogin(event)">
 function handleLogin(e) {
   e.preventDefault();
   const u = document.getElementById('loginUsername')?.value?.trim() || '';
   const p = document.getElementById('loginPassword')?.value || '';
   if (!u || !p) { alert('Enter username and password.'); return; }
-
   const ok = USERS[u] && USERS[u] === p;
-  if (!ok) {
-    alert('Invalid username or password.');
-    return;
-  }
+  if (!ok) { alert('Invalid username or password.'); return; }
   localStorage.setItem('mes_user', u);
   showApp(u);
 }
-
-// Optional: logout button calls this
-function logout() {
-  localStorage.removeItem('mes_user');
-  showLogin();
-}
+function logout() { localStorage.removeItem('mes_user'); showLogin(); }
 </script>
-<script>
-/* ========= SECTION NAVIGATION (drop-in) =========
-   Expects:
-   - Nav buttons call:  onclick="showSection('dashboard', this)" etc.
-   - Content sections have ids: dashboard, production, records, inventory, materials
-   - Each section element has class="section"
-   - CSS shows .section.active and hides others
-*/
 
-/** Show one section by id, mark the clicked button active */
+<script>
+/* ========= SECTION NAVIGATION (single source of truth) ========= */
 window.showSection = function (id, btn) {
-  // hide/show sections
   document.querySelectorAll('.section').forEach(sec => {
     sec.classList.toggle('active', sec.id === id);
   });
-
-  // active state for nav buttons
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-
-  // scroll to top for mobile ergonomics
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  window.scrollTo({ top: 0 });
 };
+window.showProductionSelection = function () { window.print(); };
 
-/** Optional: Print button handler (replace with your existing print flow if you have one) */
-window.showProductionSelection = function () {
-  // If you already build a printable DOM into #printReport elsewhere, call that here.
-  // Minimal fallback: open browser print.
-  window.print();
-};
-
-/** Boot default section on first load (after login), if none is active */
 function bootDefaultSection() {
   const alreadyActive = document.querySelector('.section.active');
   if (alreadyActive) return;
   const first = document.getElementById('dashboard') || document.querySelector('.section');
   if (first) {
     first.classList.add('active');
-    // also set the first nav button active if present
-    const firstBtn = document.querySelector('.nav-buttons .nav-btn');
-    if (firstBtn) firstBtn.classList.add('active');
-  }
-}
-
-/** If you use the login flow: when app shows, ensure a section is active */
-(function ensureSectionAfterLogin(){
-  // Try immediately (for no-login mode) and also after load
-  bootDefaultSection();
-  window.addEventListener('load', bootDefaultSection);
-})();
-</script>
-<script>
-/* ========= SECTION NAVIGATION (global) ========= */
-window.showSection = function (id, btn) {
-  // show the chosen section
-  document.querySelectorAll('.section').forEach(sec => {
-    sec.classList.toggle('active', sec.id === id);
-  });
-  // highlight the clicked nav button
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  // scroll to top for better mobile UX
-  window.scrollTo({ top: 0, behavior: 'instant' });
-};
-
-// Print button (adjust to your existing print flow if needed)
-window.showProductionSelection = function () {
-  window.print();
-};
-
-// On first load (or after login), ensure at least one section is visible
-function bootDefaultSection() {
-  const anyActive = document.querySelector('.section.active');
-  if (!anyActive) {
-    const first = document.getElementById('dashboard') || document.querySelector('.section');
-    if (first) first.classList.add('active');
     const firstBtn = document.querySelector('.nav-buttons .nav-btn');
     if (firstBtn) firstBtn.classList.add('active');
   }
 }
 window.addEventListener('load', bootDefaultSection);
 </script>
+
 <script>
-/* ===== Inventory snapshot from records + manual adjustments ===== */
-const LS_REC_KEY = 'pistachio_records';
-const LS_INV_ADJ = 'pistachio_inv_adjustments';
-
-function getRecords() {
-  const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
-  return all.filter(r => r && r.status === 'submitted');
-}
-
-function getAdjustments() {
-  return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]');
-}
-
-function addAdjustment(adj) {
-  const arr = getAdjustments();
-  arr.push({ ...adj, ts: new Date().toISOString() });
-  localStorage.setItem(LS_INV_ADJ, JSON.stringify(arr));
-}
-
-function saveInvAdjust() {
-  const adj = {
-    brand: document.getElementById('adj_brand')?.value || '',
-    size: document.getElementById('adj_size')?.value || '',
-    bags: Number(document.getElementById('adj_bags')?.value || 0),
-    kg: Number(document.getElementById('adj_kg')?.value || 0),
-    mat_bags_used: Number(document.getElementById('adj_mat_bags_used')?.value || 0),
-    mat_boxes_used: Number(document.getElementById('adj_mat_boxes_used')?.value || 0),
-    mat_bags_waste: Number(document.getElementById('adj_mat_bags_waste')?.value || 0),
-    mat_boxes_waste: Number(document.getElementById('adj_mat_boxes_waste')?.value || 0),
-    rejectsKg: Number(document.getElementById('adj_rejects_kg')?.value || 0)
-  };
-  addAdjustment(adj);
-  renderInventory();
-}
-
-function computeInventory() {
-  const recs = getRecords();
-  const mapFG = {};
-  let matUsed = 0, boxUsed = 0, matWaste = 0, boxWaste = 0, rejectsKg = 0;
-
-  recs.forEach(r => {
-    const key = `${r.brand}|${r.size}`;
-    if (!mapFG[key]) mapFG[key] = { brand: r.brand, size: r.size, bags: 0, kg: 0 };
-    mapFG[key].bags += Number(r.bags10 || 0);
-    mapFG[key].kg   += Number(r.finishedKg || 0);
-    matUsed  += Number(r.materials?.bags_used  || 0);
-    boxUsed  += Number(r.materials?.boxes_used || 0);
-    matWaste += Number(r.materials?.bags_waste || 0);
-    boxWaste += Number(r.materials?.boxes_waste|| 0);
-    rejectsKg += Number(r.rejectsKg || 0);
-  });
-
-  const adjs = getAdjustments();
-  adjs.forEach(a => {
-    const key = `${a.brand}|${a.size}`;
-    if (!mapFG[key]) mapFG[key] = { brand: a.brand, size: a.size, bags: 0, kg: 0 };
-    mapFG[key].bags += Number(a.bags || 0);
-    mapFG[key].kg   += Number(a.kg   || 0);
-    matUsed  += Number(a.mat_bags_used  || 0);
-    boxUsed  += Number(a.mat_boxes_used || 0);
-    matWaste += Number(a.mat_bags_waste || 0);
-    boxWaste += Number(a.mat_boxes_waste|| 0);
-    rejectsKg += Number(a.rejectsKg || 0);
-  });
-
-  return {
-    finished: Object.values(mapFG).sort((a,b)=> (a.brand+a.size).localeCompare(b.brand+b.size)),
-    materials: { matUsed, boxUsed, matWaste, boxWaste },
-    rejectsKg
-  };
-}
-
-function renderInventory() {
-  const snap = computeInventory();
-
-  document.querySelector('#invFinished tbody').innerHTML = snap.finished.length
-    ? snap.finished.map(r => `<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
-    : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
-
-  document.querySelector('#invMaterials tbody').innerHTML = `<tr>
-    <td>${snap.materials.matUsed}</td>
-    <td>${snap.materials.boxUsed}</td>
-    <td>${snap.materials.matWaste}</td>
-    <td>${snap.materials.boxWaste}</td>
-  </tr>`;
-
-  document.querySelector('#invRejects tbody').innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
-}
-
-window.invAddEntry = function () { saveInvAdjust(); };
-window.invExport = function () { exportInventoryCSV(); };
-window.invClearAll = function () {
-  if (!confirm('Clear all inventory data?')) return;
-  localStorage.removeItem(LS_INV_ADJ);
-  renderInventory();
-};
-
-const _origShowSection = window.showSection;
-window.showSection = function(id, btn){
-  if (typeof _origShowSection === 'function') _origShowSection(id, btn);
-  if (id === 'inventory') renderInventory();
-};
-
-window.addEventListener('load', renderInventory);
-</script>
-<script>
-/* ===== Inventory snapshot from records + manual adjustments =====
-   - Uses LS_REC_KEY ('pistachio_records') for Submitted Production
-   - Uses LS_INV_ADJ for manual adjustments that affect the summary tables
-   - Also provides a simple stock engine for your counters + log (invAddEntry)
-*/
-const LS_REC_KEY  = 'pistachio_records';
-const LS_INV_ADJ  = 'pistachio_inv_adjustments';
+/* ===== Inventory: counters + log + summary tables ===== */
+const LS_INV_ADJ   = 'pistachio_inv_adjustments';
 const LS_INV_STOCK = 'pistachio_inv_stock';
 const LS_INV_LOG   = 'pistachio_inv_log';
 
@@ -810,13 +606,13 @@ const COUNTER_ID = {
   bag_25:           'inv_bag25'
 };
 
-/* ---------- Production records (submitted only) ---------- */
+/* ----- Production records (submitted only) ----- */
 function getRecords() {
   const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
   return all.filter(r => r && r.status === 'submitted');
 }
 
-/* ---------- Manual adjustments (applied to summary tables) ---------- */
+/* ----- Manual adjustments (applied to summary tables) ----- */
 function getAdjustments() {
   return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]');
 }
@@ -826,14 +622,13 @@ function addAdjustment(adj) {
   localStorage.setItem(LS_INV_ADJ, JSON.stringify(arr));
 }
 
-/* ---------- Simple stock engine for counters + log ---------- */
+/* ----- Simple stock engine for counters + log ----- */
 function loadStock(){
   return Object.assign({
     vacuum_bags_10kg: 0, packing_boxes: 0, big_bag_998: 0, carton_11_34: 0, bag_25: 0
   }, JSON.parse(localStorage.getItem(LS_INV_STOCK) || '{}'));
 }
 function saveStock(s){ localStorage.setItem(LS_INV_STOCK, JSON.stringify(s)); }
-
 function loadLog(){ return JSON.parse(localStorage.getItem(LS_INV_LOG) || '[]'); }
 function saveLog(l){ localStorage.setItem(LS_INV_LOG, JSON.stringify(l)); }
 
@@ -865,16 +660,15 @@ function renderStockUI(){
   renderCounters(loadStock());
   renderLog(loadLog());
 }
-
 function applyAction(stock, item, action, qty){
   const cur = Number(stock[item] || 0);
-  if (action === 'add')       stock[item] = cur + qty;
+  if (action === 'add') stock[item] = cur + qty;
   else if (action === 'remove') stock[item] = Math.max(0, cur - qty);
   else if (action === 'adjust') stock[item] = Math.max(0, qty);
   return stock[item];
 }
 
-/* Exposed handlers for your buttons */
+/* Buttons */
 window.invAddEntry = function (){
   const item = document.getElementById('inv_item')?.value;
   const action = document.getElementById('inv_action')?.value;
@@ -914,7 +708,7 @@ window.invClearAll = function (){
   renderStockUI();
 };
 
-/* ---------- Summary tables from Production + Adjustments ---------- */
+/* ----- Summary tables from Production + Adjustments ----- */
 function computeInventory() {
   const recs = getRecords();
   const mapFG = {};
@@ -934,7 +728,6 @@ function computeInventory() {
     rejectsKg += Number(r.rejectsKg || 0);
   });
 
-  // Apply manual adjustments to tables
   getAdjustments().forEach(a=>{
     const key = `${a.brand}|${a.size}`;
     if (!mapFG[key]) mapFG[key] = { brand:a.brand, size:a.size, bags:0, kg:0 };
@@ -955,17 +748,14 @@ function computeInventory() {
     rejectsKg
   };
 }
-
 function renderInventory() {
   const snap = computeInventory();
 
-  // Finished
   const tb1 = document.querySelector('#invFinished tbody');
   tb1.innerHTML = snap.finished.length
     ? snap.finished.map(r=>`<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
     : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
 
-  // Materials
   document.querySelector('#invMaterials tbody').innerHTML = `
     <tr>
       <td>${snap.materials.matUsed}</td>
@@ -974,17 +764,16 @@ function renderInventory() {
       <td>${snap.materials.boxWaste}</td>
     </tr>`;
 
-  // Rejects
   document.querySelector('#invRejects tbody').innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
 }
 
-/* Hook summary render on tab switch + on load */
-const _origShowSection = window.showSection;
+/* Hook renders */
+const prevShowSection = window.showSection;
 window.showSection = function(id, btn){
-  if (typeof _origShowSection === 'function') _origShowSection(id, btn);
+  if (typeof prevShowSection === 'function') prevShowSection(id, btn);
   if (id === 'inventory') { renderStockUI(); renderInventory(); }
 };
-window.addEventListener('load', function(){ renderStockUI(); /* don’t render tables until needed */ });
+window.addEventListener('load', function(){ renderStockUI(); /* tables render on first open */ });
 </script>
 
 </body>
