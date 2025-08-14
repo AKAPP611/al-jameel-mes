@@ -280,6 +280,57 @@ function logout() {
   showLogin();
 }
 </script>
+<script>
+/* ========= SECTION NAVIGATION (drop-in) =========
+   Expects:
+   - Nav buttons call:  onclick="showSection('dashboard', this)" etc.
+   - Content sections have ids: dashboard, production, records, inventory, materials
+   - Each section element has class="section"
+   - CSS shows .section.active and hides others
+*/
+
+/** Show one section by id, mark the clicked button active */
+window.showSection = function (id, btn) {
+  // hide/show sections
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.classList.toggle('active', sec.id === id);
+  });
+
+  // active state for nav buttons
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // scroll to top for mobile ergonomics
+  window.scrollTo({ top: 0, behavior: 'instant' });
+};
+
+/** Optional: Print button handler (replace with your existing print flow if you have one) */
+window.showProductionSelection = function () {
+  // If you already build a printable DOM into #printReport elsewhere, call that here.
+  // Minimal fallback: open browser print.
+  window.print();
+};
+
+/** Boot default section on first load (after login), if none is active */
+function bootDefaultSection() {
+  const alreadyActive = document.querySelector('.section.active');
+  if (alreadyActive) return;
+  const first = document.getElementById('dashboard') || document.querySelector('.section');
+  if (first) {
+    first.classList.add('active');
+    // also set the first nav button active if present
+    const firstBtn = document.querySelector('.nav-buttons .nav-btn');
+    if (firstBtn) firstBtn.classList.add('active');
+  }
+}
+
+/** If you use the login flow: when app shows, ensure a section is active */
+(function ensureSectionAfterLogin(){
+  // Try immediately (for no-login mode) and also after load
+  bootDefaultSection();
+  window.addEventListener('load', bootDefaultSection);
+})();
+</script>
 
 </body>
 </html>
