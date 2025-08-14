@@ -331,6 +331,37 @@ function bootDefaultSection() {
   window.addEventListener('load', bootDefaultSection);
 })();
 </script>
+<script>
+/* ========= SECTION NAVIGATION (global) ========= */
+window.showSection = function (id, btn) {
+  // show the chosen section
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.classList.toggle('active', sec.id === id);
+  });
+  // highlight the clicked nav button
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // scroll to top for better mobile UX
+  window.scrollTo({ top: 0, behavior: 'instant' });
+};
+
+// Print button (adjust to your existing print flow if needed)
+window.showProductionSelection = function () {
+  window.print();
+};
+
+// On first load (or after login), ensure at least one section is visible
+function bootDefaultSection() {
+  const anyActive = document.querySelector('.section.active');
+  if (!anyActive) {
+    const first = document.getElementById('dashboard') || document.querySelector('.section');
+    if (first) first.classList.add('active');
+    const firstBtn = document.querySelector('.nav-buttons .nav-btn');
+    if (firstBtn) firstBtn.classList.add('active');
+  }
+}
+window.addEventListener('load', bootDefaultSection);
+</script>
 
 </body>
 </html>
