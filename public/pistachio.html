@@ -330,10 +330,62 @@
 
 <!-- INVENTORY -->
 <section id="inventory" class="section">
-  <div class="output-section">
-    <p>Inventory snapshot coming soon…</p>
+  <div class="stats-grid" style="margin-bottom:16px">
+    <div class="stat-card"><div>Vacuum bags (10 kg)</div><div class="stat-value" id="inv_bags">0</div></div>
+    <div class="stat-card"><div>Packing boxes</div><div class="stat-value" id="inv_boxes">0</div></div>
+    <div class="stat-card"><div>Big Bags (~998.7 kg)</div><div class="stat-value" id="inv_bigbags">0</div></div>
+    <div class="stat-card"><div>Cartons (11.34 kg)</div><div class="stat-value" id="inv_cartons">0</div></div>
+    <div class="stat-card"><div>Bags (25 kg)</div><div class="stat-value" id="inv_bag25">0</div></div>
+  </div>
+
+  <div class="materials-section">
+    <div class="form-grid materials-grid">
+      <div class="form-group">
+        <label>Item</label>
+        <select id="inv_item">
+          <option value="vacuum_bags_10kg">Vacuum bags (10 kg)</option>
+          <option value="packing_boxes">Packing boxes</option>
+          <option value="big_bag_998">Big Bag (~998.7 kg)</option>
+          <option value="carton_11_34">Carton (11.34 kg)</option>
+          <option value="bag_25">Bag (25 kg)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Action</label>
+        <select id="inv_action">
+          <option value="add">Add to stock</option>
+          <option value="remove">Remove from stock</option>
+          <option value="adjust">Set exact quantity</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input id="inv_qty" type="number" min="0" step="1" value="0" />
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <input id="inv_note" type="text" placeholder="PO#, reason…" />
+      </div>
+    </div>
+    <div class="row" style="gap:10px;margin-top:8px;flex-wrap:wrap">
+      <button type="button" onclick="invAddEntry()">Add Entry</button>
+      <button type="button" class="ghost" onclick="invExport()">Export CSV</button>
+      <button type="button" class="delete-btn" onclick="invClearAll()" style="margin-inline-start:auto">Clear All (danger)</button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table id="invTable">
+      <thead>
+        <tr>
+          <th>Time</th><th>Item</th><th>Action</th><th>Qty</th><th>Resulting Stock</th><th>Notes</th>
+        </tr>
+      </thead>
+      <tbody><!-- rows injected --></tbody>
+    </table>
   </div>
 </section>
+
 
 <!-- MATERIALS -->
 <section id="materials" class="section">
@@ -585,6 +637,166 @@ function bootDefaultSection() {
   }
 }
 window.addEventListener('load', bootDefaultSection);
+</script>
+<script>
+/* ===== Inventory snapshot from records + manual adjustments =====
+   Depends on:
+   - Records stored in localStorage under LS_REC ('pistachio_records')
+   - Each record payload built by buildPayload(status) in your page
+   - We aggregate only records with status === 'submitted'
+*/
+const LS_REC = 'pistachio_records';
+const LS_INV_ADJ = 'pistachio_inv_adjustments';
+
+function getRecords() {
+  const all = JSON.parse(localStorage.getItem(LS_REC) || '[]');
+  return all.filter(r => r && r.status === 'submitted');
+}
+
+function getAdjustments() {
+  return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]');
+}
+
+function addAdjustment(adj) {
+  const arr = getAdjustments();
+  arr.push({ ...adj, ts: new Date().toISOString() });
+  localStorage.setItem(LS_INV_ADJ, JSON.stringify(arr));
+}
+
+function clearInvAdjust() {
+  if (!confirm('Clear all manual adjustments?')) return;
+  localStorage.removeItem(LS_INV_ADJ);
+  renderInventory();
+}
+
+function openInvAdjust() {
+  document.getElementById('invAdjustModal').style.display = 'flex';
+}
+function closeInvAdjust() {
+  document.getElementById('invAdjustModal').style.display = 'none';
+}
+function saveInvAdjust() {
+  const adj = {
+    brand: document.getElementById('adj_brand').value,
+    size: document.getElementById('adj_size').value,
+    bags: Number(document.getElementById('adj_bags').value || 0),
+    kg: Number(document.getElementById('adj_kg').value || 0),
+    mat_bags_used: Number(document.getElementById('adj_mat_bags_used').value || 0),
+    mat_boxes_used: Number(document.getElementById('adj_mat_boxes_used').value || 0),
+    mat_bags_waste: Number(document.getElementById('adj_mat_bags_waste').value || 0),
+    mat_boxes_waste: Number(document.getElementById('adj_mat_boxes_waste').value || 0),
+    rejectsKg: Number(document.getElementById('adj_rejects_kg').value || 0)
+  };
+  addAdjustment(adj);
+  closeInvAdjust();
+  renderInventory();
+}
+
+/* Compute inventory snapshot */
+function computeInventory() {
+  const recs = getRecords();
+  const mapFG = {}; // key: brand|size -> {brand, size, bags, kg}
+  let matUsed = 0, boxUsed = 0, matWaste = 0, boxWaste = 0, rejectsKg = 0;
+
+  recs.forEach(r => {
+    const key = `${r.brand}|${r.size}`;
+    if (!mapFG[key]) mapFG[key] = { brand: r.brand, size: r.size, bags: 0, kg: 0 };
+    mapFG[key].bags += Number(r.bags10 || 0);
+    mapFG[key].kg   += Number(r.finishedKg || 0);
+
+    matUsed  += Number(r.materials?.bags_used  || 0);
+    boxUsed  += Number(r.materials?.boxes_used || 0);
+    matWaste += Number(r.materials?.bags_waste || 0);
+    boxWaste += Number(r.materials?.boxes_waste|| 0);
+
+    rejectsKg += Number(r.rejectsKg || 0);
+  });
+
+  // Apply adjustments
+  const adjs = getAdjustments();
+  adjs.forEach(a => {
+    const key = `${a.brand}|${a.size}`;
+    if (!mapFG[key]) mapFG[key] = { brand: a.brand, size: a.size, bags: 0, kg: 0 };
+    mapFG[key].bags += Number(a.bags || 0);
+    mapFG[key].kg   += Number(a.kg   || 0);
+
+    matUsed  += Number(a.mat_bags_used  || 0);
+    boxUsed  += Number(a.mat_boxes_used || 0);
+    matWaste += Number(a.mat_bags_waste || 0);
+    boxWaste += Number(a.mat_boxes_waste|| 0);
+
+    rejectsKg += Number(a.rejectsKg || 0);
+  });
+
+  const finished = Object.values(mapFG).sort((a,b)=> (a.brand+a.size).localeCompare(b.brand+b.size));
+  return {
+    finished,
+    materials: { matUsed, boxUsed, matWaste, boxWaste },
+    rejectsKg
+  };
+}
+
+/* Render tables */
+function renderInventory() {
+  const snap = computeInventory();
+
+  // Finished goods
+  const tb1 = document.querySelector('#invFinished tbody');
+  tb1.innerHTML = snap.finished.length
+    ? snap.finished.map(r => `<tr>
+        <td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
+
+  // Materials
+  const tb2 = document.querySelector('#invMaterials tbody');
+  tb2.innerHTML = `<tr>
+    <td>${snap.materials.matUsed}</td>
+    <td>${snap.materials.boxUsed}</td>
+    <td>${snap.materials.matWaste}</td>
+    <td>${snap.materials.boxWaste}</td>
+  </tr>`;
+
+  // Rejects
+  const tb3 = document.querySelector('#invRejects tbody');
+  tb3.innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
+}
+
+/* Export CSV */
+function exportInventoryCSV() {
+  const { finished, materials, rejectsKg } = computeInventory();
+  const lines = [];
+  lines.push('Section,Brand,Size,Bags(10kg),Kg');
+  if (finished.length) {
+    finished.forEach(r => lines.push(`Finished,${r.brand},${r.size},${r.bags},${r.kg}`));
+  } else {
+    lines.push('Finished,,,,');
+  }
+  lines.push('');
+  lines.push('Materials,Vacuum bags used,Boxes used,Vacuum bags wasted,Boxes wasted');
+  lines.push(`Materials,${materials.matUsed},${materials.boxUsed},${materials.matWaste},${materials.boxWaste}`);
+  lines.push('');
+  lines.push('Rejects,Total Rejects (kg)');
+  lines.push(`Rejects,${rejectsKg}`);
+
+  const csv = lines.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `inventory_pistachio_${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* Hook inventory rendering when you switch tabs */
+const _origShowSection = window.showSection;
+window.showSection = function(id, btn){
+  if (typeof _origShowSection === 'function') _origShowSection(id, btn);
+  if (id === 'inventory') renderInventory();
+};
+
+// Also render once on page load (in case Inventory is the first tab you open)
+window.addEventListener('load', renderInventory);
 </script>
 
 </body>
