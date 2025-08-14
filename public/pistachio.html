@@ -206,7 +206,231 @@
       <button class="nav-btn print-btn" onclick="showProductionSelection()">📊 Print Report</button>
     </div>
 
-    <!-- (Your original sections and JavaScript logic go here unchanged) -->
+    <!-- DASHBOARD -->
+<section id="dashboard" class="section active">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div>Total Finished (kg)</div>
+      <div class="stat-value" id="kpiFinished">0</div>
+    </div>
+    <div class="stat-card">
+      <div>Efficiency (%)</div>
+      <div class="stat-value" id="kpiEff">0</div>
+    </div>
+    <div class="stat-card">
+      <div>Reject Rate (%)</div>
+      <div class="stat-value" id="kpiReject">0</div>
+    </div>
+  </div>
+  <div class="output-section">
+    <p>This is your Pistachio dashboard. KPIs update when you add records in <strong>New Production</strong>.</p>
+  </div>
+</section>
+
+<!-- NEW PRODUCTION -->
+<section id="production" class="section">
+  <div class="warning-box">
+    Enter shift outputs for Golden Hill / Extra (sizes 18–21 / 21–25). Repacking mode records no rejects.
+  </div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Run Type</label>
+      <select id="runType">
+        <option value="huller">Huller Run</option>
+        <option value="repack">Repacking Only</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Brand</label>
+      <select id="brand">
+        <option>Golden Hill</option>
+        <option>Extra</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Size</label>
+      <select id="size">
+        <option>18-21</option>
+        <option>21-25</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Final Goods — Qty (10 kg bags)</label>
+      <input id="bags10" type="number" min="0" step="1" value="0" />
+    </div>
+  </div>
+
+  <div class="materials-section">
+    <div class="form-grid materials-grid">
+      <div class="form-group">
+        <label>Vacuum bags used</label>
+        <input id="mat_bags_used" type="number" min="0" step="1" value="0" />
+      </div>
+      <div class="form-group">
+        <label>Packing boxes used</label>
+        <input id="mat_boxes_used" type="number" min="0" step="1" value="0" />
+      </div>
+      <div class="form-group">
+        <label>Vacuum bags wasted</label>
+        <input id="mat_bags_waste" type="number" min="0" step="1" value="0" />
+      </div>
+      <div class="form-group">
+        <label>Packing boxes wasted</label>
+        <input id="mat_boxes_waste" type="number" min="0" step="1" value="0" />
+      </div>
+    </div>
+  </div>
+
+  <div id="rejectBlock" class="reject-section">
+    <p><strong>Rejects (kg)</strong> — only for Huller Run</p>
+    <div class="form-grid materials-grid">
+      <div class="form-group"><label>Non-Split (Closed)</label><input id="rej_non_split" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Light Stain</label><input id="rej_light_stain" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Adhering Hull</label><input id="rej_adhering_hull" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Dark Stain</label><input id="rej_dark_stain" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Shell & Split (Pre-clean 1)</label><input id="rej_shell_split_pre1" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Undersize 30/64 & Kernel (Pre-clean 2)</label><input id="rej_undersize_kernel_pre2" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Loose Shell</label><input id="rej_loose_shell" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Loose Kernel</label><input id="rej_loose_kernel" type="number" min="0" step="5" value="0"></div>
+      <div class="form-group"><label>Dust</label><input id="rej_dust" type="number" min="0" step="5" value="0"></div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button type="button" onclick="saveProduction()">Save Draft</button>
+    <button type="button" class="edit-btn" onclick="submitProduction()">Submit</button>
+  </div>
+
+  <div class="output-section">
+    <div class="total-box" id="calcSummary">
+      Finished: 0 kg · Total Rejects: 0 kg · Efficiency: 0% · Reject Rate: 0%
+    </div>
+  </div>
+</section>
+
+<!-- RECORDS -->
+<section id="records" class="section">
+  <div class="table-container">
+    <table id="recordsTable">
+      <thead>
+        <tr>
+          <th>Time</th><th>Run</th><th>Brand</th><th>Size</th>
+          <th>Final Bags</th><th>Bags Used</th><th>Boxes Used</th>
+          <th>Total Rejects (kg)</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody><!-- rows injected --></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- INVENTORY -->
+<section id="inventory" class="section">
+  <div class="output-section">
+    <p>Inventory snapshot coming soon…</p>
+  </div>
+</section>
+
+<!-- MATERIALS -->
+<section id="materials" class="section">
+  <div class="output-section">
+    <p>Materials usage summary coming soon…</p>
+  </div>
+</section>
+
+<script>
+/* ==== Minimal localStorage flow so KPIs & Records work ==== */
+const LS_REC = 'pistachio_records';
+
+function readNum(id){ const el = document.getElementById(id); return Number(el?.value||0); }
+function sumRejects(){
+  const keys = ['non_split','light_stain','adhering_hull','dark_stain','shell_split_pre1','undersize_kernel_pre2','loose_shell','loose_kernel','dust'];
+  return keys.reduce((s,k)=> s + readNum('rej_'+k), 0);
+}
+function updateSummary(){
+  const bags = readNum('bags10');
+  const finishedKg = bags * 10;
+  const rejectsKg = document.getElementById('rejectBlock').style.display === 'none' ? 0 : sumRejects();
+  const inputKg = finishedKg + rejectsKg || 0;
+  const eff = inputKg ? Math.round((finishedKg / inputKg) * 100) : 0;
+  const rejRate = inputKg ? Math.round((rejectsKg / inputKg) * 1000)/10 : 0;
+  document.getElementById('calcSummary').textContent =
+    `Finished: ${finishedKg} kg · Total Rejects: ${rejectsKg} kg · Efficiency: ${eff}% · Reject Rate: ${rejRate}%`;
+}
+['bags10','rej_non_split','rej_light_stain','rej_adhering_hull','rej_dark_stain','rej_shell_split_pre1','rej_undersize_kernel_pre2','rej_loose_shell','rej_loose_kernel','rej_dust']
+  .forEach(id => document.addEventListener('input', e => { if(e.target.id===id) updateSummary(); }));
+
+document.addEventListener('change', (e)=>{
+  if (e.target && e.target.id === 'runType') {
+    const repack = e.target.value === 'repack';
+    document.getElementById('rejectBlock').style.display = repack ? 'none' : 'block';
+    updateSummary();
+  }
+});
+
+function saveProduction(){
+  const recs = JSON.parse(localStorage.getItem(LS_REC) || '[]');
+  const payload = buildPayload('draft');
+  recs.push(payload);
+  localStorage.setItem(LS_REC, JSON.stringify(recs));
+  alert('Draft saved.');
+}
+
+function submitProduction(){
+  const recs = JSON.parse(localStorage.getItem(LS_REC) || '[]');
+  const payload = buildPayload('submitted');
+  recs.push(payload);
+  localStorage.setItem(LS_REC, JSON.stringify(recs));
+  alert('Submitted.');
+  renderRecords();
+}
+
+function buildPayload(status){
+  const bags = readNum('bags10');
+  const finishedKg = bags * 10;
+  const rejectsKg = document.getElementById('rejectBlock').style.display === 'none' ? 0 : sumRejects();
+  return {
+    ts: new Date().toISOString(),
+    run: document.getElementById('runType').value,
+    brand: document.getElementById('brand').value,
+    size: document.getElementById('size').value,
+    bags10: bags,
+    materials: {
+      bags_used: readNum('mat_bags_used'),
+      boxes_used: readNum('mat_boxes_used'),
+      bags_waste: readNum('mat_bags_waste'),
+      boxes_waste: readNum('mat_boxes_waste')
+    },
+    rejectsKg,
+    finishedKg,
+    status
+  };
+}
+
+function renderRecords(){
+  const tbody = document.querySelector('#recordsTable tbody');
+  const recs = JSON.parse(localStorage.getItem(LS_REC) || '[]').slice(-100).reverse();
+  tbody.innerHTML = recs.map(r=>`
+    <tr>
+      <td>${new Date(r.ts).toLocaleString()}</td>
+      <td>${r.run}</td>
+      <td>${r.brand}</td>
+      <td>${r.size}</td>
+      <td>${r.bags10}</td>
+      <td>${r.materials.bags_used}</td>
+      <td>${r.materials.boxes_used}</td>
+      <td>${r.rejectsKg}</td>
+      <td>${r.status}</td>
+    </tr>
+  `).join('');
+}
+window.addEventListener('load', renderRecords);
+</script>
+
     <!-- I intentionally kept all computations / fields intact from your upload. -->
   </div>
 </div>
