@@ -219,6 +219,67 @@
    paste the entire <script> from your app here. I did not alter any math;
    only the CSS/branding above changed. */
 </script>
+<script>
+/** ===== SIMPLE LOGIN HANDLER (drop-in) =====
+ * Demo users:
+ *   admin / admin123
+ *   operator / op123
+ * Persists the session in localStorage so reload keeps you logged in.
+ */
+
+const USERS = {
+  admin: 'admin123',
+  operator: 'op123'
+};
+
+// Show the right screen on load (persisted session)
+window.addEventListener('load', function () {
+  const savedUser = localStorage.getItem('mes_user');
+  if (savedUser && USERS[savedUser]) {
+    showApp(savedUser);
+  } else {
+    showLogin();
+  }
+});
+
+function showLogin() {
+  const log = document.getElementById('loginScreen');
+  const app = document.getElementById('mainApp');
+  if (log) log.style.display = 'flex';
+  if (app) app.style.display = 'none';
+}
+
+function showApp(username) {
+  const log = document.getElementById('loginScreen');
+  const app = document.getElementById('mainApp');
+  if (log) log.style.display = 'none';
+  if (app) app.style.display = 'block';
+  const userDisplay = document.getElementById('userDisplay');
+  if (userDisplay) userDisplay.textContent = username;
+}
+
+// Called by the form: <form onsubmit="handleLogin(event)">
+function handleLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById('loginUsername')?.value?.trim() || '';
+  const p = document.getElementById('loginPassword')?.value || '';
+  if (!u || !p) { alert('Enter username and password.'); return; }
+
+  const ok = USERS[u] && USERS[u] === p;
+  if (!ok) {
+    alert('Invalid username or password.');
+    return;
+  }
+  localStorage.setItem('mes_user', u);
+  showApp(u);
+}
+
+// Optional: logout button calls this
+function logout() {
+  localStorage.removeItem('mes_user');
+  showLogin();
+}
+</script>
 
 </body>
 </html>
