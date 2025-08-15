@@ -4,7 +4,6 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Pistachio – Al Jameel MES</title>
-  <!-- neutral (empty) favicon to avoid 404 -->
   <link rel="icon" href="data:," />
   <link rel="shortcut icon" href="data:," />
 
@@ -23,12 +22,12 @@
 
     /* ============ Brand Tokens (Al Jameel) ============ */
     :root{
-      --brand-primary:#a32034;   /* Deep Red */
+      --brand-primary:#a32034;
       --brand-primary-600:#8b1a2a;
       --brand-primary-700:#781624;
-      --brand-accent:#d5a333;    /* Gold */
-      --text:#2f2a28;            /* Dark Charcoal */
-      --bg:#f3f4f6;              /* Light Gray */
+      --brand-accent:#d5a333;
+      --text:#2f2a28;
+      --bg:#f3f4f6;
       --surface:#ffffff;
       --muted:#6b7280;
       --border:#e5e7eb;
@@ -98,6 +97,14 @@
       box-shadow:0 0 0 2px rgba(213,163,51,.25);
     }
 
+    /* Prominent selects (box types) */
+    select#boxTypeUsed, select#boxTypeWasted{
+      background:#fff7e6; border:2px solid #f5e1a8; font-weight:600;
+    }
+    select#boxTypeUsed:focus, select#boxTypeWasted:focus{
+      background:#fff2cc; border-color:var(--brand-accent);
+    }
+
     button{
       padding:12px 24px; background:var(--brand-primary); color:#fff;
       border:none; border-radius:10px; cursor:pointer; font-size:16px; min-height:44px;
@@ -109,7 +116,7 @@
     .materials-section{ background:#fff7e6; padding:15px; border-radius:10px; margin:20px 0; border:1px solid #f5e1a8 }
 
     .table-container{ overflow-x:auto; margin-top:20px; padding-bottom:10px; -webkit-overflow-scrolling:touch }
-    table{ width:100%; border-collapse:collapse; min-width:500px }
+    table{ width:100%; border-collapse:collapse; min-width:700px }
     th, td{ padding:12px; text-align:left; border-bottom:1px solid var(--border) }
     th{ background:var(--brand-primary); color:#fff }
 
@@ -124,19 +131,6 @@
     .total-box{ background:#fff7e6; padding:10px; margin-top:10px; border-radius:8px; font-weight:700; border:1px solid #f5e1a8 }
 
     .warning-box{ background:#fff3cd; border:1px solid #ffeeba; color:#7a5d00; padding:15px; border-radius:10px; margin-bottom:20px }
-
-    /* Mobile polish */
-    @media (max-width:768px){
-      .form-grid{ grid-template-columns:1fr }
-      .form-grid.materials-grid{ grid-template-columns:repeat(2,1fr) }
-      .stats-grid{ grid-template-columns:repeat(2,1fr) }
-      .nav-btn{ flex:1 1 calc(50% - 5px); min-width:120px }
-      .nav-btn.print-btn{ flex:1 1 100%; margin-top:10px }
-    }
-    @media (max-width:480px){
-      .stats-grid{ grid-template-columns:1fr }
-      .form-grid.materials-grid{ grid-template-columns:1fr }
-    }
   </style>
 </head>
 <body>
@@ -205,9 +199,10 @@
     <!-- NEW PRODUCTION -->
     <section id="production" class="section">
       <div class="warning-box">
-        Enter shift outputs for Golden Hill / Extra (sizes 18–21 / 21–25). Repacking mode records no rejects.
+        Huller Run hides Size and shows Rejects. Repacking keeps Size and hides Rejects.
       </div>
 
+      <!-- run + brand + size (size hidden for huller) + lot + input -->
       <div class="form-grid">
         <div class="form-group">
           <label>Run Type</label>
@@ -233,41 +228,70 @@
           </select>
         </div>
 
-        <!-- FINAL GOODS — two sizes; labels change with brand + run type -->
-        <div class="size-qty-grid">
-          <div class="form-group">
-            <label><span id="label_1821">18–21</span> — Qty (10 kg bags)</label>
-            <input id="fg_1821_bags" type="number" min="0" step="1" value="0" />
-          </div>
+        <div class="form-group">
+          <label>Lot #</label>
+          <input id="lot_no" type="text" placeholder="e.g., GH-240315-01">
+        </div>
 
-          <div class="form-group">
-            <label><span id="label_2125">21–25</span> — Qty (10 kg bags)</label>
-            <input id="fg_2125_bags" type="number" min="0" step="1" value="0" />
-          </div>
+        <div class="form-group">
+          <label>Raw material input (kg)</label>
+          <input id="raw_input_kg" type="number" min="0" step="1" value="0">
         </div>
       </div>
 
+      <!-- FINAL GOODS — two sizes; labels change with brand + run type -->
+      <div class="size-qty-grid">
+        <div class="form-group">
+          <label><span id="label_1821">18–21</span> — Qty (10 kg bags)</label>
+          <input id="fg_1821_bags" type="number" min="0" step="1" value="0" />
+        </div>
+
+        <div class="form-group">
+          <label><span id="label_2125">21–25</span> — Qty (10 kg bags)</label>
+          <input id="fg_2125_bags" type="number" min="0" step="1" value="0" />
+        </div>
+      </div>
+
+      <!-- MATERIALS -->
       <div class="materials-section">
         <div class="form-grid materials-grid">
           <div class="form-group">
-            <label>Vacuum bags used</label>
-            <input id="mat_bags_used" type="number" min="0" step="1" value="0" />
+            <label>Box type (used)</label>
+            <select id="boxTypeUsed">
+              <option value="">—</option>
+              <option value="Golden Hill">Golden Hill</option>
+              <option value="Extra">Extra</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Packing boxes used</label>
             <input id="mat_boxes_used" type="number" min="0" step="1" value="0" />
           </div>
           <div class="form-group">
-            <label>Vacuum bags wasted</label>
-            <input id="mat_bags_waste" type="number" min="0" step="1" value="0" />
+            <label>Plastic bags used (10 kg)</label>
+            <input id="mat_bags_used" type="number" min="0" step="1" value="0" />
+          </div>
+
+          <div class="form-group">
+            <label>Box type (wasted)</label>
+            <select id="boxTypeWasted">
+              <option value="">—</option>
+              <option value="Golden Hill">Golden Hill</option>
+              <option value="Extra">Extra</option>
+            </select>
           </div>
           <div class="form-group">
-            <label>Packing boxes wasted</label>
+            <label>Boxes wasted</label>
             <input id="mat_boxes_waste" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Plastic bags wasted (10 kg)</label>
+            <input id="mat_bags_waste" type="number" min="0" step="1" value="0" />
           </div>
         </div>
       </div>
 
+      <!-- REJECTS -->
       <div id="rejectBlock" class="reject-section">
         <p><strong>Rejects (kg)</strong> — only for Huller Run</p>
         <div class="form-grid materials-grid">
@@ -300,7 +324,8 @@
         <table id="recordsTable">
           <thead>
             <tr>
-              <th>Time</th><th>Run</th><th>Brand</th><th>Size</th>
+              <th>Time</th><th>Run</th><th>Brand</th><th>Size/Sizes</th>
+              <th>Lot</th><th>Raw Input (kg)</th>
               <th>Final Bags</th><th>Bags Used</th><th>Boxes Used</th>
               <th>Total Rejects (kg)</th><th>Status</th>
             </tr>
@@ -466,9 +491,7 @@
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
-    // Inventory lazy render
     if (id === 'inventory') { renderStockUI(); renderInventory(); }
-
     window.scrollTo({ top: 0 });
   };
   window.showProductionSelection = function(){ window.print(); };
@@ -517,7 +540,7 @@
     updateSummary();
   }
 
-  /* Summary calc */
+  /* Summary calc: uses raw input if provided, otherwise finished + rejects */
   function updateSummary(){
     const bags2125 = readNum('fg_2125_bags');
     const bags1821 = readNum('fg_1821_bags');
@@ -527,7 +550,9 @@
     const isHuller = (document.getElementById('runType')?.value === 'huller');
     const rejectsKg = isHuller ? sumRejects() : 0;
 
-    const inputKg = finishedKg + rejectsKg || 0;
+    const providedRaw = readNum('raw_input_kg');
+    const inputKg = providedRaw > 0 ? providedRaw : (finishedKg + rejectsKg);
+
     const eff = inputKg ? Math.round((finishedKg / inputKg) * 100) : 0;
     const rejRate = inputKg ? Math.round((rejectsKg / inputKg) * 1000)/10 : 0;
 
@@ -537,7 +562,7 @@
   }
 
   /* Recompute on input/change */
-  ['fg_2125_bags','fg_1821_bags',
+  ['raw_input_kg','fg_2125_bags','fg_1821_bags',
    'rej_non_split','rej_light_stain','rej_adhering_hull','rej_dark_stain',
    'rej_shell_split_pre1','rej_undersize_kernel_pre2','rej_loose_shell','rej_loose_kernel','rej_dust'
   ].forEach(id => document.addEventListener('input', e => { if(e.target.id===id) updateSummary(); }));
@@ -560,6 +585,8 @@
     return {
       ts: new Date().toISOString(),
       run, brand, size,
+      lot: (document.getElementById('lot_no')?.value || '').trim(),
+      rawInputKg: readNum('raw_input_kg'),
       sizes: { '21-25': bags2125, '18-21': bags1821 },
       bags10: totalBags,
       finishedKg,
@@ -567,7 +594,9 @@
         bags_used:  readNum('mat_bags_used'),
         boxes_used: readNum('mat_boxes_used'),
         bags_waste: readNum('mat_bags_waste'),
-        boxes_waste:readNum('mat_boxes_waste')
+        boxes_waste: readNum('mat_boxes_waste'),
+        box_type:   document.getElementById('boxTypeUsed')?.value || '',
+        box_type_waste: document.getElementById('boxTypeWasted')?.value || ''
       },
       rejectsKg,
       status
@@ -578,19 +607,25 @@
   function renderRecords(){
     const tbody = document.querySelector('#recordsTable tbody');
     const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]').slice(-100).reverse();
-    tbody.innerHTML = recs.map(r=>`
+    tbody.innerHTML = recs.map(r=>{
+      const sizeCell = r.sizes
+        ? `18–21:${Number(r.sizes['18-21']||0)} | 21–25:${Number(r.sizes['21-25']||0)}`
+        : (r.size || '-');
+      return `
       <tr>
         <td>${new Date(r.ts).toLocaleString()}</td>
         <td>${r.run}</td>
         <td>${r.brand}</td>
-        <td>${r.size || '-'}</td>
+        <td>${sizeCell}</td>
+        <td>${r.lot || ''}</td>
+        <td>${Number(r.rawInputKg||0)}</td>
         <td>${r.bags10}</td>
         <td>${r.materials.bags_used}</td>
         <td>${r.materials.boxes_used}</td>
         <td>${r.rejectsKg}</td>
         <td>${r.status}</td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   }
 
   /* Inventory subtraction on submit (consumables) */
@@ -658,7 +693,7 @@
     return all.filter(r => r && r.status === 'submitted');
   }
 
-  /* Manual adjustments (currently unused in UI, but kept for parity) */
+  /* Manual adjustments (kept for parity) */
   function getAdjustments(){ return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]'); }
   function addAdjustment(adj){
     const arr = getAdjustments();
@@ -752,26 +787,41 @@
     renderStockUI();
   };
 
-  /* Summary tables from Production + Adjustments */
+  /* Summary tables from Production + Adjustments
+     NOTE: this respects the new r.sizes map, so huller records
+     correctly produce rows for both 18–21 and 21–25. */
   function computeInventory() {
     const recs = getRecords();
     const mapFG = {};
     let matUsed = 0, boxUsed = 0, matWaste = 0, boxWaste = 0, rejectsKg = 0;
 
     recs.forEach(r=>{
-      const key = `${r.brand}|${r.size}`;
-      if (!mapFG[key]) mapFG[key] = { brand:r.brand, size:r.size, bags:0, kg:0 };
-      mapFG[key].bags += Number(r.bags10 || 0);
-      mapFG[key].kg   += Number(r.finishedKg || 0);
+      // Finished goods by size
+      if (r.sizes && typeof r.sizes === 'object'){
+        Object.entries(r.sizes).forEach(([sz, bags])=>{
+          const key = `${r.brand}|${sz}`;
+          if (!mapFG[key]) mapFG[key] = { brand:r.brand, size:sz, bags:0, kg:0 };
+          const b = Number(bags||0);
+          mapFG[key].bags += b;
+          mapFG[key].kg   += b * 10;
+        });
+      } else {
+        const sz = r.size || '';
+        const key = `${r.brand}|${sz}`;
+        if (!mapFG[key]) mapFG[key] = { brand:r.brand, size:sz, bags:0, kg:0 };
+        mapFG[key].bags += Number(r.bags10 || 0);
+        mapFG[key].kg   += Number(r.finishedKg || 0);
+      }
 
+      // Materials + rejects totals
       matUsed  += Number(r.materials?.bags_used  || 0);
       boxUsed  += Number(r.materials?.boxes_used || 0);
       matWaste += Number(r.materials?.bags_waste || 0);
       boxWaste += Number(r.materials?.boxes_waste|| 0);
-
       rejectsKg += Number(r.rejectsKg || 0);
     });
 
+    // Manual adjustments (optional)
     getAdjustments().forEach(a=>{
       const key = `${a.brand}|${a.size}`;
       if (!mapFG[key]) mapFG[key] = { brand:a.brand, size:a.size, bags:0, kg:0 };
@@ -782,7 +832,6 @@
       boxUsed  += Number(a.mat_boxes_used || 0);
       matWaste += Number(a.mat_bags_waste || 0);
       boxWaste += Number(a.mat_boxes_waste|| 0);
-
       rejectsKg += Number(a.rejectsKg || 0);
     });
 
