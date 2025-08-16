@@ -39,7 +39,7 @@ function Card({ title, subtitle, content, href = '#/' }) {
 
 // --- Built-in fallback data (used if fetch fails) ---
 const FALLBACK_FACTORIES = [
-  { key: "Pistachio", name: "Pistachio", iconUrl: "src/assets/icon/pistachio.png" },
+  { key: "Pistachio", name: "Pistachio", iconUrl: "src/assets/icons/pistachio.png" },
   { key: "Walnut",    name: "Walnut" },
   { key: "Cardamom",  name: "Cardamom" }
 ];
@@ -81,7 +81,7 @@ export function FactorySelectView(mount) {
     // ensure pistachio has an iconUrl even if JSON doesn’t provide it
 const enriched = factories.map(f =>
   f.key === 'Pistachio' && !f.iconUrl
-    ? { ...f, iconUrl: 'src/assets/icon/pistachio.png' }
+    ? { ...f, iconUrl: 'src/assets/icons/pistachio.png' }
     : f
 );
 renderCards(mount.querySelector('#factoryGrid'), enriched, prod);
