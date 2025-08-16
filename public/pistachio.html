@@ -362,6 +362,11 @@
             <label>Vacuum Bags Used</label>
             <input id="bagsUsed" type="number" min="0" step="1" value="0">
           </div>
+          <div id="inventoryStatus" style="background: #e3f2fd; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem;">
+  <strong>Current Stock:</strong> 
+  <span id="currentBags">0</span> vacuum bags, 
+  <span id="currentBoxes">0</span> packing boxes
+</div>
           <div class="form-group">
             <label>Packing Boxes Used</label>
             <input id="boxesUsed" type="number" min="0" step="1" value="0">
@@ -630,7 +635,28 @@ function submitProduction() {
     return;
   }
   
+  // ✅ ADD INVENTORY VALIDATION HERE
+  const bagsUsed = parseInt(document.getElementById('bagsUsed').value) || 0;
+  const boxesUsed = parseInt(document.getElementById('boxesUsed').value) || 0;
+  const bagsWasted = parseInt(document.getElementById('bagsWasted').value) || 0;
+  const boxesWasted = parseInt(document.getElementById('boxesWasted').value) || 0;
+  
+  const totalBagsNeeded = bagsUsed + bagsWasted;
+  const totalBoxesNeeded = boxesUsed + boxesWasted;
+  
+  // Check if sufficient inventory exists
+  if (totalBagsNeeded > currentInventory.vacuumBags) {
+    alert(`Insufficient vacuum bags! Required: ${totalBagsNeeded}, Available: ${currentInventory.vacuumBags}`);
+    return;
+  }
+  
+  if (totalBoxesNeeded > currentInventory.packingBoxes) {
+    alert(`Insufficient packing boxes! Required: ${totalBoxesNeeded}, Available: ${currentInventory.packingBoxes}`);
+    return;
+  }
+  
   const runType = document.getElementById('runType').value;
+  // ... rest of function continues
   const finishedKg = totalBags;
   
   let rejectsKg = 0;
@@ -669,12 +695,12 @@ function submitProduction() {
   
   productionRecords.push(record);
   
-  // Update inventory
-  const totalBagsUsed = record.materials.bagsUsed + record.materials.bagsWasted;
-  const totalBoxesUsed = record.materials.boxesUsed + record.materials.boxesWasted;
-  
-  currentInventory.vacuumBags = Math.max(0, currentInventory.vacuumBags - totalBagsUsed);
-  currentInventory.packingBoxes = Math.max(0, currentInventory.packingBoxes - totalBoxesUsed);
+ // Update inventory (we already validated sufficient stock exists)
+const totalBagsUsed = record.materials.bagsUsed + record.materials.bagsWasted;
+const totalBoxesUsed = record.materials.boxesUsed + record.materials.boxesWasted;
+
+currentInventory.vacuumBags -= totalBagsUsed;
+currentInventory.packingBoxes -= totalBoxesUsed;
   
   if (totalBagsUsed > 0) {
     inventoryLog.push({
@@ -792,7 +818,11 @@ function adjustInventory() {
 function renderInventory() {
   document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags;
   document.getElementById('invPackingBoxes').textContent = currentInventory.packingBoxes;
-  
+  // ✅ Update the production form display too
+  if (document.getElementById('currentBags')) {
+    document.getElementById('currentBags').textContent = currentInventory.vacuumBags;
+    document.getElementById('currentBoxes').textContent = currentInventory.packingBoxes;
+  }
   const tbody = document.querySelector('#inventoryTable tbody');
   tbody.innerHTML = '';
   
