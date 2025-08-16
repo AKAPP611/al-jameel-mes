@@ -716,28 +716,53 @@ function submitProduction() {
   currentInventory.vacuumBags -= totalBagsUsed;
   currentInventory[boxType] -= totalBoxesUsed;
   
-  if (totalBagsUsed > 0) {
-    inventoryLog.push({
-      timestamp: new Date().toISOString(),
-      item: 'Vacuum Bags (10kg)',
-      action: 'remove',
-      quantity: totalBagsUsed,
-      result: currentInventory.vacuumBags,
-      notes: 'Auto: Production submission'
-    });
-  }
-  
-  if (totalBoxesUsed > 0) {
-    const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
-    inventoryLog.push({
-      timestamp: new Date().toISOString(),
-      item: boxTypeName,
-      action: 'remove',
-      quantity: totalBoxesUsed,
-      result: currentInventory[boxType],
-      notes: 'Auto: Production submission'
-    });
-  }
+  // Log vacuum bags usage and waste separately
+if (record.materials.bagsUsed > 0) {
+  inventoryLog.push({
+    timestamp: new Date().toISOString(),
+    item: 'Vacuum Bags (10kg)',
+    action: 'remove',
+    quantity: record.materials.bagsUsed,
+    result: currentInventory.vacuumBags + record.materials.bagsWasted, // Before waste deduction
+    notes: 'Production: Used'
+  });
+}
+
+if (record.materials.bagsWasted > 0) {
+  inventoryLog.push({
+    timestamp: new Date().toISOString(),
+    item: 'Vacuum Bags (10kg)',
+    action: 'remove',
+    quantity: record.materials.bagsWasted,
+    result: currentInventory.vacuumBags,
+    notes: 'Production: Wasted'
+  });
+}
+
+// Log boxes usage and waste separately
+const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
+
+if (record.materials.boxesUsed > 0) {
+  inventoryLog.push({
+    timestamp: new Date().toISOString(),
+    item: boxTypeName,
+    action: 'remove',
+    quantity: record.materials.boxesUsed,
+    result: currentInventory[boxType] + record.materials.boxesWasted, // Before waste deduction
+    notes: 'Production: Used'
+  });
+}
+
+if (record.materials.boxesWasted > 0) {
+  inventoryLog.push({
+    timestamp: new Date().toISOString(),
+    item: boxTypeName,
+    action: 'remove',
+    quantity: record.materials.boxesWasted,
+    result: currentInventory[boxType],
+    notes: 'Production: Wasted'
+  });
+}
   
   alert('Production record submitted successfully!');
   clearForm();
