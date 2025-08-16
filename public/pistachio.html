@@ -631,7 +631,7 @@ function submitProduction() {
   }
   
   const runType = document.getElementById('runType').value;
-  const finishedKg = totalBags * 10;
+  const finishedKg = totalBags;
   
   let rejectsKg = 0;
   if (runType === 'huller') {
@@ -653,10 +653,10 @@ function submitProduction() {
     size: document.getElementById('size').value,
     lot: document.getElementById('lotNo').value,
     rawInput,
-    bags1821,
-    bags2125,
-    totalBags,
-    finishedKg,
+    kg1821: bags1821,      // ✅ Renamed for clarity
+  kg2125: bags2125,      // ✅ Renamed for clarity  
+  totalKg: totalBags,    // ✅ Renamed for clarity
+  finishedKg,
     rejectsKg,
     efficiency,
     materials: {
