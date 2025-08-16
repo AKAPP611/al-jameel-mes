@@ -224,7 +224,6 @@
 <body>
 
 <!-- Login Screen -->
-<!-- AFTER: -->
 <div id="loginScreen" class="login-screen">
   <a href="./index.html" style="position: absolute; top: 20px; left: 20px; color: var(--primary); text-decoration: none; z-index: 10;">← Back to MES</a>
   <div class="login-form">
@@ -255,10 +254,10 @@
 <div id="mainApp" style="display: none;">
   <header class="header">
     <div style="display: flex; align-items: center;">
-  <a href="./index.html" class="back-link">← Back to MES</a>
-  <img src="src/assets/icons/pistachio.png" alt="Pistachio" class="pistachio-brand-icon" onerror="this.outerHTML='🥜 '">
-  <h1>Pistachio Production Management</h1>
-</div>
+      <a href="./index.html" class="back-link">← Back to MES</a>
+      <img src="src/assets/icons/pistachio.png" alt="Pistachio" class="pistachio-brand-icon" onerror="this.outerHTML='🥜 '">
+      <h1>Pistachio Production Management</h1>
+    </div>
     <div>
       <span id="userDisplay">User</span>
       <button onclick="logout()" style="margin-left: 1rem; background: rgba(255,255,255,0.2);">
@@ -319,7 +318,7 @@
         </div>
         <div class="form-group">
           <label>Brand</label>
-          <select id="brand">
+          <select id="brand" onchange="updateInventoryDisplay()">
             <option>Golden Hill</option>
             <option>Extra</option>
           </select>
@@ -345,28 +344,29 @@
       <h3>Final Goods Output</h3>
       <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
         <div class="form-group">
-  <label>18-21 Size (kg)</label>
-  <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary()">
-</div>
-<div class="form-group">
-  <label>21-25 Size (kg)</label>
-  <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary()">
-</div>
+          <label>18-21 Size (kg)</label>
+          <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>21-25 Size (kg)</label>
+          <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
       </div>
 
       <!-- Materials -->
       <div class="materials-section">
         <h3>Materials Usage</h3>
+        <div id="inventoryStatus" style="background: #e3f2fd; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem;">
+          <strong>Current Stock:</strong> 
+          <span id="currentBags">0</span> vacuum bags, 
+          <span id="currentGoldenBoxes">0</span> Golden Hill boxes, 
+          <span id="currentExtraBoxes">0</span> Extra boxes
+        </div>
         <div class="form-grid">
           <div class="form-group">
             <label>Vacuum Bags Used</label>
             <input id="bagsUsed" type="number" min="0" step="1" value="0">
           </div>
-          <div id="inventoryStatus" style="background: #e3f2fd; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem;">
-  <strong>Current Stock:</strong> 
-  <span id="currentBags">0</span> vacuum bags, 
-  <span id="currentBoxes">0</span> packing boxes
-</div>
           <div class="form-group">
             <label>Packing Boxes Used</label>
             <input id="boxesUsed" type="number" min="0" step="1" value="0">
@@ -469,8 +469,12 @@
           <div class="stat-value" id="invVacuumBags">0</div>
         </div>
         <div class="stat-card">
-          <div>Packing Boxes</div>
-          <div class="stat-value" id="invPackingBoxes">0</div>
+          <div>Golden Hill Boxes</div>
+          <div class="stat-value" id="invGoldenHillBoxes">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Extra Boxes</div>
+          <div class="stat-value" id="invExtraBoxes">0</div>
         </div>
       </div>
 
@@ -481,7 +485,8 @@
             <label>Item</label>
             <select id="invItem">
               <option value="vacuumBags">Vacuum Bags (10kg)</option>
-              <option value="packingBoxes">Packing Boxes</option>
+              <option value="goldenHillBoxes">Golden Hill Boxes</option>
+              <option value="extraBoxes">Extra Boxes</option>
             </select>
           </div>
           <div class="form-group">
@@ -530,7 +535,8 @@ let productionRecords = [];
 let inventoryLog = [];
 let currentInventory = {
   vacuumBags: 0,
-  packingBoxes: 0
+  goldenHillBoxes: 0,
+  extraBoxes: 0
 };
 
 // User management
@@ -591,6 +597,10 @@ function updateFormVisibility() {
   updateSummary();
 }
 
+function updateInventoryDisplay() {
+  renderInventory();
+}
+
 function updateSummary() {
   const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
@@ -635,7 +645,11 @@ function submitProduction() {
     return;
   }
   
-  // ✅ ADD INVENTORY VALIDATION HERE
+  // Get the brand to determine which box type to use
+  const brand = document.getElementById('brand').value;
+  const boxType = brand === 'Golden Hill' ? 'goldenHillBoxes' : 'extraBoxes';
+  
+  // Inventory validation
   const bagsUsed = parseInt(document.getElementById('bagsUsed').value) || 0;
   const boxesUsed = parseInt(document.getElementById('boxesUsed').value) || 0;
   const bagsWasted = parseInt(document.getElementById('bagsWasted').value) || 0;
@@ -650,13 +664,13 @@ function submitProduction() {
     return;
   }
   
-  if (totalBoxesNeeded > currentInventory.packingBoxes) {
-    alert(`Insufficient packing boxes! Required: ${totalBoxesNeeded}, Available: ${currentInventory.packingBoxes}`);
+  if (totalBoxesNeeded > currentInventory[boxType]) {
+    const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill boxes' : 'Extra boxes';
+    alert(`Insufficient ${boxTypeName}! Required: ${totalBoxesNeeded}, Available: ${currentInventory[boxType]}`);
     return;
   }
   
   const runType = document.getElementById('runType').value;
-  // ... rest of function continues
   const finishedKg = totalBags;
   
   let rejectsKg = 0;
@@ -675,32 +689,32 @@ function submitProduction() {
   const record = {
     timestamp: new Date().toISOString(),
     runType,
-    brand: document.getElementById('brand').value,
+    brand: brand,
     size: document.getElementById('size').value,
     lot: document.getElementById('lotNo').value,
     rawInput,
-    kg1821: bags1821,      // ✅ Renamed for clarity
-  kg2125: bags2125,      // ✅ Renamed for clarity  
-  totalKg: totalBags,    // ✅ Renamed for clarity
-  finishedKg,
+    kg1821: bags1821,
+    kg2125: bags2125,
+    totalKg: totalBags,
+    finishedKg,
     rejectsKg,
     efficiency,
     materials: {
-      bagsUsed: parseInt(document.getElementById('bagsUsed').value) || 0,
-      boxesUsed: parseInt(document.getElementById('boxesUsed').value) || 0,
-      bagsWasted: parseInt(document.getElementById('bagsWasted').value) || 0,
-      boxesWasted: parseInt(document.getElementById('boxesWasted').value) || 0
+      bagsUsed: bagsUsed,
+      boxesUsed: boxesUsed,
+      bagsWasted: bagsWasted,
+      boxesWasted: boxesWasted
     }
   };
   
   productionRecords.push(record);
   
- // Update inventory (we already validated sufficient stock exists)
-const totalBagsUsed = record.materials.bagsUsed + record.materials.bagsWasted;
-const totalBoxesUsed = record.materials.boxesUsed + record.materials.boxesWasted;
+  // Update inventory (we already validated sufficient stock exists)
+  const totalBagsUsed = record.materials.bagsUsed + record.materials.bagsWasted;
+  const totalBoxesUsed = record.materials.boxesUsed + record.materials.boxesWasted;
 
-currentInventory.vacuumBags -= totalBagsUsed;
-currentInventory.packingBoxes -= totalBoxesUsed;
+  currentInventory.vacuumBags -= totalBagsUsed;
+  currentInventory[boxType] -= totalBoxesUsed;
   
   if (totalBagsUsed > 0) {
     inventoryLog.push({
@@ -714,12 +728,13 @@ currentInventory.packingBoxes -= totalBoxesUsed;
   }
   
   if (totalBoxesUsed > 0) {
+    const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
     inventoryLog.push({
       timestamp: new Date().toISOString(),
-      item: 'Packing Boxes',
+      item: boxTypeName,
       action: 'remove',
       quantity: totalBoxesUsed,
-      result: currentInventory.packingBoxes,
+      result: currentInventory[boxType],
       notes: 'Auto: Production submission'
     });
   }
@@ -786,7 +801,11 @@ function adjustInventory() {
     return;
   }
   
-  const itemName = item === 'vacuumBags' ? 'Vacuum Bags (10kg)' : 'Packing Boxes';
+  let itemName;
+  if (item === 'vacuumBags') itemName = 'Vacuum Bags (10kg)';
+  else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
+  else if (item === 'extraBoxes') itemName = 'Extra Boxes';
+  
   let result = 0;
   
   if (action === 'add') {
@@ -817,12 +836,16 @@ function adjustInventory() {
 
 function renderInventory() {
   document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags;
-  document.getElementById('invPackingBoxes').textContent = currentInventory.packingBoxes;
-  // ✅ Update the production form display too
+  document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes;
+  document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes;
+  
+  // Update the production form display too
   if (document.getElementById('currentBags')) {
     document.getElementById('currentBags').textContent = currentInventory.vacuumBags;
-    document.getElementById('currentBoxes').textContent = currentInventory.packingBoxes;
+    document.getElementById('currentGoldenBoxes').textContent = currentInventory.goldenHillBoxes;
+    document.getElementById('currentExtraBoxes').textContent = currentInventory.extraBoxes;
   }
+  
   const tbody = document.querySelector('#inventoryTable tbody');
   tbody.innerHTML = '';
   
@@ -844,6 +867,7 @@ function renderInventory() {
 window.addEventListener('load', () => {
   updateFormVisibility();
   updateSummary();
+  renderInventory();
 });
 </script>
 
