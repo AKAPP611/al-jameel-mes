@@ -587,10 +587,9 @@ function updateFormVisibility() {
 }
 
 function updateSummary() {
-  const bags1821 = parseInt(document.getElementById('bags1821').value) || 0;
-  const bags2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const totalBags = bags1821 + bags2125;
-  const finishedKg = totalBags * 10;
+  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
+  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
+  const finishedKg = kg1821 + kg2125;
   
   const runType = document.getElementById('runType').value;
   let rejectsKg = 0;
