@@ -36,7 +36,7 @@ function Card({ title, subtitle, content, href = '#/' }) {
 
 // Fallback data
 const FALLBACK_FACTORIES = [
-  { key: "Pistachio", name: "Pistachio", iconUrl: "src/assets/icons/pistachio.png" },
+  { key: "Pistachio", name: "Pistachio" },
   { key: "Walnut", name: "Walnut" },
   { key: "Cardamom", name: "Cardamom" }
 ];
@@ -74,14 +74,7 @@ export function FactorySelectView(mount) {
   ]).then(([fRes, pRes]) => {
     const factories = fRes.status === 'fulfilled' ? fRes.value : FALLBACK_FACTORIES;
     const prod = pRes.status === 'fulfilled' ? pRes.value : FALLBACK_PROD;
-    
-    // Ensure pistachio has correct iconUrl
-    const enriched = factories.map(f =>
-      f.key === 'Pistachio' && !f.iconUrl
-        ? { ...f, iconUrl: 'src/assets/icons/pistachio.png' }  // FIXED PATH
-        : f
-    );
-    renderCards(mount.querySelector('#factoryGrid'), enriched, prod);
+    renderCards(mount.querySelector('#factoryGrid'), factories, prod);
   }).catch(() => {
     renderCards(mount.querySelector('#factoryGrid'), FALLBACK_FACTORIES, FALLBACK_PROD);
   });
@@ -96,15 +89,15 @@ function renderCards(grid, factories, prod) {
     // Use emoji as fallback
     const emoji = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
     
-    // Use correct path for icon
-    const iconUrl = f.iconUrl || (f.key === 'Pistachio' ? 'src/assets/icons/pistachio.png' : null);
+    // Fixed icon path and handling
+    const iconUrl = f.key === 'Pistachio' ? './src/assets/icons/pistachio.png' : null;
     const iconMarkup = iconUrl
-      ? `<img src="${iconUrl}" class="ws-icon" alt="" onerror="this.replaceWith('${emoji} ')">`
+      ? `<img src="${iconUrl}" class="ws-icon" alt="" onerror="this.outerHTML='${emoji} '">`
       : `${emoji} `;
 
-    // Link to pistachio production system or dashboard
+    // Fixed href - use correct filename
     const href = f.key === 'Pistachio'
-      ? './pistachio-production.html'  // Link to your standalone production system
+      ? './pistachio.html'  // Fixed: was pistachio-production.html
       : `#/dashboard?factory=${encodeURIComponent(f.key)}`;
 
     return Card({
