@@ -1,3 +1,4 @@
+// pistachio-shift.js - COMPLETE VERSION
 import { t, getParams } from '../app.js';
 import { Counter, bindCounter } from '../components/counter.js';
 import { Chip } from '../components/chip.js';
@@ -94,27 +95,43 @@ export function PistachioShift(mount){
 
   bindCounter(mount);
 
+  // Default reject types if fetch fails
+  const defaultRejects = [
+    { key: 'non_split', name: 'Non-Split (Closed)', color: '#8b4513' },
+    { key: 'light_stain', name: 'Light Stain', color: '#daa520' },
+    { key: 'adhering_hull', name: 'Adhering Hull', color: '#cd853f' },
+    { key: 'dark_stain', name: 'Dark Stain', color: '#654321' },
+    { key: 'shell_split', name: 'Shell & Split', color: '#d2691e' },
+    { key: 'undersize', name: 'Undersize 30/64', color: '#bc8f8f' },
+    { key: 'loose_shell', name: 'Loose Shell', color: '#f4a460' },
+    { key: 'loose_kernel', name: 'Loose Kernel', color: '#ffd700' },
+    { key: 'dust', name: 'Dust', color: '#c0c0c0' }
+  ];
+
   // Load rejects & create counters
-  fetch('./src/data/mock/pistachio_reject_types.json').then(r=>r.json()).then(list=>{
-    const grid = mount.querySelector('#rejectGrid');
-    grid.innerHTML = list.map(r=>{
-      return `
-        <div class="card" style="padding:14px">
-          <div class="row" style="justify-content:space-between;align-items:center">
-            <div>${Chip({ text:r.name, color:r.color })}</div>
+  fetch('./src/data/mock/pistachio_reject_types.json')
+    .then(r => r.json())
+    .catch(() => defaultRejects) // Use default if fetch fails
+    .then(list => {
+      const grid = mount.querySelector('#rejectGrid');
+      grid.innerHTML = list.map(r => {
+        return `
+          <div class="card" style="padding:14px">
+            <div class="row" style="justify-content:space-between;align-items:center">
+              <div>${Chip({ text: r.name, color: r.color })}</div>
+            </div>
+            <div style="margin-top:8px">
+              <small>kg (approx into big bags)</small>
+              ${Counter({ id: `rej_${r.key}`, value: 0, step: 5 })}
+            </div>
           </div>
-          <div style="margin-top:8px">
-            <small>kg (approx into big bags)</small>
-            ${Counter({ id:`rej_${r.key}`, value:0, step:5 })}
-          </div>
-        </div>
-      `;
-    }).join('');
-    bindCounter(grid);
-  });
+        `;
+      }).join('');
+      bindCounter(grid);
+    });
 
   // Toggle rejects visibility on run type change
-  mount.addEventListener('change', (e)=>{
+  mount.addEventListener('change', (e) => {
     if (e.target.name === 'runType') {
       const isRepack = e.target.value === 'repack';
       mount.querySelector('#rejectBlock').style.display = isRepack ? 'none' : 'block';
@@ -122,51 +139,72 @@ export function PistachioShift(mount){
   });
 
   // Buttons
-  mount.querySelector('#clearBtn').addEventListener('click', ()=> resetForm(mount));
-  mount.querySelector('#saveDraftBtn').addEventListener('click', ()=> saveDraft(mount));
-  mount.querySelector('#submitBtn').addEventListener('click', ()=> submitShift(mount));
+  mount.querySelector('#clearBtn').addEventListener('click', () => resetForm(mount));
+  mount.querySelector('#saveDraftBtn').addEventListener('click', () => saveDraft(mount));
+  mount.querySelector('#submitBtn').addEventListener('click', () => submitShift(mount));
 }
 
-function readValue(id){ const el = document.getElementById(id); return Number(el?.value || 0); }
-function readText(id){ const el = document.getElementById(id); return el?.value || ''; }
+function readValue(id) { 
+  const el = document.getElementById(id); 
+  return Number(el?.value || 0); 
+}
 
-function collectRejects(){
+function readText(id) { 
+  const el = document.getElementById(id); 
+  return el?.value || ''; 
+}
+
+function collectRejects() {
   const inputs = Array.from(document.querySelectorAll('[id^="rej_"]'));
   const obj = {};
-  inputs.forEach(i => obj[i.id.replace('rej_','')] = Number(i.value||0));
+  inputs.forEach(i => obj[i.id.replace('rej_', '')] = Number(i.value || 0));
   return obj;
 }
 
-function resetForm(mount){
-  mount.querySelectorAll('input[type="number"]').forEach(i=> i.value = 0);
+function resetForm(mount) {
+  mount.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
 }
 
-function saveDraft(mount){
+function saveDraft(mount) {
   const runType = mount.querySelector('input[name="runType"]:checked').value;
   const payload = buildPayload(runType);
   const arr = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-  arr.push({ ...payload, status:'draft', ts: new Date().toISOString() });
+  arr.push({ ...payload, status: 'draft', ts: new Date().toISOString() });
   localStorage.setItem(LS_KEY, JSON.stringify(arr));
   alert('Draft saved locally.');
 }
 
-function submitShift(mount){
+function submitShift(mount) {
   const runType = mount.querySelector('input[name="runType"]:checked').value;
   // Basic validation
-  if (readValue('qtyBags') <= 0) { alert('Enter final goods quantity (10 kg bags).'); return; }
+  if (readValue('qtyBags') <= 0) { 
+    alert('Enter final goods quantity (10 kg bags).'); 
+    return; 
+  }
 
   const payload = buildPayload(runType);
-  const arr = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-  arr.push({ ...payload, status:'submitted', ts: new Date().toISOString() });
-  localStorage.setItem(LS_KEY, JSON.stringify(arr));
-  alert('Shift submitted (stored locally for now).');
+  
+  // Save to pistachio_records for integration with production system
+  const records = JSON.parse(localStorage.getItem('pistachio_records') || '[]');
+  records.push({
+    ...payload,
+    status: 'submitted',
+    ts: new Date().toISOString(),
+    finishedKg: payload.finalGoods.qtyBags10kg * 10,
+    bags10: payload.finalGoods.qtyBags10kg,
+    rejectsKg: Object.values(payload.rejects).reduce((sum, val) => sum + val, 0)
+  });
+  localStorage.setItem('pistachio_records', JSON.stringify(records));
+  
+  alert('Shift submitted successfully!');
   resetForm(mount);
 }
 
-function buildPayload(runType){
+function buildPayload(runType) {
   const params = getParams();
   const factory = params.get('factory') || 'Pistachio';
-  const rejects = (runType==='repack') ? {} : collectRejects();
+  const rejects = (runType === 'repack') ? {} : collectRejects();
+  
   return {
     factory,
     runType,
