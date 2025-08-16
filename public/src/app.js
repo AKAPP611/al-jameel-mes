@@ -1,10 +1,9 @@
-// app.js - Main application
+// app.js - Complete version with error handling
 import { FactorySelectView } from './views/factory-select.js';
 import { PistachioHome } from './views/pistachio-home.js';
 import { PistachioShift } from './views/pistachio-shift.js';
 import { MaterialsView } from './views/materials.js';
 
-// Translations
 const i18n = {
   en: {
     factories: "Factories",
@@ -113,153 +112,204 @@ const i18n = {
   }
 };
 
-// Global state
-let currentLang = 'en';
-
-// Language functions
-export function t(key) { 
-  return i18n[currentLang] && i18n[currentLang][key] ? i18n[currentLang][key] : key; 
+// Safe localStorage access with fallbacks
+function getStoredLang() {
+  try {
+    return localStorage.getItem('lang') || 'en';
+  } catch (e) {
+    console.warn('localStorage not available, using default language');
+    return 'en';
+  }
 }
 
-function applyLang(lang) {
-  currentLang = lang;
-  document.documentElement.lang = lang;
-  document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+function setStoredLang(lang) {
+  try {
+    localStorage.setItem('lang', lang);
+  } catch (e) {
+    console.warn('localStorage not available, cannot save language preference');
+  }
+}
+
+let lang = getStoredLang();
+applyLang(lang);
+
+function applyLang(l) {
+  lang = l;
+  setStoredLang(l);
+  
+  if (document.documentElement) {
+    document.documentElement.lang = l;
+    document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
+  }
   
   // Update language buttons
-  document.querySelectorAll('.lang-switch .pill').forEach(btn => {
-    btn.setAttribute('aria-pressed', btn.dataset.lang === lang ? 'true' : 'false');
+  document.querySelectorAll('.lang-switch .pill').forEach(b => {
+    if (b.dataset.lang) {
+      b.setAttribute('aria-pressed', b.dataset.lang === l ? 'true' : 'false');
+    }
   });
 }
 
-// Navigation functions
+export function t(key) { 
+  return i18n[lang] && i18n[lang][key] ? i18n[lang][key] : key; 
+}
+
 export function goTo(path, params = {}) {
-  const qs = new URLSearchParams(params).toString();
-  location.hash = `${path}${qs ? '?' + qs : ''}`;
+  try {
+    const qs = new URLSearchParams(params).toString();
+    location.hash = `${path}${qs ? '?' + qs : ''}`;
+  } catch (e) {
+    console.error('Navigation error:', e);
+    location.hash = path;
+  }
 }
 
 export function getParams() {
-  const q = (location.hash.split('?')[1] || '');
-  return new URLSearchParams(q);
-}
-
-// Back button management
-let backBtn;
-function ensureBackButton() {
-  if (backBtn) return backBtn;
-  
-  backBtn = document.createElement('button');
-  backBtn.id = 'backBtn';
-  backBtn.className = 'ghost back-btn';
-  backBtn.type = 'button';
-  backBtn.innerHTML = `← ${t('back')}`;
-  backBtn.setAttribute('aria-label', 'Go back');
-
-  backBtn.addEventListener('click', () => {
-    if (history.length > 1) { 
-      history.back(); 
-    } else { 
-      goTo('#/'); 
-    }
-  });
-
-  const headerRow = document.querySelector('.header-row');
-  if (headerRow) {
-    headerRow.insertBefore(backBtn, headerRow.firstChild);
-  }
-  
-  return backBtn;
-}
-
-// Main render function
-function render() {
-  const mount = document.getElementById('app');
-  if (!mount) return;
-  
-  const hash = location.hash || '#/';
-  const route = hash.split('?')[0];
-
-  // Manage back button
-  const btn = ensureBackButton();
-  const isHome = (route === '#/' || route === '#/select');
-  if (btn) {
-    btn.style.display = isHome ? 'none' : '';
-    btn.innerHTML = `← ${t('back')}`;
-  }
-
-  // Route to appropriate view
   try {
-    switch(route) {
-      case '#/':
-      case '#/select':
-        FactorySelectView(mount, { t });
-        break;
-      case '#/pistachio':
-        PistachioHome(mount, { t });
-        break;
-      case '#/shift/new':
-        PistachioShift(mount, { t });
-        break;
-      case '#/materials':
-        MaterialsView(mount, { t });
-        break;
-      default:
-        mount.innerHTML = `
-          <div class="card">
-            <h2>404 - Page not found</h2>
-            <p>The requested route "${route}" was not found.</p>
-            <button onclick="location.hash='#/'" class="btn">Go Home</button>
-          </div>
-        `;
-    }
-  } catch (error) {
-    console.error('Render error:', error);
-    mount.innerHTML = `
-      <div class="card">
-        <h2>Error Loading Page</h2>
-        <p>There was an error loading this page: ${error.message}</p>
-        <button onclick="location.hash='#/'" class="btn">Go Home</button>
-      </div>
-    `;
-  }
-
-  // Update date display
-  const dateEl = document.getElementById('todayDate');
-  if (dateEl) {
-    try {
-      dateEl.textContent = new Date().toLocaleDateString(
-        document.documentElement.lang, 
-        { dateStyle: 'medium' }
-      );
-    } catch (e) {
-      dateEl.textContent = new Date().toLocaleDateString();
-    }
+    const q = (location.hash.split('?')[1] || '');
+    return new URLSearchParams(q);
+  } catch (e) {
+    console.error('Error parsing URL parameters:', e);
+    return new URLSearchParams();
   }
 }
 
-// Event listeners
+/* Back Button */
+let __backBtn;
+function ensureBackButton() {
+  if (__backBtn) return __backBtn;
+  
+  try {
+    __backBtn = document.createElement('button');
+    __backBtn.id = 'backBtn';
+    __backBtn.className = 'ghost back-btn';
+    __backBtn.type = 'button';
+    __backBtn.innerHTML = `← ${t('back')}`;
+    __backBtn.setAttribute('aria-label', 'Go back');
+
+    __backBtn.addEventListener('click', () => {
+      try {
+        if (history.length > 1) { 
+          history.back(); 
+        } else { 
+          goTo('#/'); 
+        }
+      } catch (e) {
+        console.error('Navigation error:', e);
+        goTo('#/');
+      }
+    });
+
+    const headerRow = document.querySelector('.header-row');
+    if (headerRow) {
+      headerRow.insertBefore(__backBtn, headerRow.firstChild);
+    }
+  } catch (e) {
+    console.error('Error creating back button:', e);
+  }
+  
+  return __backBtn;
+}
+
+/* Main Render Function */
+function render() {
+  try {
+    const mount = document.getElementById('app');
+    if (!mount) {
+      console.error('App mount point not found');
+      return;
+    }
+    
+    const hash = location.hash || '#/';
+    const route = hash.split('?')[0];
+
+    // Ensure back button exists and toggle visibility
+    const backBtn = ensureBackButton();
+    const isHome = (route === '#/' || route === '#/select');
+    if (backBtn) {
+      backBtn.style.display = isHome ? 'none' : '';
+      backBtn.innerHTML = `← ${t('back')}`;
+    }
+
+    // Route to appropriate view
+    try {
+      switch(route) {
+        case '#/':
+        case '#/select':
+          FactorySelectView(mount, { t });
+          break;
+        case '#/pistachio':
+          PistachioHome(mount, { t });
+          break;
+        case '#/shift/new':
+          PistachioShift(mount, { t });
+          break;
+        case '#/materials':
+          MaterialsView(mount, { t });
+          break;
+        default:
+          mount.innerHTML = `<div class="card"><p>404 - Page not found</p><p>Route: ${route}</p></div>`;
+      }
+    } catch (e) {
+      console.error('Error rendering view:', e);
+      mount.innerHTML = `<div class="card"><p>Error loading page</p><p>${e.message}</p></div>`;
+    }
+
+    // Update date display
+    try {
+      const dateEl = document.getElementById('todayDate');
+      if (dateEl) {
+        dateEl.textContent = new Date().toLocaleDateString(
+          document.documentElement.lang, 
+          { dateStyle: 'medium' }
+        );
+      }
+    } catch (e) {
+      console.error('Error updating date:', e);
+    }
+  } catch (e) {
+    console.error('Critical render error:', e);
+  }
+}
+
+/* Event Listeners */
 window.addEventListener('hashchange', render);
 window.addEventListener('load', render);
 
-// Language switching
+// Language switching with error handling
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.pill');
-  if (btn && btn.dataset.lang) { 
-    applyLang(btn.dataset.lang); 
-    render(); 
+  try {
+    const btn = e.target.closest('.pill');
+    if (btn && btn.dataset.lang) { 
+      applyLang(btn.dataset.lang); 
+      render(); 
+    }
+  } catch (err) {
+    console.error('Language switch error:', err);
   }
 });
 
-// Direction toggle
+// Direction toggle with error handling
 document.addEventListener('DOMContentLoaded', () => {
   const dirBtn = document.getElementById('dirToggle');
   if (dirBtn) {
     dirBtn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('dir') || 'ltr';
-      document.documentElement.setAttribute('dir', current === 'ltr' ? 'rtl' : 'ltr');
+      try {
+        const current = document.documentElement.getAttribute('dir') || 'ltr';
+        document.documentElement.setAttribute('dir', current === 'ltr' ? 'rtl' : 'ltr');
+      } catch (e) {
+        console.error('Direction toggle error:', e);
+      }
     });
   }
 });
 
-// Initialize
-applyLang(currentLang);
+// Global error handler
+window.addEventListener('error', (e) => {
+  console.error('Global error:', e.error);
+});
+
+// Global promise rejection handler
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('Unhandled promise rejection:', e.reason);
+});
