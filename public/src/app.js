@@ -1,3 +1,4 @@
+// app.js - Complete version
 import { FactorySelectView } from './views/factory-select.js';
 import { PistachioHome } from './views/pistachio-home.js';
 import { PistachioShift } from './views/pistachio-shift.js';
@@ -36,7 +37,8 @@ const i18n = {
     csvExport: "Export CSV",
     editMaterials: "Materials Usage",
     add: "Add",
-    remove: "Remove"
+    remove: "Remove",
+    back: "Back"
   },
   ar: {
     factories: "المصانع",
@@ -70,7 +72,8 @@ const i18n = {
     csvExport: "تصدير CSV",
     editMaterials: "استهلاك المواد",
     add: "إضافة",
-    remove: "حذف"
+    remove: "حذف",
+    back: "رجوع"
   },
   hi: {
     factories: "कारख़ाने",
@@ -104,9 +107,11 @@ const i18n = {
     csvExport: "CSV एक्सपोर्ट",
     editMaterials: "सामग्री उपयोग",
     add: "जोड़ें",
-    remove: "हटाएं"
+    remove: "हटाएं",
+    back: "वापस"
   }
 };
+
 let lang = localStorage.getItem('lang') || 'en';
 applyLang(lang);
 
@@ -115,24 +120,26 @@ function applyLang(l) {
   localStorage.setItem('lang', l);
   document.documentElement.lang = l;
   document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
-  document.querySelectorAll('.lang-switch .pill').forEach(b=>{
-    b.setAttribute('aria-pressed', b.dataset.lang===l ? 'true':'false');
+  document.querySelectorAll('.lang-switch .pill').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.lang === l ? 'true' : 'false');
   });
 }
-export function t(key){ return i18n[lang][key] || key; }
 
-export function goTo(path, params={}) {
+export function t(key) { 
+  return i18n[lang][key] || key; 
+}
+
+export function goTo(path, params = {}) {
   const qs = new URLSearchParams(params).toString();
   location.hash = `${path}${qs ? '?' + qs : ''}`;
 }
-export function getParams(){
+
+export function getParams() {
   const q = (location.hash.split('?')[1] || '');
   return new URLSearchParams(q);
 }
-/* ============================
-   BACK BUTTON (shared)
-   ============================ */
-// NEW: create once and insert into header
+
+/* Back Button */
 let __backBtn;
 function ensureBackButton() {
   if (__backBtn) return __backBtn;
@@ -140,56 +147,87 @@ function ensureBackButton() {
   __backBtn.id = 'backBtn';
   __backBtn.className = 'ghost back-btn';
   __backBtn.type = 'button';
-  __backBtn.textContent = '← Back';
+  __backBtn.innerHTML = `← ${t('back')}`;
   __backBtn.setAttribute('aria-label', 'Go back');
 
   __backBtn.addEventListener('click', () => {
-    // Prefer browser history; fall back to home
-    if (history.length > 1) { history.back(); }
-    else { goTo('#/'); }
+    if (history.length > 1) { 
+      history.back(); 
+    } else { 
+      goTo('#/'); 
+    }
   });
 
   const headerRow = document.querySelector('.header-row');
-  if (headerRow) headerRow.insertBefore(__backBtn, headerRow.firstChild);
+  if (headerRow) {
+    headerRow.insertBefore(__backBtn, headerRow.firstChild);
+  }
   return __backBtn;
 }
 
+/* Main Render Function */
 function render() {
   const mount = document.getElementById('app');
+  if (!mount) return;
+  
   const hash = location.hash || '#/';
   const route = hash.split('?')[0];
 
-  // NEW: make sure back button exists, then toggle its visibility
+  // Ensure back button exists and toggle visibility
   const backBtn = ensureBackButton();
   const isHome = (route === '#/' || route === '#/select');
-  backBtn.style.display = isHome ? 'none' : '';
-
-  if (route === '#/' || route === '#/select') {
-    FactorySelectView(mount, { t });
-  } else if (route === '#/pistachio') {
-    PistachioHome(mount, { t });
-  } else if (route === '#/shift/new') {
-    PistachioShift(mount, { t });
-  } else if (route === '#/materials') {
-    MaterialsView(mount, { t });
-  } else {
-    mount.innerHTML = `<div class="card"><p>Not Found</p></div>`;
+  if (backBtn) {
+    backBtn.style.display = isHome ? 'none' : '';
+    backBtn.innerHTML = `← ${t('back')}`;
   }
 
-  const el = document.getElementById('todayDate');
-  if (el) el.textContent = new Date().toLocaleDateString(document.documentElement.lang, { dateStyle: 'medium' });
+  // Route to appropriate view
+  switch(route) {
+    case '#/':
+    case '#/select':
+      FactorySelectView(mount, { t });
+      break;
+    case '#/pistachio':
+      PistachioHome(mount, { t });
+      break;
+    case '#/shift/new':
+      PistachioShift(mount, { t });
+      break;
+    case '#/materials':
+      MaterialsView(mount, { t });
+      break;
+    default:
+      mount.innerHTML = `<div class="card"><p>404 - Page not found</p></div>`;
+  }
+
+  // Update date display
+  const dateEl = document.getElementById('todayDate');
+  if (dateEl) {
+    dateEl.textContent = new Date().toLocaleDateString(
+      document.documentElement.lang, 
+      { dateStyle: 'medium' }
+    );
+  }
 }
 
+/* Event Listeners */
 window.addEventListener('hashchange', render);
 window.addEventListener('load', render);
 
-document.addEventListener('click', (e)=>{
+// Language switching
+document.addEventListener('click', (e) => {
   const btn = e.target.closest('.pill');
-  if (btn && btn.dataset.lang) { applyLang(btn.dataset.lang); render(); }
+  if (btn && btn.dataset.lang) { 
+    applyLang(btn.dataset.lang); 
+    render(); 
+  }
 });
 
+// Direction toggle
 const dirBtn = document.getElementById('dirToggle');
-if (dirBtn) dirBtn.addEventListener('click', ()=>{
-  const current = document.documentElement.getAttribute('dir') || 'ltr';
-  document.documentElement.setAttribute('dir', current === 'ltr' ? 'rtl' : 'ltr');
-});
+if (dirBtn) {
+  dirBtn.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('dir') || 'ltr';
+    document.documentElement.setAttribute('dir', current === 'ltr' ? 'rtl' : 'ltr');
+  });
+}
