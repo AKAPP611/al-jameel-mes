@@ -4,8 +4,9 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Pistachio – Al Jameel MES</title>
-  <link rel="icon" href="data:," />
-  <link rel="shortcut icon" href="data:," />
+ <link rel="icon" href="src/assets/icon/pistachio.png">
+<link rel="shortcut icon" href="src/assets/icon/pistachio.png">
+
 
   <style>
     /* --- small layout helpers --- */
@@ -57,7 +58,6 @@
       color:#fff; text-decoration:none; background:rgba(255,255,255,.12);
       padding:8px 12px; border-radius:10px; margin-right:10px;
     }
-
     .container{ max-width:1200px; margin:0 auto; padding:20px }
 
     .nav-buttons{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap }
@@ -77,6 +77,12 @@
       transform:translateY(-1px);
       box-shadow:0 4px 8px rgba(213,163,51,.35);
     }
+/* header icon */
+.brandwrap{ display:flex; align-items:center; gap:10px; }
+.brandmark{
+  width:32px; height:32px; object-fit:contain;
+  display:inline-block; vertical-align:middle;
+}
 
     /* ======= Sections / Cards ======= */
     .section{ display:none; background:var(--surface); padding:20px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,.06) }
@@ -157,6 +163,7 @@
   <div class="header">
     <div>
       <a class="back" href="./#/">← Back to MES</a>
+<img src="src/assets/icon/pistachio.png" alt="Pistachio" class="brandmark">
       <h1>Pistachio Production Management</h1>
     </div>
     <div>
@@ -198,6 +205,8 @@
 
     <!-- NEW PRODUCTION -->
     <section id="production" class="section">
+      <img src="src/assets/icon/pistachio.png" alt="Pistachio" style="width:48px;height:48px;display:block;margin-bottom:10px;">
+
       <div class="warning-box">
         Huller Run hides Size and shows Rejects. Repacking keeps Size and hides Rejects.
       </div>
