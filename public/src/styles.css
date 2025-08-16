@@ -468,3 +468,111 @@ html[dir="rtl"] .ws-icon {
     border: 1px solid #ccc;
   }
 }
+/* Add these styles to the end of your existing public/src/styles.css file */
+
+/* ===== Pistachio Icon Enhancements ===== */
+
+/* Factory card pistachio icon */
+.ws-icon.pistachio-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  vertical-align: -6px;
+  margin-right: 8px;
+  display: inline-block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  transition: transform 0.2s ease;
+}
+
+/* Hover effect for pistachio icon in factory cards */
+.factory-card:hover .ws-icon.pistachio-icon {
+  transform: scale(1.05);
+}
+
+/* Pistachio icon in different contexts */
+.pistachio-icon-small {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: -3px;
+  margin-right: 6px;
+}
+
+.pistachio-icon-medium {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  vertical-align: -6px;
+  margin-right: 8px;
+}
+
+.pistachio-icon-large {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-right: 12px;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));
+}
+
+/* Factory card specific enhancements */
+.factory-card .title {
+  display: flex;
+  align-items: center;
+  font-weight: 900; 
+  font-size: 18px; 
+  letter-spacing: .2px;
+}
+
+/* RTL support for pistachio icons */
+html[dir="rtl"] .ws-icon.pistachio-icon,
+html[dir="rtl"] .pistachio-icon-small,
+html[dir="rtl"] .pistachio-icon-medium,
+html[dir="rtl"] .pistachio-icon-large {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+/* Animation for pistachio icons */
+@keyframes pistachioFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+.pistachio-icon-animated {
+  animation: pistachioFloat 3s ease-in-out infinite;
+}
+
+/* Responsive pistachio icons */
+@media (max-width: 768px) {
+  .ws-icon.pistachio-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .pistachio-icon-large {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .ws-icon.pistachio-icon,
+  .pistachio-icon-small,
+  .pistachio-icon-medium,
+  .pistachio-icon-large {
+    filter: contrast(1.2) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+}
+
+/* Print styles for pistachio icons */
+@media print {
+  .ws-icon.pistachio-icon,
+  .pistachio-icon-small,
+  .pistachio-icon-medium,
+  .pistachio-icon-large {
+    filter: none;
+    transform: none !important;
+    animation: none !important;
+  }
+}
