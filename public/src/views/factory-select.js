@@ -39,9 +39,9 @@ function Card({ title, subtitle, content, href = '#/' }) {
 
 // --- Built-in fallback data (used if fetch fails) ---
 const FALLBACK_FACTORIES = [
-  { key: "Pistachio", name: "Pistachio" },
-  { key: "Walnut",   name: "Walnut" },
-  { key: "Cardamom", name: "Cardamom" }
+  { key: "Pistachio", name: "Pistachio", iconUrl: "src/assets/icon/pistachio.png" },
+  { key: "Walnut",    name: "Walnut" },
+  { key: "Cardamom",  name: "Cardamom" }
 ];
 
 const FALLBACK_PROD = {
@@ -78,7 +78,14 @@ export function FactorySelectView(mount) {
   ]).then(([fRes, pRes]) => {
     const factories = fRes.status === 'fulfilled' ? fRes.value : FALLBACK_FACTORIES;
     const prod      = pRes.status === 'fulfilled' ? pRes.value : FALLBACK_PROD;
-    renderCards(mount.querySelector('#factoryGrid'), factories, prod);
+    // ensure pistachio has an iconUrl even if JSON doesn’t provide it
+const enriched = factories.map(f =>
+  f.key === 'Pistachio' && !f.iconUrl
+    ? { ...f, iconUrl: 'src/assets/icon/pistachio.png' }
+    : f
+);
+renderCards(mount.querySelector('#factoryGrid'), enriched, prod);
+
   }).catch(() => {
     renderCards(mount.querySelector('#factoryGrid'), FALLBACK_FACTORIES, FALLBACK_PROD);
   });
@@ -89,7 +96,19 @@ function renderCards(grid, factories, prod) {
     const p = prod[f.key] || { actualKg: 0, targetKg: 0, efficiency: 0, rejectRate: 0 };
     const effClass    = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
-    const emoji       = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
+   const emoji = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
+
+// prefer image if provided; fall back to emoji
+const iconUrl = f.iconUrl || (f.key === 'Pistachio' ? 'src/assets/icon/pistachio.png' : null);
+const iconMarkup = iconUrl
+  ? `<img src="${iconUrl}" class="ws-icon" alt="">`
+  : `${emoji} `;
+
+return Card({
+  title: `${iconMarkup}${f.name}`,
+  ...
+});
+
 
     // Pistachio opens your standalone interface
     const href = f.key === 'Pistachio'
