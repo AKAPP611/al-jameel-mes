@@ -1,7 +1,7 @@
-// factory-select.js - FIXED VERSION
+// factory-select.js - Factory selection view with updated pistachio image
 import { t as getText } from '../app.js';
 
-// Minimal inline components
+// Inline components
 function KpiTile({ label, value, state = 'ok' }) {
   return `
     <div class="kpi ${state}" role="group" aria-label="${label}">
@@ -34,28 +34,26 @@ function Card({ title, subtitle, content, href = '#/' }) {
   `;
 }
 
-// Fallback data
-const FALLBACK_FACTORIES = [
+// Factory data
+const factories = [
   { key: "Pistachio", name: "Pistachio" },
   { key: "Walnut", name: "Walnut" },
   { key: "Cardamom", name: "Cardamom" }
 ];
 
-const FALLBACK_PROD = {
+const productionData = {
   Pistachio: { actualKg: 5600, targetKg: 6000, efficiency: 94, rejectRate: 1.4 },
   Walnut: { actualKg: 7200, targetKg: 7000, efficiency: 97, rejectRate: 2.1 },
   Cardamom: { actualKg: 3100, targetKg: 4000, efficiency: 78, rejectRate: 0.9 }
 };
 
 export function FactorySelectView(mount) {
-  const logoSrc = './logo.ico';
-
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
       <div style="text-align:center">
-        <img src="${logoSrc}" alt="Al Jameel Logo" 
-             style="width:64px; height:64px; margin-bottom:0.5rem;" 
-             onerror="this.style.display='none'">
+        <div style="width:64px; height:64px; margin: 0 auto 1rem; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+          🏭
+        </div>
         <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
         <p class="section-sub">Pick a workspace to view today's performance.</p>
       </div>
@@ -67,17 +65,10 @@ export function FactorySelectView(mount) {
     </section>
   `;
 
-  // Try to load JSON; fall back to built-in data on any error
-  Promise.allSettled([
-    fetch('./src/data/mock/factories.json').then(r => r.ok ? r.json() : Promise.reject()),
-    fetch('./src/data/mock/production_today.json').then(r => r.ok ? r.json() : Promise.reject())
-  ]).then(([fRes, pRes]) => {
-    const factories = fRes.status === 'fulfilled' ? fRes.value : FALLBACK_FACTORIES;
-    const prod = pRes.status === 'fulfilled' ? pRes.value : FALLBACK_PROD;
-    renderCards(mount.querySelector('#factoryGrid'), factories, prod);
-  }).catch(() => {
-    renderCards(mount.querySelector('#factoryGrid'), FALLBACK_FACTORIES, FALLBACK_PROD);
-  });
+  // Simulate loading delay then render cards
+  setTimeout(() => {
+    renderCards(mount.querySelector('#factoryGrid'), factories, productionData);
+  }, 500);
 }
 
 function renderCards(grid, factories, prod) {
@@ -86,18 +77,18 @@ function renderCards(grid, factories, prod) {
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
     
-    // Use emoji as fallback
+    // Factory icons with updated pistachio image
     const emoji = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
     
-    // Fixed icon path and handling
+    // Updated icon handling with proper pistachio image
     const iconUrl = f.key === 'Pistachio' ? './src/assets/icons/pistachio.png' : null;
     const iconMarkup = iconUrl
-      ? `<img src="${iconUrl}" class="ws-icon" alt="" onerror="this.outerHTML='${emoji} '">`
+      ? `<img src="${iconUrl}" class="ws-icon pistachio-icon" alt="Pistachio" onerror="this.outerHTML='${emoji} '">`
       : `${emoji} `;
 
-    // Fixed href - use correct filename
+    // Navigation links
     const href = f.key === 'Pistachio'
-      ? './pistachio.html'  // Fixed: was pistachio-production.html
+      ? './pistachio.html'
       : `#/dashboard?factory=${encodeURIComponent(f.key)}`;
 
     return Card({
@@ -106,8 +97,16 @@ function renderCards(grid, factories, prod) {
       href,
       content: `
         <div class="grid grid-3" aria-label="Key performance indicators">
-          ${KpiTile({ label: getText('efficiency'), value: `${p.efficiency}%`, state: effClass })}
-          ${KpiTile({ label: getText('rejectRate'), value: `${p.rejectRate}%`, state: p.rejectRate < 2 ? 'ok' : (p.rejectRate < 5 ? 'warn' : 'bad') })}
+          ${KpiTile({ 
+            label: getText('efficiency'), 
+            value: `${p.efficiency}%`, 
+            state: effClass 
+          })}
+          ${KpiTile({ 
+            label: getText('rejectRate'), 
+            value: `${p.rejectRate}%`, 
+            state: p.rejectRate < 2 ? 'ok' : (p.rejectRate < 5 ? 'warn' : 'bad') 
+          })}
           <div class="kpi" role="group" aria-label="Target progress">
             <div class="label">Target Progress</div>
             <div><strong>${progressPct}%</strong> · ${p.actualKg.toLocaleString()} / ${p.targetKg.toLocaleString()} kg</div>
