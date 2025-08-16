@@ -1,9 +1,10 @@
-// app.js - Complete version
+// app.js - Main application
 import { FactorySelectView } from './views/factory-select.js';
 import { PistachioHome } from './views/pistachio-home.js';
 import { PistachioShift } from './views/pistachio-shift.js';
 import { MaterialsView } from './views/materials.js';
 
+// Translations
 const i18n = {
   en: {
     factories: "Factories",
@@ -112,23 +113,26 @@ const i18n = {
   }
 };
 
-let lang = localStorage.getItem('lang') || 'en';
-applyLang(lang);
+// Global state
+let currentLang = 'en';
 
-function applyLang(l) {
-  lang = l;
-  localStorage.setItem('lang', l);
-  document.documentElement.lang = l;
-  document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
-  document.querySelectorAll('.lang-switch .pill').forEach(b => {
-    b.setAttribute('aria-pressed', b.dataset.lang === l ? 'true' : 'false');
+// Language functions
+export function t(key) { 
+  return i18n[currentLang] && i18n[currentLang][key] ? i18n[currentLang][key] : key; 
+}
+
+function applyLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+  
+  // Update language buttons
+  document.querySelectorAll('.lang-switch .pill').forEach(btn => {
+    btn.setAttribute('aria-pressed', btn.dataset.lang === lang ? 'true' : 'false');
   });
 }
 
-export function t(key) { 
-  return i18n[lang][key] || key; 
-}
-
+// Navigation functions
 export function goTo(path, params = {}) {
   const qs = new URLSearchParams(params).toString();
   location.hash = `${path}${qs ? '?' + qs : ''}`;
@@ -139,18 +143,19 @@ export function getParams() {
   return new URLSearchParams(q);
 }
 
-/* Back Button */
-let __backBtn;
+// Back button management
+let backBtn;
 function ensureBackButton() {
-  if (__backBtn) return __backBtn;
-  __backBtn = document.createElement('button');
-  __backBtn.id = 'backBtn';
-  __backBtn.className = 'ghost back-btn';
-  __backBtn.type = 'button';
-  __backBtn.innerHTML = `← ${t('back')}`;
-  __backBtn.setAttribute('aria-label', 'Go back');
+  if (backBtn) return backBtn;
+  
+  backBtn = document.createElement('button');
+  backBtn.id = 'backBtn';
+  backBtn.className = 'ghost back-btn';
+  backBtn.type = 'button';
+  backBtn.innerHTML = `← ${t('back')}`;
+  backBtn.setAttribute('aria-label', 'Go back');
 
-  __backBtn.addEventListener('click', () => {
+  backBtn.addEventListener('click', () => {
     if (history.length > 1) { 
       history.back(); 
     } else { 
@@ -160,12 +165,13 @@ function ensureBackButton() {
 
   const headerRow = document.querySelector('.header-row');
   if (headerRow) {
-    headerRow.insertBefore(__backBtn, headerRow.firstChild);
+    headerRow.insertBefore(backBtn, headerRow.firstChild);
   }
-  return __backBtn;
+  
+  return backBtn;
 }
 
-/* Main Render Function */
+// Main render function
 function render() {
   const mount = document.getElementById('app');
   if (!mount) return;
@@ -173,44 +179,65 @@ function render() {
   const hash = location.hash || '#/';
   const route = hash.split('?')[0];
 
-  // Ensure back button exists and toggle visibility
-  const backBtn = ensureBackButton();
+  // Manage back button
+  const btn = ensureBackButton();
   const isHome = (route === '#/' || route === '#/select');
-  if (backBtn) {
-    backBtn.style.display = isHome ? 'none' : '';
-    backBtn.innerHTML = `← ${t('back')}`;
+  if (btn) {
+    btn.style.display = isHome ? 'none' : '';
+    btn.innerHTML = `← ${t('back')}`;
   }
 
   // Route to appropriate view
-  switch(route) {
-    case '#/':
-    case '#/select':
-      FactorySelectView(mount, { t });
-      break;
-    case '#/pistachio':
-      PistachioHome(mount, { t });
-      break;
-    case '#/shift/new':
-      PistachioShift(mount, { t });
-      break;
-    case '#/materials':
-      MaterialsView(mount, { t });
-      break;
-    default:
-      mount.innerHTML = `<div class="card"><p>404 - Page not found</p></div>`;
+  try {
+    switch(route) {
+      case '#/':
+      case '#/select':
+        FactorySelectView(mount, { t });
+        break;
+      case '#/pistachio':
+        PistachioHome(mount, { t });
+        break;
+      case '#/shift/new':
+        PistachioShift(mount, { t });
+        break;
+      case '#/materials':
+        MaterialsView(mount, { t });
+        break;
+      default:
+        mount.innerHTML = `
+          <div class="card">
+            <h2>404 - Page not found</h2>
+            <p>The requested route "${route}" was not found.</p>
+            <button onclick="location.hash='#/'" class="btn">Go Home</button>
+          </div>
+        `;
+    }
+  } catch (error) {
+    console.error('Render error:', error);
+    mount.innerHTML = `
+      <div class="card">
+        <h2>Error Loading Page</h2>
+        <p>There was an error loading this page: ${error.message}</p>
+        <button onclick="location.hash='#/'" class="btn">Go Home</button>
+      </div>
+    `;
   }
 
   // Update date display
   const dateEl = document.getElementById('todayDate');
   if (dateEl) {
-    dateEl.textContent = new Date().toLocaleDateString(
-      document.documentElement.lang, 
-      { dateStyle: 'medium' }
-    );
+    try {
+      dateEl.textContent = new Date().toLocaleDateString(
+        document.documentElement.lang, 
+        { dateStyle: 'medium' }
+      );
+    } catch (e) {
+      dateEl.textContent = new Date().toLocaleDateString();
+    }
   }
 }
 
-/* Event Listeners */
+// Event listeners
 window.addEventListener('hashchange', render);
 window.addEventListener('load', render);
 
@@ -224,10 +251,15 @@ document.addEventListener('click', (e) => {
 });
 
 // Direction toggle
-const dirBtn = document.getElementById('dirToggle');
-if (dirBtn) {
-  dirBtn.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('dir') || 'ltr';
-    document.documentElement.setAttribute('dir', current === 'ltr' ? 'rtl' : 'ltr');
-  });
-}
+document.addEventListener('DOMContentLoaded', () => {
+  const dirBtn = document.getElementById('dirToggle');
+  if (dirBtn) {
+    dirBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('dir') || 'ltr';
+      document.documentElement.setAttribute('dir', current === 'ltr' ? 'rtl' : 'ltr');
+    });
+  }
+});
+
+// Initialize
+applyLang(currentLang);
