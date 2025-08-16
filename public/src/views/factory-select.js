@@ -99,7 +99,7 @@ function renderCards(grid, factories, prod) {
    const emoji = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
 
 // prefer image if provided; fall back to emoji
-const iconUrl = f.iconUrl || (f.key === 'Pistachio' ? 'src/assets/icon/pistachio.png' : null);
+const iconUrl = f.iconUrl || (f.key === 'Pistachio' ? 'src/assests/icons/pistachio.png' : null);
 const iconMarkup = iconUrl
   ? `<img src="${iconUrl}" class="ws-icon" alt="">`
   : `${emoji} `;
