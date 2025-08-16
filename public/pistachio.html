@@ -4,11 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Pistachio – Al Jameel MES</title>
- <link rel="icon" href="src/assets/icon/pistachio.png">
-<link rel="shortcut icon" href="src/assets/icon/pistachio.png">
-
-<link rel="icon" href="src/assests/icons/pistachio.png">
-<link rel="shortcut icon" href="src/assests/icons/pistachio.png">
+  <link rel="icon" href="src/assets/icons/pistachio.png">
+  <link rel="shortcut icon" href="src/assets/icons/pistachio.png">
 
   <style>
     /* --- small layout helpers --- */
@@ -22,6 +19,11 @@
     }
     .action-buttons{ display:flex; gap:10px; align-items:center; }
     .action-buttons .edit-btn{ height:44px; }
+    
+    /* Missing classes */
+    .row { display:flex; }
+    .delete-btn { background:#dc3545; }
+    .ghost { background:#e0e0e0; color:#333; }
 
     /* ============ Brand Tokens (Al Jameel) ============ */
     :root{
@@ -79,12 +81,13 @@
       transform:translateY(-1px);
       box-shadow:0 4px 8px rgba(213,163,51,.35);
     }
-/* header icon */
-.brandwrap{ display:flex; align-items:center; gap:10px; }
-.brandmark{
-  width:32px; height:32px; object-fit:contain;
-  display:inline-block; vertical-align:middle;
-}
+    
+    /* header icon */
+    .brandwrap{ display:flex; align-items:center; gap:10px; }
+    .brandmark{
+      width:32px; height:32px; object-fit:contain;
+      display:inline-block; vertical-align:middle;
+    }
 
     /* ======= Sections / Cards ======= */
     .section{ display:none; background:var(--surface); padding:20px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,.06) }
@@ -163,9 +166,9 @@
 <!-- App -->
 <div id="mainApp" style="display:none;">
   <div class="header">
-    <div>
+    <div class="brandwrap">
       <a class="back" href="./#/">← Back to MES</a>
-<img src="src/assets/icons/pistachio.png" alt="Pistachio" class="brandmark">
+      <img src="src/assets/icons/pistachio.png" alt="Pistachio" class="brandmark">
       <h1>Pistachio Production Management</h1>
     </div>
     <div>
@@ -197,7 +200,7 @@
         </div>
         <div class="stat-card">
           <div>Reject Rate (%)</div>
-          <div class="stat-value" id="kpiReject">0</div>
+          <div class="stat-value" id="kpiReject">0.0</div>
         </div>
       </div>
       <div class="output-section">
@@ -207,7 +210,7 @@
 
     <!-- NEW PRODUCTION -->
     <section id="production" class="section">
-      <img src="src/assests/icons/pistachio.png" alt="Pistachio" style="width:48px;height:48px;display:block;margin-bottom:10px;">
+      <img src="src/assets/icons/pistachio.png" alt="Pistachio" style="width:48px;height:48px;display:block;margin-bottom:10px;">
 
       <div class="warning-box">
         Huller Run hides Size and shows Rejects. Repacking keeps Size and hides Rejects.
@@ -455,6 +458,9 @@
 <!-- ===== CORE CONSTANTS ===== -->
 <script>
   const LS_REC_KEY   = 'pistachio_records';          // production records
+  const LS_INV_ADJ   = 'pistachio_inv_adjustments';
+  const LS_INV_STOCK = 'pistachio_inv_stock';
+  const LS_INV_LOG   = 'pistachio_inv_log';
 </script>
 
 <!-- ===== SECTION A: Login ===== -->
@@ -520,13 +526,19 @@
   window.addEventListener('load', bootDefaultSection);
 </script>
 
-<!-- ===== SECTION C: Summary math + payload + inventory subtraction ===== -->
+<!-- ===== SECTION C: Production & Dashboard ===== -->
 <script>
   /* Helpers */
   function readNum(id){ const el = document.getElementById(id); return Number(el?.value||0); }
   function sumRejects(){
     const keys = ['non_split','light_stain','adhering_hull','dark_stain','shell_split_pre1','undersize_kernel_pre2','loose_shell','loose_kernel','dust'];
     return keys.reduce((s,k)=> s + readNum('rej_'+k), 0);
+  }
+
+  /* Get submitted records for dashboard */
+  function getRecords() {
+    const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
+    return all.filter(r => r && r.status === 'submitted');
   }
 
   /* Dynamic labels + visibility */
@@ -570,6 +582,30 @@
     const el = document.getElementById('calcSummary');
     if (el) el.textContent =
       `Finished: ${finishedKg} kg · Total Rejects: ${rejectsKg} kg · Efficiency: ${eff}% · Reject Rate: ${rejRate}%`;
+  }
+
+  /* Update Dashboard KPIs */
+  function updateDashboard() {
+    const recs = getRecords();
+    let totalFinished = 0;
+    let totalRejects = 0;
+    
+    recs.forEach(r => {
+      totalFinished += Number(r.finishedKg || 0);
+      totalRejects += Number(r.rejectsKg || 0);
+    });
+    
+    const totalInput = totalFinished + totalRejects;
+    const efficiency = totalInput ? Math.round((totalFinished / totalInput) * 100) : 0;
+    const rejectRate = totalInput ? Math.round((totalRejects / totalInput) * 1000) / 10 : 0;
+    
+    const kpiFinished = document.getElementById('kpiFinished');
+    const kpiEff = document.getElementById('kpiEff');
+    const kpiReject = document.getElementById('kpiReject');
+    
+    if (kpiFinished) kpiFinished.textContent = totalFinished;
+    if (kpiEff) kpiEff.textContent = efficiency;
+    if (kpiReject) kpiReject.textContent = rejectRate.toFixed(1);
   }
 
   /* Recompute on input/change */
@@ -617,6 +653,8 @@
   /* Records table */
   function renderRecords(){
     const tbody = document.querySelector('#recordsTable tbody');
+    if (!tbody) return;
+    
     const recs = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]').slice(-100).reverse();
     tbody.innerHTML = recs.map(r=>{
       const sizeCell = r.sizes
@@ -667,6 +705,7 @@
     alert('Submitted.');
     renderRecords();
     updateSummary();
+    updateDashboard();
   }
 
   /* Boot */
@@ -674,15 +713,12 @@
     renderRecords();
     updateOutputLabels();
     updateSummary();
+    updateDashboard();
   });
 </script>
 
 <!-- ===== SECTION D: Inventory (counters + log + summary tables) ===== -->
 <script>
-  const LS_INV_ADJ   = 'pistachio_inv_adjustments';
-  const LS_INV_STOCK = 'pistachio_inv_stock';
-  const LS_INV_LOG   = 'pistachio_inv_log';
-
   const ITEM_LABELS = {
     vacuum_bags_10kg:'Vacuum bags (10 kg)',
     packing_boxes:'Packing boxes',
@@ -697,12 +733,6 @@
     carton_11_34:'inv_cartons',
     bag_25:'inv_bag25'
   };
-
-  /* Production records for summaries (submitted only) */
-  function getRecords() {
-    const all = JSON.parse(localStorage.getItem(LS_REC_KEY) || '[]');
-    return all.filter(r => r && r.status === 'submitted');
-  }
 
   /* Manual adjustments (kept for parity) */
   function getAdjustments(){ return JSON.parse(localStorage.getItem(LS_INV_ADJ) || '[]'); }
@@ -777,6 +807,7 @@
     saveLog(log);
 
     document.getElementById('inv_qty').value = 0;
+    document.getElementById('inv_note').value = '';
     renderStockUI();
   };
   window.invExport = function (){
@@ -856,19 +887,27 @@
     const snap = computeInventory();
 
     const tb1 = document.querySelector('#invFinished tbody');
-    tb1.innerHTML = snap.finished.length
-      ? snap.finished.map(r=>`<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
-      : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
+    if (tb1) {
+      tb1.innerHTML = snap.finished.length
+        ? snap.finished.map(r=>`<tr><td>${r.brand}</td><td>${r.size}</td><td>${r.bags}</td><td>${r.kg}</td></tr>`).join('')
+        : `<tr><td colspan="4">No submitted records yet.</td></tr>`;
+    }
 
-    document.querySelector('#invMaterials tbody').innerHTML = `
-      <tr>
-        <td>${snap.materials.matUsed}</td>
-        <td>${snap.materials.boxUsed}</td>
-        <td>${snap.materials.matWaste}</td>
-        <td>${snap.materials.boxWaste}</td>
-      </tr>`;
+    const tb2 = document.querySelector('#invMaterials tbody');
+    if (tb2) {
+      tb2.innerHTML = `
+        <tr>
+          <td>${snap.materials.matUsed}</td>
+          <td>${snap.materials.boxUsed}</td>
+          <td>${snap.materials.matWaste}</td>
+          <td>${snap.materials.boxWaste}</td>
+        </tr>`;
+    }
 
-    document.querySelector('#invRejects tbody').innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
+    const tb3 = document.querySelector('#invRejects tbody');
+    if (tb3) {
+      tb3.innerHTML = `<tr><td>${snap.rejectsKg}</td></tr>`;
+    }
   }
 
   // Initial counters/log only (summary tables render when inventory tab opens)
