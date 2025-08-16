@@ -138,3 +138,11 @@ p.section-sub{margin:0 0 12px; color:var(--muted)}
 /* ===== RTL ===== */
 html[dir="rtl"] .header-row, html[dir="rtl"] .footer-row{flex-direction:row-reverse}
 html[dir="rtl"]{direction:rtl}
+/* workspace card icon (dashboard) */
+.ws-icon{
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  vertical-align: -4px;
+  margin-right: 6px;
+}
