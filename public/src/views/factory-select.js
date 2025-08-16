@@ -51,7 +51,7 @@ export function FactorySelectView(mount) {
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
       <div style="text-align:center">
-        // AFTER:
+       
 <img src="./logo.ico" alt="Al Jameel Logo" 
      style="width:64px; height:64px; margin-bottom:0.5rem;" 
      onerror="this.style.display='none'">
