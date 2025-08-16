@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MES Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+        .ok { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .warning { background: #fef3c7; color: #92400e; }
+        button {
+            background: #a32034;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { opacity: 0.9; }
+        .test-link {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 12px;
+            background: #e5e7eb;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        pre {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔧 Al Jameel MES - Diagnostic Tool</h1>
+        <p>This tool helps identify common issues with the MES application.</p>
+    </div>
+
+    <div class="card">
+        <h2>Quick Tests</h2>
+        <a href="./index.html" class="test-link">Main MES App</a>
+        <a href="./pistachio.html" class="test-link">Pistachio Production</a>
+        <a href="./src/data/mock/factories.json" class="test-link">Test JSON Data</a>
+        <button onclick="runAllTests()">Run Diagnostic Tests</button>
+    </div>
+
+    <div class="card">
+        <h2>Test Results</h2>
+        <div id="testResults">Click "Run Diagnostic Tests" to start...</div>
+    </div>
+
+    <div class="card">
+        <h2>Console Output</h2>
+        <pre id="consoleOutput">Console messages will appear here...</pre>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <script>
+        let consoleMessages = [];
+
+        // Capture console messages
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logMessage('LOG', args);
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logMessage('ERROR', args);
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            logMessage('WARN', args);
+        };
+
+        function logMessage(type, args) {
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            consoleMessages.push(`[${type}] ${new Date().toLocaleTimeString()}: ${message}`);
+            updateConsoleDisplay();
+        }
+
+        function updateConsoleDisplay() {
+            const output = document.getElementById('consoleOutput');
+            if (output) {
+                output.textContent = consoleMessages.slice(-10).join('\n');
+            }
+        }
+
+        function clearConsole() {
+            consoleMessages = [];
+            updateConsoleDisplay();
+        }
+
+        function addResult(test, status, message) {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <strong>${test}:</strong>
+                <span class="status ${status}">${status.toUpperCase()}</span>
+                ${message ? `<br><small>${message}</small>` : ''}
+            `;
+            results.appendChild(div);
+        }
+
+        async function runAllTests() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<p>Running tests...</p>';
+
+            console.log('Starting diagnostic tests...');
+
+            // Test 1: Browser features
+            const hasModules = typeof import !== 'undefined';
+            addResult('ES6 Modules', hasModules ? 'ok' : 'error', 
+                hasModules ? 'Supported' : 'Not supported - use a modern browser');
+
+            const hasFetch = typeof fetch !== 'undefined';
+            addResult('Fetch API', hasFetch ? 'ok' : 'error',
+                hasFetch ? 'Supported' : 'Not supported - update browser');
+
+            // Test 2: File access
+            try {
+                const response = await fetch('./src/app.js', { method: 'HEAD' });
+                addResult('File Access', response.ok ? 'ok' : 'error',
+                    response.ok ? 'Files accessible' : `HTTP ${response.status}`);
+            } catch (error) {
+                addResult('File Access', 'error', 
+                    'Cannot access files - ensure you\'re using a web server');
+            }
+
+            // Test 3: JSON data
+            try {
+                const response = await fetch('./src/data/mock/factories.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult('JSON Data', 'ok', `Loaded ${data.length} factories`);
+                } else {
+                    addResult('JSON Data', 'error', `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                addResult('JSON Data', 'error', 'Cannot load JSON data');
+            }
+
+            // Test 4: CSS
+            try {
+                const response = await fetch('./src/styles.css', { method: 'HEAD' });
+                addResult('CSS Styles', response.ok ? 'ok' : 'error',
+                    response.ok ? 'Stylesheet accessible' : 'Cannot load styles');
+            } catch (error) {
+                addResult('CSS Styles', 'error', 'Cannot access stylesheet');
+            }
+
+            // Test 5: Current URL
+            const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            const isHttps = location.protocol === 'https:';
+            const isHttp = location.protocol === 'http:';
+            const isFile = location.protocol === 'file:';
+
+            if (isFile) {
+                addResult('Server Check', 'error', 
+                    'Using file:// protocol - please use a web server');
+            } else if (isLocalhost && isHttp) {
+                addResult('Server Check', 'ok', 'Running on local server');
+            } else if (isHttps) {
+                addResult('Server Check', 'ok', 'Running on HTTPS');
+            } else {
+                addResult('Server Check', 'warning', 'Check server configuration');
+            }
+
+            console.log('Diagnostic tests completed');
+        }
+
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.message, e.filename, e.lineno);
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+        });
+
+        console.log('Diagnostic tool ready');
+    </script>
+</body>
+</html>
