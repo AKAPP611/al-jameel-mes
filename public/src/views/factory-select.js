@@ -1,4 +1,4 @@
-// factory-select.js - Factory selection view with updated pistachio image
+// factory-select.js - Factory selection view (Clean version without extra text)
 import { t as getText } from '../app.js';
 
 // Inline components
@@ -77,14 +77,17 @@ function renderCards(grid, factories, prod) {
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
     
-    // Factory icons with updated pistachio image
-    const emoji = f.key === 'Pistachio' ? '🥜' : f.key === 'Walnut' ? '🌰' : '🌿';
+    // Factory icons with clean implementation
+    let iconMarkup = '';
     
-    // Updated icon handling with proper pistachio image
-    const iconUrl = f.key === 'Pistachio' ? './src/assets/icons/pistachio.png' : null;
-    const iconMarkup = iconUrl
-      ? `<img src="${iconUrl}" class="ws-icon pistachio-icon" alt="Pistachio" onerror="this.outerHTML='${emoji} '">`
-      : `${emoji} `;
+    if (f.key === 'Pistachio') {
+      // Use the pistachio image with clean fallback
+      iconMarkup = `<img src="./src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" onerror="this.outerHTML='🥜 '">`;
+    } else if (f.key === 'Walnut') {
+      iconMarkup = '🌰 ';
+    } else if (f.key === 'Cardamom') {
+      iconMarkup = '🌿 ';
+    }
 
     // Navigation links
     const href = f.key === 'Pistachio'
