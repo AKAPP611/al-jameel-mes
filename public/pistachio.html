@@ -42,6 +42,16 @@
       margin-right: 1rem;
     }
 
+    /* Pistachio icon styling */
+    .pistachio-brand-icon {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      margin-right: 0.75rem;
+      vertical-align: middle;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
     .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
 
     .nav-buttons {
@@ -194,6 +204,21 @@
       border-radius: 0.5rem;
       margin: 1rem 0;
     }
+
+    /* Section header with pistachio image */
+    .section-header-with-image {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-header-with-image img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      margin-right: 1rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
   </style>
 </head>
 <body>
@@ -201,9 +226,10 @@
 <!-- Login Screen -->
 <div id="loginScreen" class="login-screen">
   <div class="login-form">
-    <h2 style="text-align: center; color: var(--primary); margin-bottom: 1.5rem;">
-      🥜 Pistachio Production Login
-    </h2>
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <img src="src/assets/icons/pistachio.png" alt="Pistachio" style="width: 64px; height: 64px; margin-bottom: 1rem;" onerror="this.outerHTML='🥜'">
+      <h2 style="color: var(--primary); margin: 0;">Pistachio Production Login</h2>
+    </div>
     <form onsubmit="handleLogin(event)">
       <div class="form-group">
         <label>Username</label>
@@ -228,7 +254,8 @@
   <header class="header">
     <div style="display: flex; align-items: center;">
       <a href="./index.html" class="back-link">← Back to MES</a>
-      <h1>🥜 Pistachio Production Management</h1>
+      <img src="src/assets/icons/pistachio.png" alt="Pistachio" class="pistachio-brand-icon" onerror="this.outerHTML='🥜 '">
+      <h1>Pistachio Production Management</h1>
     </div>
     <div>
       <span id="userDisplay">User</span>
@@ -248,7 +275,10 @@
 
     <!-- Dashboard Section -->
     <section id="dashboard" class="section active">
-      <h2 style="margin-bottom: 1rem;">📊 Production Dashboard</h2>
+      <div class="section-header-with-image">
+        <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
+        <h2>Production Dashboard</h2>
+      </div>
       <div class="stats-grid">
         <div class="stat-card">
           <div>Total Finished (kg)</div>
@@ -268,7 +298,10 @@
 
     <!-- Production Entry Section -->
     <section id="production" class="section">
-      <h2 style="margin-bottom: 1rem;">➕ New Production Entry</h2>
+      <div class="section-header-with-image">
+        <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
+        <h2>New Production Entry</h2>
+      </div>
       
       <div class="warning-box">
         <strong>Note:</strong> Huller Run shows rejects section, Repacking Only hides it.
