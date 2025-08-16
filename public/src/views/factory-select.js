@@ -51,9 +51,11 @@ export function FactorySelectView(mount) {
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
       <div style="text-align:center">
-        <div style="width:64px; height:64px; margin: 0 auto 1rem; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
-          🏭
-        </div>
+        // AFTER:
+<img src="./logo.ico" alt="Al Jameel Logo" 
+     style="width:64px; height:64px; margin-bottom:0.5rem;" 
+     onerror="this.style.display='none'">
+     
         <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
         <p class="section-sub">Pick a workspace to view today's performance.</p>
       </div>
@@ -80,9 +82,10 @@ function renderCards(grid, factories, prod) {
     // Factory icons with clean implementation
     let iconMarkup = '';
     
-    if (f.key === 'Pistachio') {
-      // Use the pistachio image with clean fallback
-      iconMarkup = `<img src="./src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" onerror="this.outerHTML='🥜 '">`;
+    // AFTER:
+if (f.key === 'Pistachio') {
+  // Use the pistachio image
+  iconMarkup = `<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="">`;
     } else if (f.key === 'Walnut') {
       iconMarkup = '🌰 ';
     } else if (f.key === 'Cardamom') {
