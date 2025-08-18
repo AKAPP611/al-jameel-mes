@@ -272,6 +272,7 @@
       <button class="nav-btn" onclick="showSection('production')">New Production</button>
       <button class="nav-btn" onclick="showSection('records')">View Records</button>
       <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
+      <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
     </div>
 
     <!-- Dashboard Section -->
@@ -282,7 +283,7 @@
       </div>
       <div class="stats-grid">
         <div class="stat-card">
-          <div>Total Produced (kg)</div>
+          <div>Total Finished (kg)</div>
           <div class="stat-value" id="kpiFinished">0</div>
         </div>
         <div class="stat-card">
@@ -459,6 +460,82 @@
       </div>
     </section>
 
+    <!-- Maintenance Section -->
+    <section id="maintenance" class="section">
+      <h2 style="margin-bottom: 1rem;">🔧 Equipment Maintenance</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Total Equipment</div>
+          <div class="stat-value" id="totalEquipment">4</div>
+        </div>
+        <div class="stat-card">
+          <div>Operational</div>
+          <div class="stat-value" id="operationalEquipment" style="color: #22c55e;">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Down/Issues</div>
+          <div class="stat-value" id="downEquipment" style="color: #ef4444;">0</div>
+        </div>
+      </div>
+
+      <h3>Equipment Status</h3>
+      <div id="equipmentGrid" class="stats-grid" style="margin-bottom: 2rem;">
+        <!-- Equipment cards will be populated here -->
+      </div>
+
+      <div class="materials-section">
+        <h3>Update Equipment Status</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Equipment</label>
+            <select id="equipmentSelect">
+              <option value="PS-001">PS-001 - Pistachio Sorter 1</option>
+              <option value="PS-002">PS-002 - Pistachio Sorter 2</option>
+              <option value="PS-003">PS-003 - Pistachio Sorter 3</option>
+              <option value="PS-004">PS-004 - Pistachio Sorter 4</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="equipmentStatus">
+              <option value="operational" style="color: #22c55e;">Operational</option>
+              <option value="maintenance" style="color: #f59e0b;">Maintenance Due</option>
+              <option value="attention" style="color: #f97316;">Needs Attention</option>
+              <option value="down" style="color: #ef4444;">Down/Broken</option>
+              <option value="offline" style="color: #6b7280;">Offline</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Problem Description</label>
+            <input id="problemDescription" type="text" placeholder="Describe the issue or maintenance needed">
+          </div>
+          <div class="form-group">
+            <label>Maintenance Cost ($)</label>
+            <input id="maintenanceCost" type="number" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <button onclick="updateEquipmentStatus()">Update Status</button>
+      </div>
+
+      <h3>Maintenance Log</h3>
+      <div style="overflow-x: auto;">
+        <table id="maintenanceTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Equipment</th>
+              <th>Status Change</th>
+              <th>Problem</th>
+              <th>Cost ($)</th>
+              <th>Downtime (hrs)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- Inventory Section -->
     <section id="inventory" class="section">
       <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
@@ -533,11 +610,48 @@
 // Data storage (in-memory)
 let productionRecords = [];
 let inventoryLog = [];
+let maintenanceLog = [];
 let currentInventory = {
   vacuumBags: 0,
   goldenHillBoxes: 0,
   extraBoxes: 0
 };
+
+// Equipment data
+let equipment = [
+  {
+    code: "PS-001",
+    name: "Pistachio Sorter 1",
+    status: "operational",
+    problem: "",
+    lastUpdate: new Date().toISOString(),
+    downtime: 0
+  },
+  {
+    code: "PS-002", 
+    name: "Pistachio Sorter 2",
+    status: "operational",
+    problem: "",
+    lastUpdate: new Date().toISOString(),
+    downtime: 0
+  },
+  {
+    code: "PS-003",
+    name: "Pistachio Sorter 3", 
+    status: "operational",
+    problem: "",
+    lastUpdate: new Date().toISOString(),
+    downtime: 0
+  },
+  {
+    code: "PS-004",
+    name: "Pistachio Sorter 4",
+    status: "operational", 
+    problem: "",
+    lastUpdate: new Date().toISOString(),
+    downtime: 0
+  }
+];
 
 // User management
 const users = { admin: 'admin123', operator: 'op123' };
@@ -716,53 +830,28 @@ function submitProduction() {
   currentInventory.vacuumBags -= totalBagsUsed;
   currentInventory[boxType] -= totalBoxesUsed;
   
-  // Log vacuum bags usage and waste separately
-if (record.materials.bagsUsed > 0) {
-  inventoryLog.push({
-    timestamp: new Date().toISOString(),
-    item: 'Vacuum Bags (10kg)',
-    action: 'remove',
-    quantity: record.materials.bagsUsed,
-    result: currentInventory.vacuumBags + record.materials.bagsWasted, // Before waste deduction
-    notes: 'Production: Used'
-  });
-}
-
-if (record.materials.bagsWasted > 0) {
-  inventoryLog.push({
-    timestamp: new Date().toISOString(),
-    item: 'Vacuum Bags (10kg)',
-    action: 'remove',
-    quantity: record.materials.bagsWasted,
-    result: currentInventory.vacuumBags,
-    notes: 'Production: Wasted'
-  });
-}
-
-// Log boxes usage and waste separately
-const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
-
-if (record.materials.boxesUsed > 0) {
-  inventoryLog.push({
-    timestamp: new Date().toISOString(),
-    item: boxTypeName,
-    action: 'remove',
-    quantity: record.materials.boxesUsed,
-    result: currentInventory[boxType] + record.materials.boxesWasted, // Before waste deduction
-    notes: 'Production: Used'
-  });
-}
-
-if (record.materials.boxesWasted > 0) {
-  inventoryLog.push({
-    timestamp: new Date().toISOString(),
-    item: boxTypeName,
-    action: 'remove',
-    quantity: record.materials.boxesWasted,
-    result: currentInventory[boxType],
-    notes: 'Production: Wasted'
-  });
-}
+  if (totalBagsUsed > 0) {
+    inventoryLog.push({
+      timestamp: new Date().toISOString(),
+      item: 'Vacuum Bags (10kg)',
+      action: 'remove',
+      quantity: totalBagsUsed,
+      result: currentInventory.vacuumBags,
+      notes: 'Auto: Production submission'
+    });
+  }
+  
+  if (totalBoxesUsed > 0) {
+    const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
+    inventoryLog.push({
+      timestamp: new Date().toISOString(),
+      item: boxTypeName,
+      action: 'remove',
+      quantity: totalBoxesUsed,
+      result: currentInventory[boxType],
+      notes: 'Auto: Production submission'
+    });
+  }
   
   alert('Production record submitted successfully!');
   clearForm();
@@ -888,11 +977,127 @@ function renderInventory() {
   });
 }
 
+// Equipment & Maintenance management
+function updateEquipmentStatus() {
+  const equipmentCode = document.getElementById('equipmentSelect').value;
+  const newStatus = document.getElementById('equipmentStatus').value;
+  const problem = document.getElementById('problemDescription').value;
+  const cost = parseFloat(document.getElementById('maintenanceCost').value) || 0;
+  
+  const equipmentItem = equipment.find(e => e.code === equipmentCode);
+  if (!equipmentItem) return;
+  
+  const oldStatus = equipmentItem.status;
+  
+  // Calculate downtime if status changed
+  let downtimeHours = 0;
+  if (oldStatus !== 'operational' && newStatus === 'operational') {
+    // Equipment coming back online
+    const downStart = new Date(equipmentItem.lastUpdate);
+    const now = new Date();
+    downtimeHours = Math.round((now - downStart) / (1000 * 60 * 60) * 10) / 10;
+  }
+  
+  // Update equipment
+  equipmentItem.status = newStatus;
+  equipmentItem.problem = problem;
+  equipmentItem.lastUpdate = new Date().toISOString();
+  if (newStatus === 'operational') {
+    equipmentItem.downtime = 0;
+  }
+  
+  // Log maintenance event
+  maintenanceLog.push({
+    timestamp: new Date().toISOString(),
+    equipment: `${equipmentCode} - ${equipmentItem.name}`,
+    statusChange: `${oldStatus} → ${newStatus}`,
+    problem: problem || 'Status update',
+    cost: cost,
+    downtime: downtimeHours
+  });
+  
+  // Clear form
+  document.getElementById('problemDescription').value = '';
+  document.getElementById('maintenanceCost').value = 0;
+  
+  alert('Equipment status updated successfully!');
+  renderEquipmentGrid();
+  renderMaintenanceLog();
+}
+
+function renderEquipmentGrid() {
+  const grid = document.getElementById('equipmentGrid');
+  
+  const equipmentCards = equipment.map(eq => {
+    const statusColors = {
+      operational: '#22c55e',
+      maintenance: '#f59e0b', 
+      attention: '#f97316',
+      down: '#ef4444',
+      offline: '#6b7280'
+    };
+    
+    const statusLabels = {
+      operational: 'Operational',
+      maintenance: 'Maintenance Due',
+      attention: 'Needs Attention', 
+      down: 'Down/Broken',
+      offline: 'Offline'
+    };
+    
+    return `
+      <div class="stat-card" style="border-left: 5px solid ${statusColors[eq.status]};">
+        <div style="font-weight: bold; font-size: 1.1rem;">${eq.code}</div>
+        <div style="margin: 0.5rem 0; color: ${statusColors[eq.status]}; font-weight: 600;">
+          ${statusLabels[eq.status]}
+        </div>
+        <div style="font-size: 0.9rem; color: #666;">
+          ${eq.name}
+        </div>
+        ${eq.problem ? `<div style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">${eq.problem}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  
+  grid.innerHTML = equipmentCards;
+  
+  // Update statistics
+  const operational = equipment.filter(e => e.status === 'operational').length;
+  const down = equipment.filter(e => ['down', 'attention', 'maintenance'].includes(e.status)).length;
+  
+  document.getElementById('operationalEquipment').textContent = operational;
+  document.getElementById('downEquipment').textContent = down;
+}
+
+function renderMaintenanceLog() {
+  const tbody = document.querySelector('#maintenanceTable tbody');
+  tbody.innerHTML = '';
+  
+  maintenanceLog.slice().reverse().forEach(log => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.equipment}</td>
+      <td>${log.statusChange}</td>
+      <td>${log.problem}</td>
+      <td>${log.cost > 0 ? '
+</script>
+
+</body>
+</html> + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.downtime > 0 ? log.downtime : '-'}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
 // Initialize
 window.addEventListener('load', () => {
   updateFormVisibility();
   updateSummary();
   renderInventory();
+  renderEquipmentGrid();
+  renderMaintenanceLog();
 });
 </script>
 
