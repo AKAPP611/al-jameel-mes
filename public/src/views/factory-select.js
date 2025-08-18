@@ -20,12 +20,15 @@ function Progress({ value = 0 }) {
   `;
 }
 
-function Card({ title, subtitle, content, href = '#/' }) {
+function Card({ icon, title, subtitle, content, href = '#/' }) {
   return `
     <article class="card factory-card" role="listitem">
       <a class="card-link" href="${href}" style="display:block; color:inherit; text-decoration:none" aria-label="${title}">
         <div>
-          <div class="title">${title}</div>
+          <div class="title">
+            ${icon || ''}
+            <span>${title}</span>
+          </div>
           <div class="subtitle">${subtitle || ''}</div>
         </div>
         <div>${content || ''}</div>
@@ -80,15 +83,15 @@ function renderCards(grid, factories, prod) {
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
     
     // Factory icons
-let iconMarkup = '';
+    let iconMarkup = '';
 
-if (f.key === 'Pistachio') {
-  iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt=""> ';
-} else if (f.key === 'Walnut') {
-  iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt=""> ';
-} else if (f.key === 'Cardamom') {
-  iconMarkup = '🌿 ';
-}
+    if (f.key === 'Pistachio') {
+      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="">';
+    } else if (f.key === 'Walnut') {
+      iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="">';
+    } else if (f.key === 'Cardamom') {
+      iconMarkup = '🌿';
+    }
 
     // Navigation links
     const href = f.key === 'Pistachio'
@@ -96,7 +99,8 @@ if (f.key === 'Pistachio') {
       : `#/dashboard?factory=${encodeURIComponent(f.key)}`;
 
     return Card({
-      title: `${iconMarkup} ${f.name}`,
+      icon: iconMarkup,
+      title: f.name,
       subtitle: `${getText('today')}: ${p.actualKg.toLocaleString()} kg`,
       href,
       content: `
