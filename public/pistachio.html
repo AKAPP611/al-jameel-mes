@@ -1080,11 +1080,7 @@ function renderMaintenanceLog() {
       <td>${log.equipment}</td>
       <td>${log.statusChange}</td>
       <td>${log.problem}</td>
-      <td>${log.cost > 0 ? '
-</script>
-
-</body>
-</html> + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
       <td>${log.downtime > 0 ? log.downtime : '-'}</td>
     `;
     tbody.appendChild(row);
