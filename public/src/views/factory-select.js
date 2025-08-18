@@ -96,7 +96,7 @@ if (f.key === 'Pistachio') {
       : `#/dashboard?factory=${encodeURIComponent(f.key)}`;
 
     return Card({
-      title: iconMarkup + f.name,
+      title: `${iconMarkup} ${f.name}`,
       subtitle: `${getText('today')}: ${p.actualKg.toLocaleString()} kg`,
       href,
       content: `
