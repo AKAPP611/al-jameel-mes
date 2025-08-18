@@ -86,12 +86,12 @@ function renderCards(grid, factories, prod) {
     let iconMarkup = '';
 
     if (f.key === 'Pistachio') {
-      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="">';
-    } else if (f.key === 'Walnut') {
-      iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="">';
-    } else if (f.key === 'Cardamom') {
-      iconMarkup = '🌿';
-    }
+  iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 32px; height: 32px; margin-right: 8px;">';
+} else if (f.key === 'Walnut') {
+  iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="" style="width: 32px; height: 32px; margin-right: 8px;">';
+} else if (f.key === 'Cardamom') {
+  iconMarkup = '🌿';
+}
 
     // Navigation links
     const href = f.key === 'Pistachio'
