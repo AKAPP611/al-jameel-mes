@@ -83,7 +83,7 @@ function renderCards(grid, factories, prod) {
 let iconMarkup = '';
 
 if (f.key === 'Pistachio') {
-  iconMarkup = `<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="">`;
+  iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="">';
 } else if (f.key === 'Walnut') {
   iconMarkup = '🌰 ';
 } else if (f.key === 'Cardamom') {
