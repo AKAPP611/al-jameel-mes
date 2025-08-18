@@ -79,18 +79,16 @@ function renderCards(grid, factories, prod) {
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
     
-    // Factory icons with clean implementation
-    let iconMarkup = '';
-    
-    // AFTER:
+    // Factory icons
+let iconMarkup = '';
+
 if (f.key === 'Pistachio') {
-  // Use the pistachio image
   iconMarkup = `<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="">`;
-    } else if (f.key === 'Walnut') {
-      iconMarkup = '🌰 ';
-    } else if (f.key === 'Cardamom') {
-      iconMarkup = '🌿 ';
-    }
+} else if (f.key === 'Walnut') {
+  iconMarkup = '🌰 ';
+} else if (f.key === 'Cardamom') {
+  iconMarkup = '🌿 ';
+}
 
     // Navigation links
     const href = f.key === 'Pistachio'
