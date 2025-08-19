@@ -467,19 +467,71 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div>Total Equipment</div>
-          <div class="stat-value" id="totalEquipment">4</div>
+          <div class="stat-value" id="totalEquipment">65</div>
         </div>
         <div class="stat-card">
           <div>Operational</div>
           <div class="stat-value" id="operationalEquipment" style="color: #22c55e;">0</div>
         </div>
         <div class="stat-card">
-          <div>Down/Issues</div>
-          <div class="stat-value" id="downEquipment" style="color: #ef4444;">0</div>
+          <div>Critical Down (P1-3)</div>
+          <div class="stat-value" id="criticalDown" style="color: #ef4444;">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Minor Issues (P5+)</div>
+          <div class="stat-value" id="minorIssues" style="color: #f59e0b;">0</div>
         </div>
       </div>
 
-      <h3>Equipment Status</h3>
+      <!-- Filters -->
+      <div class="materials-section" style="margin-bottom: 1rem;">
+        <h3>Equipment Filters</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Priority Level</label>
+            <select id="priorityFilter" onchange="filterEquipment()">
+              <option value="all">All Priorities</option>
+              <option value="1">Priority 1 (Critical)</option>
+              <option value="3">Priority 3 (High)</option>
+              <option value="5">Priority 5 (Medium)</option>
+              <option value="7">Priority 7 (Low)</option>
+              <option value="8">Priority 8 (Automation)</option>
+              <option value="10">Priority 10 (Minimal)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Equipment Type</label>
+            <select id="typeFilter" onchange="filterEquipment()">
+              <option value="all">All Types</option>
+              <option value="conveyor">Conveyors</option>
+              <option value="elevator">Elevators</option>
+              <option value="sorter">Sorters</option>
+              <option value="bin">Bins/Storage</option>
+              <option value="processing">Processing</option>
+              <option value="automation">Automation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="statusFilter" onchange="filterEquipment()">
+              <option value="all">All Status</option>
+              <option value="operational">Operational Only</option>
+              <option value="issues">Issues Only</option>
+              <option value="down">Down/Broken Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sort By</label>
+            <select id="sortBy" onchange="filterEquipment()">
+              <option value="priority">Priority Level</option>
+              <option value="code">Equipment Code</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <h3>Equipment Status (<span id="shownCount">65</span> shown)</h3>
       <div id="equipmentGrid" class="stats-grid" style="margin-bottom: 2rem;">
         <!-- Equipment cards will be populated here -->
       </div>
@@ -490,10 +542,71 @@
           <div class="form-group">
             <label>Equipment</label>
             <select id="equipmentSelect">
-              <option value="PS-001">PS-001 - Pistachio Sorter 1</option>
-              <option value="PS-002">PS-002 - Pistachio Sorter 2</option>
-              <option value="PS-003">PS-003 - Pistachio Sorter 3</option>
-              <option value="PS-004">PS-004 - Pistachio Sorter 4</option>
+              <option value="Ton">Ton - Ton bag opener (P1)</option>
+              <option value="E1">E1 - Z elevator (P1)</option>
+              <option value="E2">E2 - Z elevator (P1)</option>
+              <option value="Bin1">Bin1 - Material silo (P1)</option>
+              <option value="E3">E3 - Z elevator (P1)</option>
+              <option value="C1">C1 - Conveyor (P1)</option>
+              <option value="C2">C2 - Conveyor(LR) (P1)</option>
+              <option value="C3">C3 - Conveyor(LR) (P1)</option>
+              <option value="C4">C4 - Conveyor(LR) (P3)</option>
+              <option value="C5">C5 - Conveyor(LR) (P3)</option>
+              <option value="C6">C6 - Conveyor(LR) (P3)</option>
+              <option value="C7">C7 - Conveyor(LR) (P3)</option>
+              <option value="Sor1">Sor1 - Sorter (P3)</option>
+              <option value="Sor2">Sor2 - Sorter (P3)</option>
+              <option value="Sor3">Sor3 - Sorter (P3)</option>
+              <option value="Sor4">Sor4 - Sorter (P3)</option>
+              <option value="C8">C8 - Conveyor (P1)</option>
+              <option value="C9">C9 - Conveyor (P1)</option>
+              <option value="C10">C10 - Conveyor (P5)</option>
+              <option value="C11">C11 - Conveyor (P5)</option>
+              <option value="C12">C12 - Conveyor (P5)</option>
+              <option value="C13">C13 - Conveyor (P5)</option>
+              <option value="C14">C14 - Conveyor (P5)</option>
+              <option value="C15">C15 - Conveyor (P5)</option>
+              <option value="C16">C16 - Conveyor (P5)</option>
+              <option value="C17">C17 - Conveyor (P5)</option>
+              <option value="C18">C18 - Conveyor (P5)</option>
+              <option value="C19">C19 - Conveyor (P5)</option>
+              <option value="C20">C20 - Conveyor (P5)</option>
+              <option value="C21">C21 - Conveyor (P5)</option>
+              <option value="C22">C22 - Conveyor (P5)</option>
+              <option value="C23">C23 - Conveyor (P5)</option>
+              <option value="Bin2">Bin2 - Product bin (P7)</option>
+              <option value="Bin3">Bin3 - By product bin (P7)</option>
+              <option value="Bin4">Bin4 - By product bin (P7)</option>
+              <option value="Bin5">Bin5 - By product bin (P7)</option>
+              <option value="Bin6">Bin6 - By product bin (P7)</option>
+              <option value="Bin7">Bin7 - By product bin (P7)</option>
+              <option value="Bin8">Bin8 - By product bin (P7)</option>
+              <option value="Bin9">Bin9 - By product bin (P7)</option>
+              <option value="C24">C24 - Conveyor (P5)</option>
+              <option value="C25">C25 - Conveyor (P5)</option>
+              <option value="C26">C26 - Conveyor (P5)</option>
+              <option value="C27">C27 - Conveyor (P5)</option>
+              <option value="C28">C28 - Conveyor (P5)</option>
+              <option value="C29">C29 - Conveyor (P5)</option>
+              <option value="E4">E4 - Z elevator (P1)</option>
+              <option value="E5">E5 - Z elevator (P7)</option>
+              <option value="E6">E6 - Z elevator (P3)</option>
+              <option value="E7">E7 - Z elevator (P3)</option>
+              <option value="Bin10">Bin10 - Sizing bin (P10)</option>
+              <option value="Bin11">Bin11 - Sizing bin (P5)</option>
+              <option value="Bin12">Bin12 - Sizing bin (P5)</option>
+              <option value="C30">C30 - Conveyor (P7)</option>
+              <option value="C31">C31 - Conveyor (P7)</option>
+              <option value="E8">E8 - Z elevator (P3)</option>
+              <option value="E9">E9 - Z elevator (P3)</option>
+              <option value="E10">E10 - Z elevator (P10)</option>
+              <option value="Pac-1">Pac-1 - Packing and stacking unit (P3)</option>
+              <option value="Pac-2">Pac-2 - Packing and stacking unit (P3)</option>
+              <option value="Wra">Wra - Frame wrapper (P5)</option>
+              <option value="PRE-CL">PRE-CL - Pre-Cleaner (P1)</option>
+              <option value="AGV-1">AGV-1 - AVG Robot (P8)</option>
+              <option value="AGV-2">AGV-2 - AVG Robot (P8)</option>
+              <option value="SIZE">SIZE - Sizer Machine (P3)</option>
             </select>
           </div>
           <div class="form-group">
@@ -525,6 +638,7 @@
             <tr>
               <th>Timestamp</th>
               <th>Equipment</th>
+              <th>Priority</th>
               <th>Status Change</th>
               <th>Problem</th>
               <th>Cost ($)</th>
@@ -617,40 +731,73 @@ let currentInventory = {
   extraBoxes: 0
 };
 
-// Equipment data
+// Complete Equipment data with priorities
 let equipment = [
-  {
-    code: "PS-001",
-    name: "Pistachio Sorter 1",
-    status: "operational",
-    problem: "",
-    lastUpdate: new Date().toISOString(),
-    downtime: 0
-  },
-  {
-    code: "PS-002", 
-    name: "Pistachio Sorter 2",
-    status: "operational",
-    problem: "",
-    lastUpdate: new Date().toISOString(),
-    downtime: 0
-  },
-  {
-    code: "PS-003",
-    name: "Pistachio Sorter 3", 
-    status: "operational",
-    problem: "",
-    lastUpdate: new Date().toISOString(),
-    downtime: 0
-  },
-  {
-    code: "PS-004",
-    name: "Pistachio Sorter 4",
-    status: "operational", 
-    problem: "",
-    lastUpdate: new Date().toISOString(),
-    downtime: 0
-  }
+  {code: "Ton", name: "Ton bag opener", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E1", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E2", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin1", name: "Material silo", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E3", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C1", name: "Conveyor", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C2", name: "Conveyor(LR)", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C3", name: "Conveyor(LR)", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C4", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C5", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C6", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C7", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor1", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor2", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor3", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor4", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C8", name: "Conveyor", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C9", name: "Conveyor", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C10", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C11", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C12", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C13", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C14", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C15", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C16", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C17", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C18", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C19", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C20", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C21", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C22", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C23", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin2", name: "Product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin3", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin4", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin5", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin6", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin7", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin8", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin9", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C24", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C25", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C26", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C27", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C28", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C29", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E4", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E5", name: "Z elevator", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E6", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E7", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin10", name: "Sizing bin", priority: 10, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin11", name: "Sizing bin", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin12", name: "Sizing bin", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C30", name: "Conveyor", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C31", name: "Conveyor", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E8", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E9", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E10", name: "Z elevator", priority: 10, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Pac-1", name: "Packing and stacking unit", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Pac-2", name: "Packing and stacking unit", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Wra", name: "Frame wrapper", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "PRE-CL", name: "Pre-Cleaner", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "AGV-1", name: "AVG Robot", priority: 8, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "AGV-2", name: "AVG Robot", priority: 8, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "SIZE", name: "Sizer Machine", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0}
 ];
 
 // User management
@@ -1080,7 +1227,11 @@ function renderMaintenanceLog() {
       <td>${log.equipment}</td>
       <td>${log.statusChange}</td>
       <td>${log.problem}</td>
-      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.cost > 0 ? '
+</script>
+
+</body>
+</html> + log.cost.toFixed(2) : '-'}</td>
       <td>${log.downtime > 0 ? log.downtime : '-'}</td>
     `;
     tbody.appendChild(row);
