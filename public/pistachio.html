@@ -1154,14 +1154,15 @@ function updateEquipmentStatus() {
   }
   
   // Log maintenance event
-  maintenanceLog.push({
-    timestamp: new Date().toISOString(),
-    equipment: `${equipmentCode} - ${equipmentItem.name}`,
-    statusChange: `${oldStatus} → ${newStatus}`,
-    problem: problem || 'Status update',
-    cost: cost,
-    downtime: downtimeHours
-  });
+ maintenanceLog.push({
+  timestamp: new Date().toISOString(),
+  equipment: `${equipmentCode} - ${equipmentItem.name}`,
+  priority: equipmentItem.priority,
+  statusChange: `${oldStatus} → ${newStatus}`,
+  problem: problem || 'Status update',
+  cost: cost,
+  downtime: downtimeHours
+});
   
   // Clear form
   document.getElementById('problemDescription').value = '';
@@ -1225,13 +1226,14 @@ function renderMaintenanceLog() {
   maintenanceLog.slice().reverse().forEach(log => {
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td>${new Date(log.timestamp).toLocaleString()}</td>
-      <td>${log.equipment}</td>
-      <td>${log.statusChange}</td>
-      <td>${log.problem}</td>
-      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
-      <td>${log.downtime > 0 ? log.downtime : '-'}</td>
-    `;
+  <td>${new Date(log.timestamp).toLocaleString()}</td>
+  <td>${log.equipment}</td>
+  <td style="color: ${log.priority <= 3 ? '#ef4444' : '#22c55e'}; font-weight: bold;">P${log.priority || 'N/A'}</td>
+  <td>${log.statusChange}</td>
+  <td>${log.problem}</td>
+  <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
+  <td>${log.downtime > 0 ? log.downtime : '-'}</td>
+`;
     tbody.appendChild(row);
   });
 }
