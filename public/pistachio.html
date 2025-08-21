@@ -1177,7 +1177,97 @@ function updateEquipmentStatus() {
   renderMaintenanceLog();
 }
 function filterEquipment() {
-  renderEquipmentGrid();
+  const priorityFilter = document.getElementById('priorityFilter').value;
+  const typeFilter = document.getElementById('typeFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+  const sortBy = document.getElementById('sortBy').value;
+  
+  // Start with all equipment
+  let filteredEquipment = [...equipment];
+  
+  // Apply priority filter
+  if (priorityFilter !== 'all') {
+    filteredEquipment = filteredEquipment.filter(eq => eq.priority == priorityFilter);
+  }
+  
+  // Apply type filter
+  if (typeFilter !== 'all') {
+    filteredEquipment = filteredEquipment.filter(eq => {
+      switch(typeFilter) {
+        case 'conveyor': return eq.code.startsWith('C');
+        case 'elevator': return eq.code.startsWith('E');
+        case 'sorter': return eq.code.startsWith('Sor');
+        case 'bin': return eq.code.startsWith('Bin');
+        case 'processing': return ['SIZE', 'PRE-CL', 'Wra', 'Ton'].includes(eq.code);
+        case 'automation': return eq.code.startsWith('AGV');
+        default: return true;
+      }
+    });
+  }
+  
+  // Apply status filter
+  if (statusFilter !== 'all') {
+    if (statusFilter === 'operational') {
+      filteredEquipment = filteredEquipment.filter(eq => eq.status === 'operational');
+    } else if (statusFilter === 'issues') {
+      filteredEquipment = filteredEquipment.filter(eq => ['maintenance', 'attention'].includes(eq.status));
+    } else if (statusFilter === 'down') {
+      filteredEquipment = filteredEquipment.filter(eq => ['down', 'offline'].includes(eq.status));
+    }
+  }
+  
+  // Apply sorting
+  filteredEquipment.sort((a, b) => {
+    switch(sortBy) {
+      case 'priority': return a.priority - b.priority;
+      case 'code': return a.code.localeCompare(b.code);
+      case 'status': 
+        const statusOrder = {operational: 0, maintenance: 1, attention: 2, down: 3, offline: 4};
+        return statusOrder[a.status] - statusOrder[b.status];
+      default: return 0;
+    }
+  });
+  
+  renderFilteredEquipment(filteredEquipment);
+}
+
+function renderFilteredEquipment(filteredList) {
+  const grid = document.getElementById('equipmentGrid');
+  
+  const equipmentCards = filteredList.map(eq => {
+    const statusColors = {
+      operational: '#22c55e',
+      maintenance: '#f59e0b', 
+      attention: '#f97316',
+      down: '#ef4444',
+      offline: '#6b7280'
+    };
+    
+    const statusLabels = {
+      operational: 'Operational',
+      maintenance: 'Maintenance Due',
+      attention: 'Needs Attention', 
+      down: 'Down/Broken',
+      offline: 'Offline'
+    };
+    
+    return `
+      <div class="stat-card" style="border-left: 5px solid ${statusColors[eq.status]};">
+        <div style="font-weight: bold; font-size: 1.1rem;">${eq.code}</div>
+        <div style="margin: 0.5rem 0; color: ${statusColors[eq.status]}; font-weight: 600;">
+          ${statusLabels[eq.status]}
+        </div>
+        <div style="font-size: 0.9rem; color: #666;">
+          ${eq.name}
+        </div>
+        <div style="font-size: 0.8rem; color: #666;">Priority ${eq.priority}</div>
+        ${eq.problem ? `<div style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">${eq.problem}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  
+  grid.innerHTML = equipmentCards;
+  document.getElementById('shownCount').textContent = filteredList.length;
 }
 function renderEquipmentGrid() {
   const grid = document.getElementById('equipmentGrid');
