@@ -520,14 +520,18 @@
               <option value="down">Down/Broken Only</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Sort By</label>
-            <select id="sortBy" onchange="filterEquipment()">
-              <option value="priority">Priority Level</option>
-              <option value="code">Equipment Code</option>
-              <option value="status">Status</option>
-            </select>
-          </div>
+         <div class="form-group">
+  <label>Sort By</label>
+  <select id="sortBy">
+    <option value="priority">Priority Level</option>
+    <option value="code">Equipment Code</option>
+    <option value="status">Status</option>
+  </select>
+</div>
+<div class="form-group">
+  <label>&nbsp;</label>
+  <button onclick="filterEquipment()" style="width: 100%;">Apply Filters</button>
+</div>
         </div>
       </div>
 
