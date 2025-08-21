@@ -1211,12 +1211,14 @@ function renderEquipmentGrid() {
   
   grid.innerHTML = equipmentCards;
   
-  // Update statistics
+  // Update statistics to match HTML element IDs
   const operational = equipment.filter(e => e.status === 'operational').length;
-  const down = equipment.filter(e => ['down', 'attention', 'maintenance'].includes(e.status)).length;
+  const criticalDown = equipment.filter(e => e.priority <= 3 && e.status !== 'operational').length;
+  const minorIssues = equipment.filter(e => e.priority >= 5 && e.status !== 'operational').length;
   
   document.getElementById('operationalEquipment').textContent = operational;
-  document.getElementById('downEquipment').textContent = down;
+  document.getElementById('criticalDown').textContent = criticalDown;
+  document.getElementById('minorIssues').textContent = minorIssues;
 }
 
 function renderMaintenanceLog() {
