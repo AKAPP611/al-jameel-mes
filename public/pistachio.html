@@ -636,6 +636,23 @@
       </div>
 
       <h3>Maintenance Log</h3>
+      <div class="materials-section" style="margin-bottom: 1rem;">
+  <h4>Export Maintenance Cost Report</h4>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>From Date</label>
+      <input id="exportFromDate" type="date">
+    </div>
+    <div class="form-group">
+      <label>To Date</label>
+      <input id="exportToDate" type="date">
+    </div>
+    <div class="form-group">
+      <label>&nbsp;</label>
+      <button onclick="exportMaintenanceReport()" style="width: 100%;">Export Cost Report</button>
+    </div>
+  </div>
+</div>
       <div style="overflow-x: auto;">
         <table id="maintenanceTable">
           <thead>
@@ -1341,7 +1358,151 @@ window.addEventListener('load', () => {
   renderInventory();
   renderEquipmentGrid();
   renderMaintenanceLog();
+  // Set default export dates (last 30 days)
+const today = new Date();
+const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+
+document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
+document.getElementById('exportFromDate').value = monthAgo.toISOString().split('T')[0];
 });
+  function exportMaintenanceReport() {
+  const fromDate = document.getElementById('exportFromDate').value;
+  const toDate = document.getElementById('exportToDate').value;
+  
+  if (!fromDate || !toDate) {
+    alert('Please select both From and To dates');
+    return;
+  }
+  
+  // Filter maintenance logs by date range
+  const filtered = maintenanceLog.filter(log => {
+    const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+    return logDate >= fromDate && logDate <= toDate;
+  });
+  
+  if (filtered.length === 0) {
+    alert('No maintenance records found in the selected date range');
+    return;
+  }
+  
+  // Group by equipment and calculate totals
+  const equipmentCosts = {};
+  filtered.forEach(log => {
+    const equipment = log.equipment;
+    if (!equipmentCosts[equipment]) {
+      equipmentCosts[equipment] = {
+        totalCost: 0,
+        activities: [],
+        priority: log.priority || 'N/A'
+      };
+    }
+    equipmentCosts[equipment].totalCost += log.cost || 0;
+    if (log.cost > 0) {
+      equipmentCosts[equipment].activities.push({
+        date: new Date(log.timestamp).toLocaleDateString(),
+        cost: log.cost,
+        problem: log.problem
+      });
+    }
+  });
+  
+  // Generate report HTML
+  let reportHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Maintenance Cost Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .summary { margin-bottom: 20px; padding: 15px; background: #f5f5f5; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #a32034; color: white; }
+        .equipment-section { margin-bottom: 25px; }
+        .equipment-title { font-weight: bold; font-size: 1.1em; color: #a32034; }
+        .total-cost { font-weight: bold; color: #a32034; }
+        @media print { body { margin: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Al Jameel MES - Maintenance Cost Report</h1>
+        <h3>Pistachio Production Line</h3>
+        <p>Report Period: ${new Date(fromDate).toLocaleDateString()} to ${new Date(toDate).toLocaleDateString()}</p>
+        <p>Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+      </div>
+  `;
+  
+  // Calculate grand total
+  const grandTotal = Object.values(equipmentCosts).reduce((sum, eq) => sum + eq.totalCost, 0);
+  
+  reportHTML += `
+    <div class="summary">
+      <h3>Summary</h3>
+      <p><strong>Total Equipment with Maintenance:</strong> ${Object.keys(equipmentCosts).length}</p>
+      <p><strong>Total Maintenance Cost:</strong> $${grandTotal.toFixed(2)}</p>
+      <p><strong>Total Activities:</strong> ${filtered.filter(log => log.cost > 0).length}</p>
+    </div>
+  `;
+  
+  // Equipment details
+  reportHTML += `<h3>Equipment Breakdown</h3>`;
+  
+  // Sort by total cost (highest first)
+  const sortedEquipment = Object.entries(equipmentCosts).sort((a, b) => b[1].totalCost - a[1].totalCost);
+  
+  sortedEquipment.forEach(([equipment, data]) => {
+    if (data.totalCost > 0) {
+      reportHTML += `
+        <div class="equipment-section">
+          <div class="equipment-title">${equipment} (Priority ${data.priority})</div>
+          <div class="total-cost">Total Cost: $${data.totalCost.toFixed(2)}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Cost</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      data.activities.forEach(activity => {
+        reportHTML += `
+          <tr>
+            <td>${activity.date}</td>
+            <td>$${activity.cost.toFixed(2)}</td>
+            <td>${activity.problem}</td>
+          </tr>
+        `;
+      });
+      
+      reportHTML += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  });
+  
+  reportHTML += `
+    </body>
+    </html>
+  `;
+  
+  // Open in new window for printing
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(reportHTML);
+  printWindow.document.close();
+  printWindow.focus();
+  
+  // Auto-trigger print dialog
+  setTimeout(() => {
+    printWindow.print();
+  }, 250);
+}
 </script>
 
 </body>
