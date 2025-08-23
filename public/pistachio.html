@@ -741,19 +741,262 @@
   </div>
 </div>
 
-<script>
-// Data storage (in-memory)
-let productionRecords = [];
-let inventoryLog = [];
-let maintenanceLog = [];
-let currentInventory = {
-  vacuumBags: 0,
-  goldenHillBoxes: 0,
-  extraBoxes: 0
+// ===== STATE MANAGEMENT =====
+class AppState {
+  constructor() {
+    this.data = {
+      productionRecords: [],
+      inventoryLog: [],
+      maintenanceLog: [],
+      currentInventory: {
+        vacuumBags: 0,
+        goldenHillBoxes: 0,
+        extraBoxes: 0
+      },
+      equipment: [], // Will be populated below
+      currentUser: null
+    };
+    this.listeners = {};
+    this.loadFromStorage();
+  }
+
+  subscribe(key, callback) {
+    if (!this.listeners[key]) {
+      this.listeners[key] = [];
+    }
+    this.listeners[key].push(callback);
+  }
+
+  setState(key, value) {
+    this.data[key] = value;
+    this.saveToStorage();
+    this.notify(key, value);
+  }
+
+  getState(key) {
+    return this.data[key];
+  }
+
+  notify(key, value) {
+    if (this.listeners[key]) {
+      this.listeners[key].forEach(callback => callback(value));
+    }
+  }
+
+  addToArray(key, item) {
+    if (Array.isArray(this.data[key])) {
+      this.data[key].push(item);
+      this.saveToStorage();
+      this.notify(key, this.data[key]);
+    }
+  }
+
+  updateInventory(item, action, quantity) {
+    const current = this.data.currentInventory[item] || 0;
+    let newValue;
+
+    switch(action) {
+      case 'add':
+        newValue = current + quantity;
+        break;
+      case 'remove':
+        newValue = Math.max(0, current - quantity);
+        break;
+      case 'set':
+        newValue = Math.max(0, quantity);
+        break;
+      default:
+        return false;
+    }
+
+    this.data.currentInventory[item] = newValue;
+    this.saveToStorage();
+    this.notify('currentInventory', this.data.currentInventory);
+    return true;
+  }
+
+  saveToStorage() {
+    try {
+      localStorage.setItem('pistachio_mes_data', JSON.stringify(this.data));
+    } catch (e) {
+      console.warn('Could not save to localStorage:', e);
+    }
+  }
+
+  loadFromStorage() {
+    try {
+      const saved = localStorage.getItem('pistachio_mes_data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        this.data = { ...this.data, ...parsed };
+      }
+    } catch (e) {
+      console.warn('Could not load from localStorage:', e);
+    }
+  }
+}
+
+// ===== VALIDATION SYSTEM =====
+class FormValidator {
+  constructor() {
+    this.rules = {};
+    this.setupStyles();
+  }
+
+  setupStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .form-field-error {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+      }
+      .form-field-success {
+        border-color: #22c55e !important;
+      }
+      .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+      }
+      .form-group.has-error label {
+        color: #ef4444;
+      }
+      .success-toast, .error-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        z-index: 1001;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+      .success-toast {
+        background: #22c55e;
+      }
+      .error-toast {
+        background: #ef4444;
+      }
+      .success-toast.show, .error-toast.show {
+        transform: translateX(0);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  addRule(fieldId, validator, message) {
+    if (!this.rules[fieldId]) {
+      this.rules[fieldId] = [];
+    }
+    this.rules[fieldId].push({ validator, message });
+  }
+
+  validateField(fieldId) {
+    const field = document.getElementById(fieldId);
+    const rules = this.rules[fieldId];
+    
+    if (!field || !rules) return true;
+
+    this.clearFieldError(fieldId);
+    
+    for (const rule of rules) {
+      if (!rule.validator(field.value, field)) {
+        this.showFieldError(fieldId, rule.message);
+        return false;
+      }
+    }
+    
+    this.showFieldSuccess(fieldId);
+    return true;
+  }
+
+  validateForm() {
+    let isValid = true;
+    const fieldIds = Object.keys(this.rules);
+    
+    fieldIds.forEach(fieldId => {
+      if (!this.validateField(fieldId)) {
+        isValid = false;
+      }
+    });
+    
+    return isValid;
+  }
+
+  showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.add('form-field-error');
+    field.classList.remove('form-field-success');
+    formGroup.classList.add('has-error');
+    
+    const errorMsg = document.createElement('span');
+    errorMsg.className = 'error-message';
+    errorMsg.textContent = message;
+    formGroup.appendChild(errorMsg);
+  }
+
+  showFieldSuccess(fieldId) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.remove('form-field-error');
+    field.classList.add('form-field-success');
+    formGroup.classList.remove('has-error');
+  }
+
+  clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.remove('form-field-error', 'form-field-success');
+    formGroup.classList.remove('has-error');
+    
+    const errorMsg = formGroup.querySelector('.error-message');
+    if (errorMsg) {
+      errorMsg.remove();
+    }
+  }
+
+  showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `${type}-toast`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+}
+
+// ===== VALIDATION RULES =====
+const ValidationRules = {
+  required: (value) => value.trim() !== '',
+  positiveNumber: (value) => !isNaN(value) && parseFloat(value) >= 0,
+  range: (min, max) => (value) => {
+    const num = parseFloat(value);
+    return !isNaN(num) && num >= min && num <= max;
+  },
+  lotNumberFormat: (value) => {
+    return /^[A-Z]{2}-\d{6}-\d{2}$/.test(value);
+  }
 };
 
-// Complete Equipment data with priorities
-let equipment = [
+// ===== INITIALIZE GLOBAL OBJECTS =====
+window.appState = new AppState();
+window.formValidator = new FormValidator();
+
+// ===== ORIGINAL DATA WITH STATE INTEGRATION =====
+// Equipment data
+const equipmentData = [
   {code: "Ton", name: "Ton bag opener", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
   {code: "E1", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
   {code: "E2", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
@@ -821,9 +1064,26 @@ let equipment = [
   {code: "SIZE", name: "Sizer Machine", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0}
 ];
 
+// Initialize equipment data in state
+window.appState.setState('equipment', equipmentData);
+
 // User management
 const users = { admin: 'admin123', operator: 'op123' };
-let currentUser = null;
+
+// ===== UPDATED FUNCTIONS WITH VALIDATION =====
+function setupProductionValidation() {
+  const validator = window.formValidator;
+  
+  validator.addRule('rawInput', ValidationRules.positiveNumber, 'Raw input must be a positive number');
+  validator.addRule('rawInput', ValidationRules.range(0, 10000), 'Raw input must be between 0-10,000 kg');
+  validator.addRule('bags1821', ValidationRules.positiveNumber, '18-21 size must be a positive number');
+  validator.addRule('bags2125', ValidationRules.positiveNumber, '21-25 size must be a positive number');
+  validator.addRule('lotNo', ValidationRules.required, 'Lot number is required');
+  validator.addRule('lotNo', ValidationRules.lotNumberFormat, 'Lot format should be XX-YYMMDD-NN (e.g., GH-240315-01)');
+  validator.addRule('bagsUsed', ValidationRules.positiveNumber, 'Bags used must be a positive number');
+}
+
+// ===== MODIFIED ORIGINAL FUNCTIONS =====
 
 // Login handling
 function handleLogin(event) {
@@ -832,20 +1092,21 @@ function handleLogin(event) {
   const password = document.getElementById('loginPassword').value;
   
   if (users[username] && users[username] === password) {
-    currentUser = username;
+    window.appState.setState('currentUser', username);
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('userDisplay').textContent = username;
     updateDashboard();
     renderRecords();
     renderInventory();
+    renderEquipmentGrid();
   } else {
-    alert('Invalid credentials');
+    window.formValidator.showToast('Invalid credentials', 'error');
   }
 }
 
 function logout() {
-  currentUser = null;
+  window.appState.setState('currentUser', null);
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('mainApp').style.display = 'none';
 }
@@ -918,20 +1179,24 @@ function clearForm() {
 }
 
 function submitProduction() {
+  // Validate form first
+  if (!window.formValidator.validateForm()) {
+    window.formValidator.showToast('Please fix the errors before submitting', 'error');
+    return;
+  }
+
   const bags1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const bags2125 = parseInt(document.getElementById('bags2125').value) || 0;
   const totalBags = bags1821 + bags2125;
   
   if (totalBags === 0) {
-    alert('Please enter final goods quantities');
+    window.formValidator.showToast('Please enter finished goods quantities', 'error');
     return;
   }
   
-  // Get the brand to determine which box type to use
   const brand = document.getElementById('brand').value;
   const boxType = brand === 'Golden Hill' ? 'goldenHillBoxes' : 'extraBoxes';
   
-  // Inventory validation
   const bagsUsed = parseInt(document.getElementById('bagsUsed').value) || 0;
   const boxesUsed = parseInt(document.getElementById('boxesUsed').value) || 0;
   const bagsWasted = parseInt(document.getElementById('bagsWasted').value) || 0;
@@ -940,15 +1205,16 @@ function submitProduction() {
   const totalBagsNeeded = bagsUsed + bagsWasted;
   const totalBoxesNeeded = boxesUsed + boxesWasted;
   
-  // Check if sufficient inventory exists
+  const currentInventory = window.appState.getState('currentInventory');
+  
   if (totalBagsNeeded > currentInventory.vacuumBags) {
-    alert(`Insufficient vacuum bags! Required: ${totalBagsNeeded}, Available: ${currentInventory.vacuumBags}`);
+    window.formValidator.showToast(`Insufficient vacuum bags! Required: ${totalBagsNeeded}, Available: ${currentInventory.vacuumBags}`, 'error');
     return;
   }
   
   if (totalBoxesNeeded > currentInventory[boxType]) {
     const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill boxes' : 'Extra boxes';
-    alert(`Insufficient ${boxTypeName}! Required: ${totalBoxesNeeded}, Available: ${currentInventory[boxType]}`);
+    window.formValidator.showToast(`Insufficient ${boxTypeName}! Required: ${totalBoxesNeeded}, Available: ${currentInventory[boxType]}`, 'error');
     return;
   }
   
@@ -989,39 +1255,38 @@ function submitProduction() {
     }
   };
   
-  productionRecords.push(record);
+  // Add to state instead of local array
+  window.appState.addToArray('productionRecords', record);
   
-  // Update inventory (we already validated sufficient stock exists)
-  const totalBagsUsed = record.materials.bagsUsed + record.materials.bagsWasted;
-  const totalBoxesUsed = record.materials.boxesUsed + record.materials.boxesWasted;
-
-  currentInventory.vacuumBags -= totalBagsUsed;
-  currentInventory[boxType] -= totalBoxesUsed;
+  // Update inventory using state methods
+  window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
+  window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
   
-  if (totalBagsUsed > 0) {
-    inventoryLog.push({
+  // Add inventory log entries
+  if (totalBagsNeeded > 0) {
+    window.appState.addToArray('inventoryLog', {
       timestamp: new Date().toISOString(),
       item: 'Vacuum Bags (10kg)',
       action: 'remove',
-      quantity: totalBagsUsed,
-      result: currentInventory.vacuumBags,
+      quantity: totalBagsNeeded,
+      result: window.appState.getState('currentInventory').vacuumBags,
       notes: 'Auto: Production submission'
     });
   }
   
-  if (totalBoxesUsed > 0) {
+  if (totalBoxesNeeded > 0) {
     const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
-    inventoryLog.push({
+    window.appState.addToArray('inventoryLog', {
       timestamp: new Date().toISOString(),
       item: boxTypeName,
       action: 'remove',
-      quantity: totalBoxesUsed,
-      result: currentInventory[boxType],
+      quantity: totalBoxesNeeded,
+      result: window.appState.getState('currentInventory')[boxType],
       notes: 'Auto: Production submission'
     });
   }
   
-  alert('Production record submitted successfully!');
+  window.formValidator.showToast('Production record submitted successfully!', 'success');
   clearForm();
   updateDashboard();
   renderRecords();
@@ -1030,6 +1295,7 @@ function submitProduction() {
 
 // Dashboard updates
 function updateDashboard() {
+  const productionRecords = window.appState.getState('productionRecords') || [];
   let totalFinished = 0;
   let totalRejects = 0;
   let totalInput = 0;
@@ -1053,6 +1319,7 @@ function renderRecords() {
   const tbody = document.querySelector('#recordsTable tbody');
   tbody.innerHTML = '';
   
+  const productionRecords = window.appState.getState('productionRecords') || [];
   productionRecords.slice().reverse().forEach(record => {
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -1079,7 +1346,7 @@ function adjustInventory() {
   const notes = document.getElementById('invNotes').value;
   
   if (quantity <= 0 && action !== 'set') {
-    alert('Please enter a valid quantity');
+    window.formValidator.showToast('Please enter a valid quantity', 'error');
     return;
   }
   
@@ -1088,49 +1355,45 @@ function adjustInventory() {
   else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
   else if (item === 'extraBoxes') itemName = 'Extra Boxes';
   
-  let result = 0;
+  const success = window.appState.updateInventory(item, action, quantity);
   
-  if (action === 'add') {
-    currentInventory[item] += quantity;
-    result = currentInventory[item];
-  } else if (action === 'remove') {
-    currentInventory[item] = Math.max(0, currentInventory[item] - quantity);
-    result = currentInventory[item];
-  } else if (action === 'set') {
-    currentInventory[item] = Math.max(0, quantity);
-    result = currentInventory[item];
+  if (success) {
+    const result = window.appState.getState('currentInventory')[item];
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: itemName,
+      action,
+      quantity,
+      result,
+      notes
+    });
+    
+    document.getElementById('invQuantity').value = 0;
+    document.getElementById('invNotes').value = '';
+    window.formValidator.showToast('Inventory updated successfully', 'success');
+  } else {
+    window.formValidator.showToast('Failed to update inventory', 'error');
   }
-  
-  inventoryLog.push({
-    timestamp: new Date().toISOString(),
-    item: itemName,
-    action,
-    quantity,
-    result,
-    notes
-  });
-  
-  document.getElementById('invQuantity').value = 0;
-  document.getElementById('invNotes').value = '';
   
   renderInventory();
 }
 
 function renderInventory() {
-  document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags;
-  document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes;
-  document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes;
+  const currentInventory = window.appState.getState('currentInventory') || {};
+  document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags || 0;
+  document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes || 0;
+  document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes || 0;
   
-  // Update the production form display too
   if (document.getElementById('currentBags')) {
-    document.getElementById('currentBags').textContent = currentInventory.vacuumBags;
-    document.getElementById('currentGoldenBoxes').textContent = currentInventory.goldenHillBoxes;
-    document.getElementById('currentExtraBoxes').textContent = currentInventory.extraBoxes;
+    document.getElementById('currentBags').textContent = currentInventory.vacuumBags || 0;
+    document.getElementById('currentGoldenBoxes').textContent = currentInventory.goldenHillBoxes || 0;
+    document.getElementById('currentExtraBoxes').textContent = currentInventory.extraBoxes || 0;
   }
   
   const tbody = document.querySelector('#inventoryTable tbody');
   tbody.innerHTML = '';
   
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
   inventoryLog.slice().reverse().forEach(log => {
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -1145,28 +1408,26 @@ function renderInventory() {
   });
 }
 
-// Equipment & Maintenance management
+// Equipment & Maintenance management (keeping your original functions but using state)
 function updateEquipmentStatus() {
   const equipmentCode = document.getElementById('equipmentSelect').value;
   const newStatus = document.getElementById('equipmentStatus').value;
   const problem = document.getElementById('problemDescription').value;
   const cost = parseFloat(document.getElementById('maintenanceCost').value) || 0;
   
+  const equipment = window.appState.getState('equipment');
   const equipmentItem = equipment.find(e => e.code === equipmentCode);
   if (!equipmentItem) return;
   
   const oldStatus = equipmentItem.status;
   
-  // Calculate downtime if status changed
   let downtimeHours = 0;
   if (oldStatus !== 'operational' && newStatus === 'operational') {
-    // Equipment coming back online
     const downStart = new Date(equipmentItem.lastUpdate);
     const now = new Date();
     downtimeHours = Math.round((now - downStart) / (1000 * 60 * 60) * 10) / 10;
   }
   
-  // Update equipment
   equipmentItem.status = newStatus;
   equipmentItem.problem = problem;
   equipmentItem.lastUpdate = new Date().toISOString();
@@ -1174,40 +1435,39 @@ function updateEquipmentStatus() {
     equipmentItem.downtime = 0;
   }
   
-  // Log maintenance event
- maintenanceLog.push({
-  timestamp: new Date().toISOString(),
-  equipment: `${equipmentCode} - ${equipmentItem.name}`,
-  priority: equipmentItem.priority,
-  statusChange: `${oldStatus} → ${newStatus}`,
-  problem: problem || 'Status update',
-  cost: cost,
-  downtime: downtimeHours
-});
+  window.appState.setState('equipment', equipment);
   
-  // Clear form
+  window.appState.addToArray('maintenanceLog', {
+    timestamp: new Date().toISOString(),
+    equipment: `${equipmentCode} - ${equipmentItem.name}`,
+    priority: equipmentItem.priority,
+    statusChange: `${oldStatus} → ${newStatus}`,
+    problem: problem || 'Status update',
+    cost: cost,
+    downtime: downtimeHours
+  });
+  
   document.getElementById('problemDescription').value = '';
   document.getElementById('maintenanceCost').value = 0;
   
-  alert('Equipment status updated successfully!');
+  window.formValidator.showToast('Equipment status updated successfully!', 'success');
   renderEquipmentGrid();
   renderMaintenanceLog();
 }
+
 function filterEquipment() {
   const priorityFilter = document.getElementById('priorityFilter').value;
   const typeFilter = document.getElementById('typeFilter').value;
   const statusFilter = document.getElementById('statusFilter').value;
   const sortBy = document.getElementById('sortBy').value;
   
-  // Start with all equipment
+  const equipment = window.appState.getState('equipment');
   let filteredEquipment = [...equipment];
   
-  // Apply priority filter
   if (priorityFilter !== 'all') {
     filteredEquipment = filteredEquipment.filter(eq => eq.priority == priorityFilter);
   }
   
-  // Apply type filter
   if (typeFilter !== 'all') {
     filteredEquipment = filteredEquipment.filter(eq => {
       switch(typeFilter) {
@@ -1222,7 +1482,6 @@ function filterEquipment() {
     });
   }
   
-  // Apply status filter
   if (statusFilter !== 'all') {
     if (statusFilter === 'operational') {
       filteredEquipment = filteredEquipment.filter(eq => eq.status === 'operational');
@@ -1233,7 +1492,6 @@ function filterEquipment() {
     }
   }
   
-  // Apply sorting
   filteredEquipment.sort((a, b) => {
     switch(sortBy) {
       case 'priority': return a.priority - b.priority;
@@ -1286,7 +1544,9 @@ function renderFilteredEquipment(filteredList) {
   grid.innerHTML = equipmentCards;
   document.getElementById('shownCount').textContent = filteredList.length;
 }
+
 function renderEquipmentGrid() {
+  const equipment = window.appState.getState('equipment');
   const grid = document.getElementById('equipmentGrid');
   
   const equipmentCards = equipment.map(eq => {
@@ -1322,7 +1582,6 @@ function renderEquipmentGrid() {
   
   grid.innerHTML = equipmentCards;
   
-  // Update statistics to match HTML element IDs
   const operational = equipment.filter(e => e.status === 'operational').length;
   const criticalDown = equipment.filter(e => e.priority <= 3 && e.status !== 'operational').length;
   const minorIssues = equipment.filter(e => e.priority >= 5 && e.status !== 'operational').length;
@@ -1336,56 +1595,42 @@ function renderMaintenanceLog() {
   const tbody = document.querySelector('#maintenanceTable tbody');
   tbody.innerHTML = '';
   
+  const maintenanceLog = window.appState.getState('maintenanceLog') || [];
   maintenanceLog.slice().reverse().forEach(log => {
     const row = document.createElement('tr');
     row.innerHTML = `
-  <td>${new Date(log.timestamp).toLocaleString()}</td>
-  <td>${log.equipment}</td>
-  <td style="color: ${log.priority <= 3 ? '#ef4444' : '#22c55e'}; font-weight: bold;">P${log.priority || 'N/A'}</td>
-  <td>${log.statusChange}</td>
-  <td>${log.problem}</td>
-  <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
-  <td>${log.downtime > 0 ? log.downtime : '-'}</td>
-`;
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.equipment}</td>
+      <td style="color: ${log.priority <= 3 ? '#ef4444' : '#22c55e'}; font-weight: bold;">P${log.priority || 'N/A'}</td>
+      <td>${log.statusChange}</td>
+      <td>${log.problem}</td>
+      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.downtime > 0 ? log.downtime : '-'}</td>
+    `;
     tbody.appendChild(row);
   });
 }
 
-// Initialize
-window.addEventListener('load', () => {
-  updateFormVisibility();
-  updateSummary();
-  renderInventory();
-  renderEquipmentGrid();
-  renderMaintenanceLog();
-  // Set default export dates (last 30 days)
-const today = new Date();
-const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-
-document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
-document.getElementById('exportFromDate').value = monthAgo.toISOString().split('T')[0];
-});
-  function exportMaintenanceReport() {
+function exportMaintenanceReport() {
   const fromDate = document.getElementById('exportFromDate').value;
   const toDate = document.getElementById('exportToDate').value;
   
   if (!fromDate || !toDate) {
-    alert('Please select both From and To dates');
+    window.formValidator.showToast('Please select both From and To dates', 'error');
     return;
   }
   
-  // Filter maintenance logs by date range
+  const maintenanceLog = window.appState.getState('maintenanceLog') || [];
   const filtered = maintenanceLog.filter(log => {
     const logDate = new Date(log.timestamp).toISOString().split('T')[0];
     return logDate >= fromDate && logDate <= toDate;
   });
   
   if (filtered.length === 0) {
-    alert('No maintenance records found in the selected date range');
+    window.formValidator.showToast('No maintenance records found in the selected date range', 'error');
     return;
   }
   
-  // Group by equipment and calculate totals
   const equipmentCosts = {};
   filtered.forEach(log => {
     const equipment = log.equipment;
@@ -1406,7 +1651,6 @@ document.getElementById('exportFromDate').value = monthAgo.toISOString().split('
     }
   });
   
-  // Generate report HTML
   let reportHTML = `
     <!DOCTYPE html>
     <html>
@@ -1434,7 +1678,6 @@ document.getElementById('exportFromDate').value = monthAgo.toISOString().split('
       </div>
   `;
   
-  // Calculate grand total
   const grandTotal = Object.values(equipmentCosts).reduce((sum, eq) => sum + eq.totalCost, 0);
   
   reportHTML += `
@@ -1446,10 +1689,8 @@ document.getElementById('exportFromDate').value = monthAgo.toISOString().split('
     </div>
   `;
   
-  // Equipment details
   reportHTML += `<h3>Equipment Breakdown</h3>`;
   
-  // Sort by total cost (highest first)
   const sortedEquipment = Object.entries(equipmentCosts).sort((a, b) => b[1].totalCost - a[1].totalCost);
   
   sortedEquipment.forEach(([equipment, data]) => {
@@ -1492,18 +1733,31 @@ document.getElementById('exportFromDate').value = monthAgo.toISOString().split('
     </html>
   `;
   
-  // Open in new window for printing
   const printWindow = window.open('', '_blank');
   printWindow.document.write(reportHTML);
   printWindow.document.close();
   printWindow.focus();
   
-  // Auto-trigger print dialog
   setTimeout(() => {
     printWindow.print();
   }, 250);
 }
-</script>
+
+// Initialize
+window.addEventListener('load', () => {
+  setupProductionValidation();
+  updateFormVisibility();
+  updateSummary();
+  renderInventory();
+  renderEquipmentGrid();
+  renderMaintenanceLog();
+  
+  const today = new Date();
+  const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+  
+  document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
+  document.getElementById('exportFromDate').value = monthAgo.toISOString().split('T')[0];
+});
 
 </body>
 </html>
