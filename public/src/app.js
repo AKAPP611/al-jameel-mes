@@ -1,8 +1,23 @@
-// app.js - Complete version with error handling
-import { FactorySelectView } from './views/factory-select.js';
-import { PistachioHome } from './views/pistachio-home.js';
-import { PistachioShift } from './views/pistachio-shift.js';
-import { MaterialsView } from './views/materials.js';
+// app.js - Complete version with cache busting
+const APP_VERSION = '1.2.0'; // Increment this when making changes
+
+// Dynamic imports with cache busting
+async function loadView(viewPath) {
+  try {
+    const module = await import(`${viewPath}?v=${APP_VERSION}&t=${Date.now()}`);
+    return module;
+  } catch (error) {
+    console.error(`Failed to load view: ${viewPath}`, error);
+    // Fallback: try without cache busting
+    return import(viewPath);
+  }
+}
+
+// Load views with cache busting
+const FactorySelectView = (await loadView('./views/factory-select.js')).FactorySelectView;
+const PistachioHome = (await loadView('./views/pistachio-home.js')).PistachioHome;
+const PistachioShift = (await loadView('./views/pistachio-shift.js')).PistachioShift;
+const MaterialsView = (await loadView('./views/materials.js')).MaterialsView;
 
 const i18n = {
   en: {
@@ -112,7 +127,7 @@ const i18n = {
   }
 };
 
-// Safe localStorage access with fallbacks
+// Enhanced localStorage access with cache clearing
 function getStoredLang() {
   try {
     return localStorage.getItem('lang') || 'en';
@@ -125,10 +140,29 @@ function getStoredLang() {
 function setStoredLang(lang) {
   try {
     localStorage.setItem('lang', lang);
+    // Also store a timestamp to detect cache issues
+    localStorage.setItem('lang_updated', Date.now().toString());
   } catch (e) {
     console.warn('localStorage not available, cannot save language preference');
   }
 }
+
+// Clear old cache data
+function clearOldCache() {
+  try {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('cached_') || key.startsWith('old_')) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (e) {
+    console.warn('Could not clear old cache data');
+  }
+}
+
+// Initialize with cache clearing
+clearOldCache();
 
 let lang = getStoredLang();
 applyLang(lang);
@@ -157,7 +191,10 @@ export function t(key) {
 export function goTo(path, params = {}) {
   try {
     const qs = new URLSearchParams(params).toString();
-    location.hash = `${path}${qs ? '?' + qs : ''}`;
+    // Add cache busting to navigation
+    const separator = path.includes('?') ? '&' : '?';
+    const cacheBust = `v=${APP_VERSION}&t=${Date.now()}`;
+    location.hash = `${path}${qs ? '?' + qs : ''}${separator}${cacheBust}`;
   } catch (e) {
     console.error('Navigation error:', e);
     location.hash = path;
@@ -174,7 +211,7 @@ export function getParams() {
   }
 }
 
-/* Back Button */
+/* Back Button with cache busting */
 let __backBtn;
 function ensureBackButton() {
   if (__backBtn) return __backBtn;
@@ -192,7 +229,8 @@ function ensureBackButton() {
         if (history.length > 1) { 
           history.back(); 
         } else { 
-          goTo('#/'); 
+          // Add cache busting to fallback navigation
+          window.location.href = `#/?v=${APP_VERSION}&t=${Date.now()}`; 
         }
       } catch (e) {
         console.error('Navigation error:', e);
@@ -211,7 +249,7 @@ function ensureBackButton() {
   return __backBtn;
 }
 
-/* Main Render Function */
+/* Main Render Function with enhanced error handling */
 function render() {
   try {
     const mount = document.getElementById('app');
@@ -248,11 +286,27 @@ function render() {
           MaterialsView(mount, { t });
           break;
         default:
-          mount.innerHTML = `<div class="card"><p>404 - Page not found</p><p>Route: ${route}</p></div>`;
+          mount.innerHTML = `
+            <div class="card">
+              <p>404 - Page not found</p>
+              <p>Route: ${route}</p>
+              <button onclick="window.location.reload()" class="btn">Refresh Page</button>
+              <button onclick="clearCacheAndReload()" class="ghost">Clear Cache & Refresh</button>
+            </div>
+          `;
       }
     } catch (e) {
       console.error('Error rendering view:', e);
-      mount.innerHTML = `<div class="card"><p>Error loading page</p><p>${e.message}</p></div>`;
+      mount.innerHTML = `
+        <div class="card">
+          <h3 style="color: #dc2626;">Error Loading Page</h3>
+          <p><strong>Error:</strong> ${e.message}</p>
+          <div style="margin: 1rem 0;">
+            <button onclick="window.location.reload()" class="btn">Try Again</button>
+            <button onclick="clearCacheAndReload()" class="ghost">Clear Cache</button>
+          </div>
+        </div>
+      `;
     }
 
     // Update date display
@@ -272,11 +326,28 @@ function render() {
   }
 }
 
-/* Event Listeners */
+// Cache clearing function
+function clearCacheAndReload() {
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => caches.delete(name));
+    }).then(() => {
+      window.location.reload(true);
+    });
+  } else {
+    // Force reload with cache bust
+    window.location.href = window.location.pathname + '?bust=' + Date.now();
+  }
+}
+
+// Make function globally available
+window.clearCacheAndReload = clearCacheAndReload;
+
+/* Event Listeners with enhanced error handling */
 window.addEventListener('hashchange', render);
 window.addEventListener('load', render);
 
-// Language switching with error handling
+// Enhanced language switching with cache consideration
 document.addEventListener('click', (e) => {
   try {
     const btn = e.target.closest('.pill');
@@ -304,12 +375,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Global error handler
+// Global error handlers
 window.addEventListener('error', (e) => {
   console.error('Global error:', e.error);
+  
+  // Show user-friendly error for critical failures
+  const app = document.getElementById('app');
+  if (app && e.error.message.includes('import')) {
+    app.innerHTML = `
+      <div class="card" style="border-color: #fecaca; background: #fef2f2;">
+        <h3 style="color: #dc2626;">Loading Error</h3>
+        <p>There was a problem loading the application. This might be a cache issue.</p>
+        <button onclick="clearCacheAndReload()" class="btn">Clear Cache & Reload</button>
+      </div>
+    `;
+  }
 });
 
-// Global promise rejection handler
 window.addEventListener('unhandledrejection', (e) => {
   console.error('Unhandled promise rejection:', e.reason);
 });
+
+// Version info for debugging
+console.log('App Version:', APP_VERSION);
+console.log('Build Time:', new Date().toISOString());
