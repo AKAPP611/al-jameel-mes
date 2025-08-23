@@ -264,6 +264,138 @@
     .price-change-neutral {
       color: #6b7280;
     }
+
+    /* Professional Chart Styling */
+    .chart-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      page-break-inside: avoid;
+    }
+
+    .chart-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .pie-chart-container {
+      text-align: center;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+
+    .bar-chart-container {
+      padding: 1rem;
+    }
+
+    .bar-item {
+      margin-bottom: 1rem;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .bar-track {
+      background: #e9ecef;
+      height: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 0.5rem;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      border: 1px solid #dee2e6;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      .chart-container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+      
+      .chart-grid {
+        page-break-inside: avoid;
+      }
+      
+      .pie-chart-container,
+      .bar-chart-container {
+        page-break-inside: avoid;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2367,132 +2499,373 @@ function generateReport() {
 function generateReportHTML(records, wastageData) {
   const reportContent = document.getElementById('reportContent');
   
-  // Calculate totals
+  // Calculate comprehensive metrics
   const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
   const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
   const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
   const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const totalWasteCost = wastageData.reduce((sum, w) => sum + w.estimatedCost, 0);
   
+  // Brand analysis
+  const brandStats = {};
+  records.forEach(record => {
+    if (!brandStats[record.brand]) {
+      brandStats[record.brand] = { finished: 0, rejects: 0, count: 0 };
+    }
+    brandStats[record.brand].finished += record.finishedKg;
+    brandStats[record.brand].rejects += record.rejectsKg;
+    brandStats[record.brand].count += 1;
+  });
+
+  // Size analysis
+  const sizeStats = {
+    '18-21': records.reduce((sum, r) => sum + (r.kg1821 || 0), 0),
+    '21-25': records.reduce((sum, r) => sum + (r.kg2125 || 0), 0)
+  };
+
   const reportHTML = `
-    <div class="report-header">
+    <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #a32034 0%, #d5a333 100%); color: white; border-radius: 0.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <h1 style="color: var(--primary); margin: 0;">Al Jameel MES</h1>
-          <h2 style="margin: 0.5rem 0 0 0;">Pistachio Production Report</h2>
+          <h1 style="margin: 0; font-size: 2rem;">Al Jameel MES</h1>
+          <h2 style="margin: 0.5rem 0 0 0; font-size: 1.5rem; opacity: 0.9;">Pistachio Production Report</h2>
         </div>
         <div style="text-align: right;">
-          <p><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
-          <p><strong>Lots:</strong> ${selectedLotsList.length}</p>
+          <p style="margin: 0.25rem 0;"><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+          <p style="margin: 0.25rem 0;"><strong>Lots Analyzed:</strong> ${selectedLotsList.length}</p>
+          <p style="margin: 0.25rem 0;"><strong>Total Records:</strong> ${records.length}</p>
         </div>
       </div>
     </div>
-    
-    <div class="report-summary">
-      <div class="summary-card">
-        <div>Total Finished</div>
-        <div class="summary-value">${totalFinished} kg</div>
+
+    <!-- Executive Summary Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">${totalFinished.toLocaleString()}</div>
+        <div class="metric-label">Total Finished (kg)</div>
       </div>
-      <div class="summary-card">
-        <div>Total Rejects</div>
-        <div class="summary-value">${totalRejects} kg</div>
+      <div class="metric-card">
+        <div class="metric-value">${totalRejects.toLocaleString()}</div>
+        <div class="metric-label">Total Rejects (kg)</div>
       </div>
-      <div class="summary-card">
-        <div>Average Efficiency</div>
-        <div class="summary-value">${avgEfficiency}%</div>
+      <div class="metric-card">
+        <div class="metric-value">${avgEfficiency}%</div>
+        <div class="metric-label">Average Efficiency</div>
       </div>
-      <div class="summary-card">
-        <div>Total Waste Cost</div>
-        <div class="summary-value">$${totalWasteCost.toFixed(2)}</div>
+      <div class="metric-card">
+        <div class="metric-value">$${totalWasteCost.toFixed(0)}</div>
+        <div class="metric-label">Total Waste Cost</div>
       </div>
     </div>
-    
-    <!-- Production Volume Chart -->
+
+    <!-- Professional Charts Grid -->
+    <div class="chart-grid">
+      <!-- Production Distribution Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Production Distribution</div>
+        <div class="pie-chart-container">
+          ${generatePieChart([
+            { label: 'Finished Product', value: totalFinished, color: '#22c55e' },
+            { label: 'Rejects', value: totalRejects, color: '#ef4444' }
+          ], 200)}
+        </div>
+      </div>
+
+      <!-- Brand Performance Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Brand Distribution</div>
+        <div class="pie-chart-container">
+          ${generatePieChart(
+            Object.entries(brandStats).map(([brand, stats], index) => ({
+              label: brand,
+              value: stats.finished,
+              color: index === 0 ? '#a32034' : '#d5a333'
+            })), 200
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Size Distribution Bar Chart -->
     <div class="chart-container">
-      <h3>Production Volume by Lot</h3>
-      ${generateProductionChart(records)}
+      <div class="chart-title">Size Distribution Analysis</div>
+      <div class="bar-chart-container">
+        ${generateBarChart([
+          { label: '18-21 Size', value: sizeStats['18-21'], color: '#a32034' },
+          { label: '21-25 Size', value: sizeStats['21-25'], color: '#d5a333' }
+        ])}
+      </div>
     </div>
-    
-    <!-- Wastage Chart -->
+
+    <!-- Production Volume by Lot -->
     <div class="chart-container">
-      <h3>Wastage Analysis by Lot</h3>
-      ${generateWastageChart(wastageData)}
+      <div class="chart-title">Production Volume by Lot</div>
+      <div class="bar-chart-container">
+        ${generateProductionBarChart(records)}
+      </div>
     </div>
-    
-    <!-- Detailed Records Table -->
-    <div class="report-page">
-      <h3>Detailed Production Records</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-        <thead>
-          <tr style="background: var(--primary); color: white;">
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">Date</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">Lot</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">Brand</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">Raw Input</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">18-21 kg</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">21-25 kg</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">Finished</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">Rejects</th>
-            <th style="padding: 0.75rem; border: 1px solid #ddd;">Efficiency</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${records.map(record => `
-            <tr>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.rawInput}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.kg1821 || 0}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.kg2125 || 0}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.finishedKg}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.rejectsKg}</td>
-              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.efficiency}%</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-    
-    <!-- Wastage Details -->
+
     ${wastageData.length > 0 ? `
-      <div class="report-page">
-        <h3>Wastage Details</h3>
+      <!-- Wastage Cost Analysis -->
+      <div class="chart-container">
+        <div class="chart-title">Wastage Cost Analysis by Lot</div>
+        <div class="bar-chart-container">
+          ${generateWastageBarChart(wastageData)}
+        </div>
+      </div>
+    ` : ''}
+
+    <!-- Detailed Data Tables -->
+    <div class="chart-container">
+      <div class="chart-title">Detailed Production Records</div>
+      <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
           <thead>
             <tr style="background: var(--primary); color: white;">
-              <th style="padding: 0.75rem; border: 1px solid #ddd;">Date</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd;">Lot</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd;">Brand</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd;">Bags Wasted</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd;">Boxes Wasted</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd;">Est. Cost</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">18-21 kg</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">21-25 kg</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Rejects</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Efficiency</th>
             </tr>
           </thead>
           <tbody>
-            ${wastageData.map(waste => `
-              <tr>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(waste.timestamp).toLocaleDateString()}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.lot}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.brand}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.bagsWasted}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.boxesWasted}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">$${waste.estimatedCost.toFixed(2)}</td>
+            ${records.map(record => `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg1821 || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg2125 || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;"><strong>${record.finishedKg.toLocaleString()}</strong></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${record.rejectsKg.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600;">${record.efficiency}%</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
       </div>
+    </div>
+
+    ${wastageData.length > 0 ? `
+      <div class="chart-container">
+        <div class="chart-title">Wastage Details</div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+              <tr style="background: #dc3545; color: white;">
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Bags Wasted</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Boxes Wasted</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Est. Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${wastageData.map(waste => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(waste.timestamp).toLocaleDateString()}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.lot}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.brand}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${waste.bagsWasted}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${waste.boxesWasted}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600; color: #dc3545;">$${waste.estimatedCost.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
     ` : ''}
-    
-    <div class="report-footer">
-      Al Jameel MES - Pistachio Production Management System | Generated: ${new Date().toLocaleDateString()}
+
+    <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; text-align: center; border-top: 3px solid var(--primary);">
+      <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Pistachio Production Management System</p>
+      <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()} | Confidential Report</p>
     </div>
   `;
   
   reportContent.innerHTML = reportHTML;
 }
+  // Professional Chart Generation Functions
 
+function generatePieChart(data, size = 200) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  const radius = size / 2 - 10;
+  const centerX = size / 2;
+  const centerY = size / 2;
+  
+  let currentAngle = -90; // Start at top
+  let paths = '';
+  let legends = '';
+  
+  data.forEach((item, index) => {
+    if (item.value > 0) {
+      const percentage = (item.value / total) * 100;
+      const angle = (item.value / total) * 360;
+      const endAngle = currentAngle + angle;
+      
+      // Calculate path for pie slice
+      const startAngleRad = (currentAngle * Math.PI) / 180;
+      const endAngleRad = (endAngle * Math.PI) / 180;
+      
+      const x1 = centerX + radius * Math.cos(startAngleRad);
+      const y1 = centerY + radius * Math.sin(startAngleRad);
+      const x2 = centerX + radius * Math.cos(endAngleRad);
+      const y2 = centerY + radius * Math.sin(endAngleRad);
+      
+      const largeArcFlag = angle > 180 ? 1 : 0;
+      
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+      
+      paths += `<path d="${pathData}" fill="${item.color}" stroke="#fff" stroke-width="2" opacity="0.9"/>`;
+      
+      legends += `
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${item.color};"></div>
+          <span>${item.label}: ${item.value.toLocaleString()} (${percentage.toFixed(1)}%)</span>
+        </div>
+      `;
+      
+      currentAngle = endAngle;
+    }
+  });
+  
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="margin: 0 auto; display: block;">
+      ${paths}
+    </svg>
+    <div class="chart-legend">${legends}</div>
+  `;
+}
+
+function generateBarChart(data) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const maxValue = Math.max(...data.map(item => item.value));
+  if (maxValue === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  return data.map(item => {
+    const percentage = (item.value / maxValue) * 100;
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${item.label}</span>
+          <span style="font-weight: 700; color: ${item.color};">${item.value.toLocaleString()}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: ${item.color}; width: ${percentage}%;">
+            ${percentage > 20 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function generateProductionBarChart(records) {
+  if (!records || records.length === 0) return '<div class="chart-placeholder">No production data available</div>';
+  
+  const maxValue = Math.max(...records.map(r => r.finishedKg));
+  if (maxValue === 0) return '<div class="chart-placeholder">No production data to display</div>';
+  
+  // Sort records by production volume for better visualization
+  const sortedRecords = [...records].sort((a, b) => b.finishedKg - a.finishedKg);
+  
+  return sortedRecords.map((record, index) => {
+    const percentage = (record.finishedKg / maxValue) * 100;
+    const color = getGradientColor(index, sortedRecords.length);
+    
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${record.lot}</span>
+          <span style="font-weight: 700; color: ${color};">${record.finishedKg.toLocaleString()} kg</span>
+        </div>
+        <div class="bar-label" style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">
+          <span>${record.brand} • ${new Date(record.timestamp).toLocaleDateString()}</span>
+          <span>Efficiency: ${record.efficiency}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: linear-gradient(90deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%); width: ${percentage}%;">
+            ${percentage > 15 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function generateWastageBarChart(wastageData) {
+  if (!wastageData || wastageData.length === 0) return '<div class="chart-placeholder">No wastage data available</div>';
+  
+  const maxValue = Math.max(...wastageData.map(w => w.estimatedCost));
+  if (maxValue === 0) return '<div class="chart-placeholder">No wastage data to display</div>';
+  
+  // Sort by cost for better visualization
+  const sortedWastage = [...wastageData].sort((a, b) => b.estimatedCost - a.estimatedCost);
+  
+  return sortedWastage.map((waste, index) => {
+    const percentage = (waste.estimatedCost / maxValue) * 100;
+    const color = getRedGradientColor(index, sortedWastage.length);
+    
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${waste.lot}</span>
+          <span style="font-weight: 700; color: ${color};">$${waste.estimatedCost.toFixed(2)}</span>
+        </div>
+        <div class="bar-label" style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">
+          <span>${waste.brand} • ${new Date(waste.timestamp).toLocaleDateString()}</span>
+          <span>Bags: ${waste.bagsWasted} • Boxes: ${waste.boxesWasted}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: linear-gradient(90deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%); width: ${percentage}%;">
+            ${percentage > 15 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Helper function to generate gradient colors for bars
+function getGradientColor(index, total) {
+  const colors = ['#a32034', '#d5a333', '#22c55e', '#3b82f6', '#8b5cf6', '#f59e0b'];
+  return colors[index % colors.length];
+}
+
+// Helper function to generate red gradient colors for wastage
+function getRedGradientColor(index, total) {
+  const colors = ['#dc3545', '#fd7e14', '#ffc107', '#e74c3c', '#c0392b'];
+  return colors[index % colors.length];
+}
+
+// Helper function to adjust color brightness
+function adjustBrightness(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+    (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+}
 function generateProductionChart(records) {
   if (records.length === 0) return '<div class="chart-placeholder">No production data available</div>';
   
