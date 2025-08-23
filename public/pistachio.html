@@ -986,8 +986,8 @@ const ValidationRules = {
     return !isNaN(num) && num >= min && num <= max;
   },
   lotNumberFormat: (value) => {
-    return /^[A-Z]{2}-\d{6}-\d{2}$/.test(value);
-  }
+  return /^Lot-\d{2}-\d{2}-\d{2}-\d{4}$/.test(value);
+}
 };
 
 // ===== INITIALIZE GLOBAL OBJECTS =====
@@ -1079,7 +1079,7 @@ function setupProductionValidation() {
   validator.addRule('bags1821', ValidationRules.positiveNumber, '18-21 size must be a positive number');
   validator.addRule('bags2125', ValidationRules.positiveNumber, '21-25 size must be a positive number');
   validator.addRule('lotNo', ValidationRules.required, 'Lot number is required');
-  validator.addRule('lotNo', ValidationRules.lotNumberFormat, 'Lot format should be XX-YYMMDD-NN (e.g., GH-240315-01)');
+  validator.addRule('lotNo', ValidationRules.lotNumberFormat, 'Lot format should be Lot-##-##-##-#### (e.g., Lot-01-02-03-2024)');
   validator.addRule('bagsUsed', ValidationRules.positiveNumber, 'Bags used must be a positive number');
 }
 
