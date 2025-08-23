@@ -219,6 +219,51 @@
       margin-right: 1rem;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
+
+    /* Item Prices Management Styling */
+    #itemPricesTable th,
+    #priceAuditTable th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    #itemPricesTable td,
+    #priceAuditTable td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    #itemPricesTable button,
+    #priceAuditTable button {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.85rem;
+      border-radius: 0.25rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    #itemPricesTable button:hover,
+    #priceAuditTable button:hover {
+      opacity: 0.8;
+    }
+
+    .price-change-positive {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .price-change-negative {
+      color: #ef4444;
+      font-weight: bold;
+    }
+
+    .price-change-neutral {
+      color: #6b7280;
+    }
   </style>
 </head>
 <body>
@@ -267,13 +312,14 @@
   </header>
 
   <div class="container">
-    <div class="nav-buttons">
+   <div class="nav-buttons">
   <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
   <button class="nav-btn" onclick="showSection('production')">New Production</button>
   <button class="nav-btn" onclick="showSection('records')">View Records</button>
   <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
   <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
   <button class="nav-btn" onclick="showSection('reports')">Reports</button>
+  <button class="nav-btn" id="itemPricesBtn" onclick="showSection('itemprices')" style="display: none;">Item Prices</button>
 </div>
 
     <!-- Dashboard Section -->
@@ -733,7 +779,139 @@
     </div>
   </div>
 </section>
+<!-- Item Prices Section (Admin Only) -->
+    <section id="itemprices" class="section">
+      <h2 style="margin-bottom: 1rem;">💰 Item Prices Management</h2>
+      
+      <div class="warning-box" style="background: #fff3cd; border: 1px solid #ffeeba;">
+        <strong>Admin Only:</strong> Changes to pricing affect all future calculations and reports.
+      </div>
 
+      <!-- Current Item Prices -->
+      <div class="materials-section">
+        <h3>Current Item Prices</h3>
+        <div style="overflow-x: auto;">
+          <table id="itemPricesTable">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Unit</th>
+                <th>Unit Price ($)</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Updated By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add/Edit Item Form -->
+      <div class="materials-section">
+        <h3 id="itemFormTitle">Add New Item</h3>
+        <form id="itemPriceForm" onsubmit="saveItemPrice(event)">
+          <input type="hidden" id="editItemId" value="">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Item Name</label>
+              <input id="itemName" type="text" required placeholder="e.g., Vacuum Bags (10kg)">
+            </div>
+            <div class="form-group">
+              <label>Unit</label>
+              <input id="itemUnit" type="text" required placeholder="e.g., piece, kg, box">
+            </div>
+            <div class="form-group">
+              <label>Unit Price ($)</label>
+              <input id="itemPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="itemStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <button type="submit" id="saveItemBtn">Add Item</button>
+            <button type="button" class="btn-secondary" onclick="cancelItemEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="materials-section">
+        <h3>Quick Actions</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Bulk Price Update</label>
+            <select id="bulkUpdateType">
+              <option value="percentage">Percentage Change</option>
+              <option value="fixed">Fixed Amount Change</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Change Amount</label>
+            <input id="bulkUpdateAmount" type="number" step="0.01" placeholder="e.g., 10 for +10% or +$10">
+          </div>
+          <div class="form-group">
+            <label>Apply to</label>
+            <select id="bulkUpdateFilter">
+              <option value="all">All Active Items</option>
+              <option value="category">Specific Category</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="applyBulkUpdate()">Apply Bulk Update</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Change History -->
+      <div class="materials-section">
+        <h3>Price Change Audit Trail</h3>
+        <div class="form-grid" style="margin-bottom: 1rem;">
+          <div class="form-group">
+            <label>Filter by Item</label>
+            <select id="auditFilterItem">
+              <option value="all">All Items</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date Range</label>
+            <input id="auditFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="auditToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="filterAuditHistory()">Filter History</button>
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="priceAuditTable">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Item</th>
+                <th>Action</th>
+                <th>Old Price</th>
+                <th>New Price</th>
+                <th>Change</th>
+                <th>Updated By</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
     <!-- Inventory Section -->
     <section id="inventory" class="section">
       <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
@@ -849,7 +1027,49 @@ class AppState {
       productionRecords: [],
       inventoryLog: [],
       maintenanceLog: [],
-       wastageLog: [],  
+       wastageLog: [],
+      itemPrices: [
+    // Default items with configurable prices
+    {
+      id: 'vacuum_bags_10kg',
+      name: 'Vacuum Bags (10kg)',
+      unit: 'piece',
+      price: 2.50,
+      status: 'active',
+      category: 'packaging',
+      lastUpdated: new Date().toISOString(),
+      updatedBy: 'system'
+    },
+    {
+      id: 'golden_hill_boxes',
+      name: 'Golden Hill Boxes',
+      unit: 'piece', 
+      price: 1.25,
+      status: 'active',
+      category: 'packaging',
+      lastUpdated: new Date().toISOString(),
+      updatedBy: 'system'
+    },
+    {
+      id: 'extra_boxes',
+      name: 'Extra Boxes',
+      unit: 'piece',
+      price: 1.00,
+      status: 'active', 
+      category: 'packaging',
+      lastUpdated: new Date().toISOString(),
+      updatedBy: 'system'
+    }
+  ],
+  priceAuditLog: [],
+  currentInventory: {
+    vacuumBags: 0,
+    goldenHillBoxes: 0,
+    extraBoxes: 0
+  },
+  equipment: [], // Will be populated below
+  currentUser: null
+};
       currentInventory: {
         vacuumBags: 0,
         goldenHillBoxes: 0,
@@ -874,7 +1094,79 @@ class AppState {
     this.saveToStorage();
     this.notify(key, value);
   }
+// Add these helper methods to AppState class:
+getItemPrice(itemId) {
+  const item = this.data.itemPrices.find(item => item.id === itemId && item.status === 'active');
+  return item ? item.price : 0;
+}
 
+updateItemPrice(itemId, newPrice, updatedBy, notes = '') {
+  const item = this.data.itemPrices.find(item => item.id === itemId);
+  if (item) {
+    const oldPrice = item.price;
+    item.price = newPrice;
+    item.lastUpdated = new Date().toISOString();
+    item.updatedBy = updatedBy;
+    
+    // Add to audit log
+    this.addToArray('priceAuditLog', {
+      timestamp: new Date().toISOString(),
+      itemId: itemId,
+      itemName: item.name,
+      action: 'price_update',
+      oldPrice: oldPrice,
+      newPrice: newPrice,
+      change: newPrice - oldPrice,
+      changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
+      updatedBy: updatedBy,
+      notes: notes
+    });
+    
+    this.saveToStorage();
+    this.notify('itemPrices', this.data.itemPrices);
+    return true;
+  }
+  return false;
+}
+
+addNewItem(itemData, createdBy) {
+  const newItem = {
+    id: itemData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+    name: itemData.name,
+    unit: itemData.unit,
+    price: itemData.price,
+    status: itemData.status || 'active',
+    category: itemData.category || 'general',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: createdBy
+  };
+  
+  this.addToArray('itemPrices', newItem);
+  
+  // Add to audit log
+  this.addToArray('priceAuditLog', {
+    timestamp: new Date().toISOString(),
+    itemId: newItem.id,
+    itemName: newItem.name,
+    action: 'item_created',
+    oldPrice: 0,
+    newPrice: newItem.price,
+    change: newItem.price,
+    changePercent: 0,
+    updatedBy: createdBy,
+    notes: 'New item created'
+  });
+  
+  return newItem.id;
+}
+
+calculateWastageCost(bagsWasted, boxesWasted, brand) {
+  const bagPrice = this.getItemPrice('vacuum_bags_10kg');
+  const boxItemId = brand === 'Golden Hill' ? 'golden_hill_boxes' : 'extra_boxes';
+  const boxPrice = this.getItemPrice(boxItemId);
+  
+  return (bagsWasted * bagPrice) + (boxesWasted * boxPrice);
+}
   getState(key) {
     return this.data[key];
   }
@@ -935,6 +1227,77 @@ class AppState {
     } catch (e) {
       console.warn('Could not load from localStorage:', e);
     }
+  }
+
+  getItemPrice(itemId) {
+    const item = this.data.itemPrices.find(item => item.id === itemId && item.status === 'active');
+    return item ? item.price : 0;
+  }
+
+  updateItemPrice(itemId, newPrice, updatedBy, notes = '') {
+    const item = this.data.itemPrices.find(item => item.id === itemId);
+    if (item) {
+      const oldPrice = item.price;
+      item.price = newPrice;
+      item.lastUpdated = new Date().toISOString();
+      item.updatedBy = updatedBy;
+      
+      this.addToArray('priceAuditLog', {
+        timestamp: new Date().toISOString(),
+        itemId: itemId,
+        itemName: item.name,
+        action: 'price_update',
+        oldPrice: oldPrice,
+        newPrice: newPrice,
+        change: newPrice - oldPrice,
+        changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
+        updatedBy: updatedBy,
+        notes: notes
+      });
+      
+      this.saveToStorage();
+      this.notify('itemPrices', this.data.itemPrices);
+      return true;
+    }
+    return false;
+  }
+
+  addNewItem(itemData, createdBy) {
+    const newItem = {
+      id: itemData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+      name: itemData.name,
+      unit: itemData.unit,
+      price: itemData.price,
+      status: itemData.status || 'active',
+      category: itemData.category || 'general',
+      lastUpdated: new Date().toISOString(),
+      updatedBy: createdBy
+    };
+    
+    this.addToArray('itemPrices', newItem);
+    
+    this.addToArray('priceAuditLog', {
+      timestamp: new Date().toISOString(),
+      itemId: newItem.id,
+      itemName: newItem.name,
+      action: 'item_created',
+      oldPrice: 0,
+      newPrice: newItem.price,
+      change: newItem.price,
+      changePercent: 0,
+      updatedBy: createdBy,
+      notes: 'New item created'
+    });
+    
+    return newItem.id;
+  }
+
+  calculateWastageCost(bagsWasted, boxesWasted, brand) {
+    const bagPrice = this.getItemPrice('vacuum_bags_10kg');
+    const boxItemId = brand === 'Golden Hill' ? 'golden_hill_boxes' : 'extra_boxes';
+    const boxPrice = this.getItemPrice(boxItemId);
+    
+    return (bagsWasted * bagPrice) + (boxesWasted * boxPrice);
   }
 }
 
@@ -1189,23 +1552,6 @@ function setupProductionValidation() {
 
 // Login handling
 function handleLogin(event) {
-  event.preventDefault();
-  const username = document.getElementById('loginUsername').value;
-  const password = document.getElementById('loginPassword').value;
-  
-  if (users[username] && users[username] === password) {
-    window.appState.setState('currentUser', username);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    document.getElementById('userDisplay').textContent = username;
-    updateDashboard();
-    renderRecords();
-    renderInventory();
-    renderEquipmentGrid();
-  } else {
-    window.formValidator.showToast('Invalid credentials', 'error');
-  }
-}
 
 function logout() {
   window.appState.setState('currentUser', null);
@@ -1854,13 +2200,19 @@ function exportMaintenanceReport() {
 // Add this after the submitProduction function
 function trackWastage(record) {
   if (record.materials.bagsWasted > 0 || record.materials.boxesWasted > 0) {
+    const estimatedCost = window.appState.calculateWastageCost(
+      record.materials.bagsWasted, 
+      record.materials.boxesWasted, 
+      record.brand
+    );
+    
     const wastageRecord = {
       timestamp: record.timestamp,
       lot: record.lot,
       brand: record.brand,
       bagsWasted: record.materials.bagsWasted,
       boxesWasted: record.materials.boxesWasted,
-      estimatedCost: (record.materials.bagsWasted * 2.5) + (record.materials.boxesWasted * 1.0) // Adjust costs as needed
+      estimatedCost: estimatedCost
     };
     
     window.appState.addToArray('wastageLog', wastageRecord);
@@ -2241,6 +2593,293 @@ function initializeReportDates() {
   document.getElementById('reportToDate').value = today.toISOString().split('T')[0];
   document.getElementById('reportFromDate').value = monthAgo.toISOString().split('T')[0];
 }
+
+// ===== ITEM PRICES MANAGEMENT =====
+
+function showAdminControls() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser === 'admin') {
+    document.getElementById('itemPricesBtn').style.display = 'block';
+  } else {
+    document.getElementById('itemPricesBtn').style.display = 'none';
+  }
+}
+
+function renderItemPricesTable() {
+  const tbody = document.querySelector('#itemPricesTable tbody');
+  if (!tbody) return;
+  
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  tbody.innerHTML = '';
+  
+  itemPrices.forEach(item => {
+    const row = document.createElement('tr');
+    const statusColor = item.status === 'active' ? '#22c55e' : '#6b7280';
+    
+    row.innerHTML = `
+      <td><strong>${item.name}</strong></td>
+      <td>${item.unit}</td>
+      <td>$${item.price.toFixed(2)}</td>
+      <td style="color: ${statusColor}; font-weight: bold;">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</td>
+      <td>${new Date(item.lastUpdated).toLocaleDateString()}</td>
+      <td>${item.updatedBy}</td>
+      <td>
+        <button onclick="editItemPrice('${item.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</button>
+        <button onclick="toggleItemStatus('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" class="btn-secondary">
+          ${item.status === 'active' ? 'Deactivate' : 'Activate'}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+  
+  updateAuditFilterOptions();
+}
+
+function editItemPrice(itemId) {
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    document.getElementById('editItemId').value = itemId;
+    document.getElementById('itemName').value = item.name;
+    document.getElementById('itemUnit').value = item.unit;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemStatus').value = item.status;
+    
+    document.getElementById('itemFormTitle').textContent = 'Edit Item Price';
+    document.getElementById('saveItemBtn').textContent = 'Update Item';
+    
+    document.getElementById('itemPriceForm').scrollIntoView({behavior: 'smooth'});
+  }
+}
+
+function cancelItemEdit() {
+  document.getElementById('itemPriceForm').reset();
+  document.getElementById('editItemId').value = '';
+  document.getElementById('itemFormTitle').textContent = 'Add New Item';
+  document.getElementById('saveItemBtn').textContent = 'Add Item';
+}
+
+function saveItemPrice(event) {
+  event.preventDefault();
+  
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const itemId = document.getElementById('editItemId').value;
+  const itemData = {
+    name: document.getElementById('itemName').value,
+    unit: document.getElementById('itemUnit').value,
+    price: parseFloat(document.getElementById('itemPrice').value),
+    status: document.getElementById('itemStatus').value
+  };
+  
+  if (itemId) {
+    const success = window.appState.updateItemPrice(itemId, itemData.price, currentUser, 'Manual price update');
+    
+    if (success) {
+      const itemPrices = window.appState.getState('itemPrices');
+      const item = itemPrices.find(item => item.id === itemId);
+      if (item) {
+        item.name = itemData.name;
+        item.unit = itemData.unit;
+        item.status = itemData.status;
+        item.lastUpdated = new Date().toISOString();
+        item.updatedBy = currentUser;
+        window.appState.setState('itemPrices', itemPrices);
+      }
+      
+      window.formValidator.showToast('Item updated successfully!', 'success');
+    } else {
+      window.formValidator.showToast('Failed to update item', 'error');
+    }
+  } else {
+    const newItemId = window.appState.addNewItem(itemData, currentUser);
+    if (newItemId) {
+      window.formValidator.showToast('New item added successfully!', 'success');
+    } else {
+      window.formValidator.showToast('Failed to add item', 'error');
+    }
+  }
+  
+  cancelItemEdit();
+  renderItemPricesTable();
+  renderPriceAuditTable();
+}
+
+function toggleItemStatus(itemId) {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const itemPrices = window.appState.getState('itemPrices');
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    const oldStatus = item.status;
+    item.status = item.status === 'active' ? 'inactive' : 'active';
+    item.lastUpdated = new Date().toISOString();
+    item.updatedBy = currentUser;
+    
+    window.appState.addToArray('priceAuditLog', {
+      timestamp: new Date().toISOString(),
+      itemId: itemId,
+      itemName: item.name,
+      action: 'status_change',
+      oldPrice: item.price,
+      newPrice: item.price,
+      change: 0,
+      changePercent: 0,
+      updatedBy: currentUser,
+      notes: `Status changed from ${oldStatus} to ${item.status}`
+    });
+    
+    window.appState.setState('itemPrices', itemPrices);
+    window.formValidator.showToast(`Item ${item.status === 'active' ? 'activated' : 'deactivated'}!`, 'success');
+    renderItemPricesTable();
+    renderPriceAuditTable();
+  }
+}
+
+function applyBulkUpdate() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const updateType = document.getElementById('bulkUpdateType').value;
+  const amount = parseFloat(document.getElementById('bulkUpdateAmount').value);
+  const filter = document.getElementById('bulkUpdateFilter').value;
+  
+  if (!amount || amount === 0) {
+    window.formValidator.showToast('Please enter a valid update amount', 'error');
+    return;
+  }
+  
+  const itemPrices = window.appState.getState('itemPrices');
+  let itemsToUpdate = itemPrices.filter(item => item.status === 'active');
+  
+  let updatedCount = 0;
+  
+  itemsToUpdate.forEach(item => {
+    const oldPrice = item.price;
+    let newPrice;
+    
+    if (updateType === 'percentage') {
+      newPrice = oldPrice * (1 + (amount / 100));
+    } else {
+      newPrice = oldPrice + amount;
+    }
+    
+    newPrice = Math.max(0, Math.round(newPrice * 100) / 100);
+    
+    if (newPrice !== oldPrice) {
+      item.price = newPrice;
+      item.lastUpdated = new Date().toISOString();
+      item.updatedBy = currentUser;
+      
+      window.appState.addToArray('priceAuditLog', {
+        timestamp: new Date().toISOString(),
+        itemId: item.id,
+        itemName: item.name,
+        action: 'bulk_update',
+        oldPrice: oldPrice,
+        newPrice: newPrice,
+        change: newPrice - oldPrice,
+        changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
+        updatedBy: currentUser,
+        notes: `Bulk ${updateType} update: ${amount > 0 ? '+' : ''}${amount}${updateType === 'percentage' ? '%' : '$'}`
+      });
+      
+      updatedCount++;
+    }
+  });
+  
+  window.appState.setState('itemPrices', itemPrices);
+  window.formValidator.showToast(`Bulk update applied to ${updatedCount} items!`, 'success');
+  
+  document.getElementById('bulkUpdateAmount').value = '';
+  
+  renderItemPricesTable();
+  renderPriceAuditTable();
+}
+
+function updateAuditFilterOptions() {
+  const select = document.getElementById('auditFilterItem');
+  if (!select) return;
+  
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  
+  select.innerHTML = '<option value="all">All Items</option>';
+  itemPrices.forEach(item => {
+    select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+  });
+}
+
+function filterAuditHistory() {
+  const itemFilter = document.getElementById('auditFilterItem').value;
+  const fromDate = document.getElementById('auditFromDate').value;
+  const toDate = document.getElementById('auditToDate').value;
+  
+  const auditLog = window.appState.getState('priceAuditLog') || [];
+  let filteredLog = [...auditLog];
+  
+  if (itemFilter !== 'all') {
+    filteredLog = filteredLog.filter(log => log.itemId === itemFilter);
+  }
+  
+  if (fromDate) {
+    filteredLog = filteredLog.filter(log => {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      return logDate >= fromDate;
+    });
+  }
+  
+  if (toDate) {
+    filteredLog = filteredLog.filter(log => {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      return logDate <= toDate;
+    });
+  }
+  
+  renderPriceAuditTable(filteredLog);
+}
+
+function renderPriceAuditTable(filteredData = null) {
+  const tbody = document.querySelector('#priceAuditTable tbody');
+  if (!tbody) return;
+  
+  const auditData = filteredData || window.appState.getState('priceAuditLog') || [];
+  tbody.innerHTML = '';
+  
+  auditData.slice().reverse().forEach(log => {
+    const row = document.createElement('tr');
+    const changeColor = log.change > 0 ? '#22c55e' : log.change < 0 ? '#ef4444' : '#6b7280';
+    
+    row.innerHTML = `
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.itemName}</td>
+      <td style="text-transform: capitalize;">${log.action.replace('_', ' ')}</td>
+      <td>$${log.oldPrice.toFixed(2)}</td>
+      <td>$${log.newPrice.toFixed(2)}</td>
+      <td style="color: ${changeColor}; font-weight: bold;">
+        ${log.change > 0 ? '+' : ''}${log.change.toFixed(2)} 
+        ${log.changePercent != 0 ? `(${log.changePercent > 0 ? '+' : ''}${log.changePercent}%)` : ''}
+      </td>
+      <td>${log.updatedBy}</td>
+      <td>${log.notes}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+// Initialize
 // Initialize
 window.addEventListener('load', () => {
   setupProductionValidation();
@@ -2250,13 +2889,32 @@ window.addEventListener('load', () => {
   renderEquipmentGrid();
   renderMaintenanceLog();
   renderWastageTable();
-  initializeReportDates();  // <-- ADD THIS LINE
+  initializeReportDates();
+  
+  renderItemPricesTable();
+  renderPriceAuditTable();
   
   const today = new Date();
   const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
   
   document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
   document.getElementById('exportFromDate').value = monthAgo.toISOString().split('T')[0];
+  
+  if (document.getElementById('auditToDate')) {
+    document.getElementById('auditToDate').value = today.toISOString().split('T')[0];
+    document.getElementById('auditFromDate').value = monthAgo.toISOString().split('T')[0];
+  }
+  
+  window.appState.subscribe('itemPrices', () => {
+    renderItemPricesTable();
+    updateAuditFilterOptions();
+  });
+  
+  window.appState.subscribe('priceAuditLog', () => {
+    renderPriceAuditTable();
+  });
+  
+  showAdminControls();
 });
 </script>
 
