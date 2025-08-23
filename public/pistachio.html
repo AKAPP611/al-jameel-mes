@@ -1470,10 +1470,14 @@ function setupProductionValidation() {
 // ===== MODIFIED ORIGINAL FUNCTIONS =====
 
 // Login handling
+// Login handling
 function handleLogin(event) {
   event.preventDefault();
   const username = document.getElementById('loginUsername').value;
   const password = document.getElementById('loginPassword').value;
+  
+  console.log('Login attempt:', username, password); // Debug line
+  console.log('Available users:', users); // Debug line
   
   if (users[username] && users[username] === password) {
     window.appState.setState('currentUser', username);
@@ -1504,7 +1508,6 @@ function logout() {
 }
 
 // Navigation
-function showSection(sectionId) {
 function showSection(sectionId) {
   // Check admin access for restricted sections
   if (sectionId === 'itemprices') {
