@@ -1027,49 +1027,40 @@ class AppState {
       productionRecords: [],
       inventoryLog: [],
       maintenanceLog: [],
-       wastageLog: [],
+      wastageLog: [],
       itemPrices: [
-    // Default items with configurable prices
-    {
-      id: 'vacuum_bags_10kg',
-      name: 'Vacuum Bags (10kg)',
-      unit: 'piece',
-      price: 2.50,
-      status: 'active',
-      category: 'packaging',
-      lastUpdated: new Date().toISOString(),
-      updatedBy: 'system'
-    },
-    {
-      id: 'golden_hill_boxes',
-      name: 'Golden Hill Boxes',
-      unit: 'piece', 
-      price: 1.25,
-      status: 'active',
-      category: 'packaging',
-      lastUpdated: new Date().toISOString(),
-      updatedBy: 'system'
-    },
-    {
-      id: 'extra_boxes',
-      name: 'Extra Boxes',
-      unit: 'piece',
-      price: 1.00,
-      status: 'active', 
-      category: 'packaging',
-      lastUpdated: new Date().toISOString(),
-      updatedBy: 'system'
-    }
-  ],
-  priceAuditLog: [],
-  currentInventory: {
-    vacuumBags: 0,
-    goldenHillBoxes: 0,
-    extraBoxes: 0
-  },
-  equipment: [], // Will be populated below
-  currentUser: null
-};
+        {
+          id: 'vacuum_bags_10kg',
+          name: 'Vacuum Bags (10kg)',
+          unit: 'piece',
+          price: 2.50,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'golden_hill_boxes',
+          name: 'Golden Hill Boxes',
+          unit: 'piece', 
+          price: 1.25,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'extra_boxes',
+          name: 'Extra Boxes',
+          unit: 'piece',
+          price: 1.00,
+          status: 'active', 
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        }
+      ],
+      priceAuditLog: [],
       currentInventory: {
         vacuumBags: 0,
         goldenHillBoxes: 0,
@@ -1094,79 +1085,7 @@ class AppState {
     this.saveToStorage();
     this.notify(key, value);
   }
-// Add these helper methods to AppState class:
-getItemPrice(itemId) {
-  const item = this.data.itemPrices.find(item => item.id === itemId && item.status === 'active');
-  return item ? item.price : 0;
-}
 
-updateItemPrice(itemId, newPrice, updatedBy, notes = '') {
-  const item = this.data.itemPrices.find(item => item.id === itemId);
-  if (item) {
-    const oldPrice = item.price;
-    item.price = newPrice;
-    item.lastUpdated = new Date().toISOString();
-    item.updatedBy = updatedBy;
-    
-    // Add to audit log
-    this.addToArray('priceAuditLog', {
-      timestamp: new Date().toISOString(),
-      itemId: itemId,
-      itemName: item.name,
-      action: 'price_update',
-      oldPrice: oldPrice,
-      newPrice: newPrice,
-      change: newPrice - oldPrice,
-      changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
-      updatedBy: updatedBy,
-      notes: notes
-    });
-    
-    this.saveToStorage();
-    this.notify('itemPrices', this.data.itemPrices);
-    return true;
-  }
-  return false;
-}
-
-addNewItem(itemData, createdBy) {
-  const newItem = {
-    id: itemData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
-    name: itemData.name,
-    unit: itemData.unit,
-    price: itemData.price,
-    status: itemData.status || 'active',
-    category: itemData.category || 'general',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: createdBy
-  };
-  
-  this.addToArray('itemPrices', newItem);
-  
-  // Add to audit log
-  this.addToArray('priceAuditLog', {
-    timestamp: new Date().toISOString(),
-    itemId: newItem.id,
-    itemName: newItem.name,
-    action: 'item_created',
-    oldPrice: 0,
-    newPrice: newItem.price,
-    change: newItem.price,
-    changePercent: 0,
-    updatedBy: createdBy,
-    notes: 'New item created'
-  });
-  
-  return newItem.id;
-}
-
-calculateWastageCost(bagsWasted, boxesWasted, brand) {
-  const bagPrice = this.getItemPrice('vacuum_bags_10kg');
-  const boxItemId = brand === 'Golden Hill' ? 'golden_hill_boxes' : 'extra_boxes';
-  const boxPrice = this.getItemPrice(boxItemId);
-  
-  return (bagsWasted * bagPrice) + (boxesWasted * boxPrice);
-}
   getState(key) {
     return this.data[key];
   }
@@ -1552,15 +1471,46 @@ function setupProductionValidation() {
 
 // Login handling
 function handleLogin(event) {
-
-function logout() {
-  window.appState.setState('currentUser', null);
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('mainApp').style.display = 'none';
+  event.preventDefault();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  if (users[username] && users[username] === password) {
+    window.appState.setState('currentUser', username);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('userDisplay').textContent = username;
+    
+    showAdminControls();
+    
+    updateDashboard();
+    renderRecords();
+    renderInventory();
+    renderEquipmentGrid();
+    
+    if (username === 'admin') {
+      renderItemPricesTable();
+      renderPriceAuditTable();
+    }
+  } else {
+    window.formValidator.showToast('Invalid credentials', 'error');
+  }
 }
 
+function logout() {
+
+// Navigation
 // Navigation
 function showSection(sectionId) {
+  // Check admin access for restricted sections
+  if (sectionId === 'itemprices') {
+    const currentUser = window.appState.getState('currentUser');
+    if (currentUser !== 'admin') {
+      window.formValidator.showToast('Access denied: Admin only section', 'error');
+      return;
+    }
+  }
+  
   document.querySelectorAll('.section').forEach(section => {
     section.classList.remove('active');
   });
@@ -1570,6 +1520,12 @@ function showSection(sectionId) {
   
   document.getElementById(sectionId).classList.add('active');
   event.target.classList.add('active');
+  
+  // Load section-specific data when switching
+  if (sectionId === 'itemprices') {
+    renderItemPricesTable();
+    renderPriceAuditTable();
+  }
 }
 
 // Form handling
