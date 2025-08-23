@@ -576,3 +576,150 @@ html[dir="rtl"] .pistachio-icon-large {
     animation: none !important;
   }
 }
+/* Reports and Print Styling */
+.lot-selector {
+  margin: 1rem 0;
+}
+
+.search-box {
+  margin-bottom: 0.5rem;
+}
+
+.lot-option {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  margin: 0.25rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.lot-option:hover {
+  background: #f0f0f0;
+}
+
+.lot-option.selected {
+  background: var(--accent);
+  color: var(--text);
+}
+
+.lot-option input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.report-content {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.chart-container {
+  margin: 2rem 0;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  background: white;
+}
+
+.chart-placeholder {
+  height: 300px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  border-radius: 0.5rem;
+}
+
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.summary-card {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.summary-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .report-content, .report-content * {
+    visibility: visible;
+  }
+  
+  .report-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  
+  .header, .nav-buttons, .container > *:not(.section), 
+  .section:not(#reports), #reportPreview button {
+    display: none !important;
+  }
+  
+  .report-header {
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .report-page {
+    page-break-after: always;
+  }
+  
+  .report-page:last-child {
+    page-break-after: avoid;
+  }
+  
+  .chart-container {
+    page-break-inside: avoid;
+    margin: 1rem 0;
+  }
+  
+  table {
+    page-break-inside: avoid;
+  }
+  
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+  
+  @page {
+    margin: 1in;
+    size: A4;
+  }
+  
+  .report-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+    border-top: 1px solid #ccc;
+    padding: 0.5rem;
+    background: white;
+  }
+}
