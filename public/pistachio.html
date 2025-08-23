@@ -1075,7 +1075,7 @@ function setupProductionValidation() {
   const validator = window.formValidator;
   
   validator.addRule('rawInput', ValidationRules.positiveNumber, 'Raw input must be a positive number');
-  validator.addRule('rawInput', ValidationRules.range(0, 10000), 'Raw input must be between 0-10,000 kg');
+  validator.addRule('rawInput', ValidationRules.range(0, 999999), 'Raw input must be between 0-999,999 kg');
   validator.addRule('bags1821', ValidationRules.positiveNumber, '18-21 size must be a positive number');
   validator.addRule('bags2125', ValidationRules.positiveNumber, '21-25 size must be a positive number');
   validator.addRule('lotNo', ValidationRules.required, 'Lot number is required');
