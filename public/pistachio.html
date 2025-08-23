@@ -441,20 +441,22 @@
       <h2 style="margin-bottom: 1rem;">📋 Production Records</h2>
       <div style="overflow-x: auto;">
         <table id="recordsTable">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Run Type</th>
-              <th>Brand</th>
-              <th>Size</th>
-              <th>Lot</th>
-              <th>Raw Input (kg)</th>
-              <th>Final Bags</th>
-              <th>Finished (kg)</th>
-              <th>Rejects (kg)</th>
-              <th>Efficiency (%)</th>
-            </tr>
-          </thead>
+         <thead>
+  <tr>
+    <th>Timestamp</th>
+    <th>Run Type</th>
+    <th>Brand</th>
+    <th>Lot</th>
+    <th>Raw Input (kg)</th>
+    <th>18-21 Size (kg)</th>
+    <th>21-25 Size (kg)</th>
+    <th>Finished (kg)</th>
+    <th>Rejects (kg)</th>
+    <th>Total Output (kg)</th>
+    <th>Material Gain/Loss</th>
+    <th>Efficiency (%)</th>
+  </tr>
+</thead>
           <tbody></tbody>
         </table>
       </div>
@@ -737,9 +739,47 @@
           <tbody></tbody>
         </table>
       </div>
+      <h3>Wastage Analysis</h3>
+      <div class="materials-section">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Filter by Date Range</label>
+            <input id="wastageFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="wastageToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="filterWastageByDate()" style="width: 100%;">Filter Wastage</button>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="showAllWastage()" style="width: 100%;" class="btn-secondary">Show All</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table id="wastageTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Lot Number</th>
+              <th>Brand</th>
+              <th>Bags Wasted</th>
+              <th>Boxes Wasted</th>
+              <th>Total Waste Cost</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </section>
   </div>
 </div>
+ 
 <script>
 // ===== STATE MANAGEMENT =====
 class AppState {
@@ -748,6 +788,7 @@ class AppState {
       productionRecords: [],
       inventoryLog: [],
       maintenanceLog: [],
+       wastageLog: [],  
       currentInventory: {
         vacuumBags: 0,
         goldenHillBoxes: 0,
@@ -1257,7 +1298,7 @@ function submitProduction() {
   
   // Add to state instead of local array
   window.appState.addToArray('productionRecords', record);
-  
+  trackWastage(record);
   // Update inventory using state methods
   window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
   window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
@@ -1322,18 +1363,25 @@ function renderRecords() {
   const productionRecords = window.appState.getState('productionRecords') || [];
   productionRecords.slice().reverse().forEach(record => {
     const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${new Date(record.timestamp).toLocaleString()}</td>
-      <td>${record.runType}</td>
-      <td>${record.brand}</td>
-      <td>${record.size}</td>
-      <td>${record.lot}</td>
-      <td>${record.rawInput}</td>
-      <td>${record.totalKg || record.totalBags}</td>
-      <td>${record.finishedKg}</td>
-      <td>${record.rejectsKg}</td>
-      <td>${record.efficiency}%</td>
-    `;
+    const totalOutput = record.finishedKg + record.rejectsKg;
+const materialGain = totalOutput - record.rawInput;
+const gainPercent = record.rawInput > 0 ? ((materialGain / record.rawInput) * 100).toFixed(1) : 0;
+const gainColor = materialGain > 0 ? '#22c55e' : '#ef4444';
+
+row.innerHTML = `
+  <td>${new Date(record.timestamp).toLocaleString()}</td>
+  <td>${record.runType}</td>
+  <td>${record.brand}</td>
+  <td>${record.lot}</td>
+  <td>${record.rawInput}</td>
+  <td>${record.kg1821 || 0}</td>
+  <td>${record.kg2125 || 0}</td>
+  <td>${record.finishedKg}</td>
+  <td>${record.rejectsKg}</td>
+  <td>${totalOutput}</td>
+  <td style="color: ${gainColor}; font-weight: bold;">${materialGain > 0 ? '+' : ''}${materialGain} (${gainPercent > 0 ? '+' : ''}${gainPercent}%)</td>
+  <td>${record.efficiency}%</td>
+`;
     tbody.appendChild(row);
   });
 }
@@ -1742,6 +1790,93 @@ function exportMaintenanceReport() {
     printWindow.print();
   }, 250);
 }
+// Add this after the submitProduction function
+function trackWastage(record) {
+  if (record.materials.bagsWasted > 0 || record.materials.boxesWasted > 0) {
+    const wastageRecord = {
+      timestamp: record.timestamp,
+      lot: record.lot,
+      brand: record.brand,
+      bagsWasted: record.materials.bagsWasted,
+      boxesWasted: record.materials.boxesWasted,
+      estimatedCost: (record.materials.bagsWasted * 2.5) + (record.materials.boxesWasted * 1.0) // Adjust costs as needed
+    };
+    
+    window.appState.addToArray('wastageLog', wastageRecord);
+  }
+}
+
+// Add wastage rendering function
+function renderWastageTable(filteredData = null) {
+  const tbody = document.querySelector('#wastageTable tbody');
+  if (!tbody) return;
+  
+  const wastageData = filteredData || window.appState.getState('wastageLog') || [];
+  tbody.innerHTML = '';
+  
+  let totalBagsWasted = 0;
+  let totalBoxesWasted = 0;
+  let totalCost = 0;
+  
+  wastageData.slice().reverse().forEach(waste => {
+    totalBagsWasted += waste.bagsWasted;
+    totalBoxesWasted += waste.boxesWasted;
+    totalCost += waste.estimatedCost;
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${new Date(waste.timestamp).toLocaleDateString()}</td>
+      <td>${waste.lot}</td>
+      <td>${waste.brand}</td>
+      <td>${waste.bagsWasted}</td>
+      <td>${waste.boxesWasted}</td>
+      <td>$${waste.estimatedCost.toFixed(2)}</td>
+    `;
+    tbody.appendChild(row);
+  });
+  
+  // Add summary row
+  if (wastageData.length > 0) {
+    const summaryRow = document.createElement('tr');
+    summaryRow.style.backgroundColor = '#f8f9fa';
+    summaryRow.style.fontWeight = 'bold';
+    summaryRow.innerHTML = `
+      <td colspan="3">TOTAL</td>
+      <td>${totalBagsWasted}</td>
+      <td>${totalBoxesWasted}</td>
+      <td>$${totalCost.toFixed(2)}</td>
+    `;
+    tbody.appendChild(summaryRow);
+  }
+}
+
+function filterWastageByDate() {
+  const fromDate = document.getElementById('wastageFromDate').value;
+  const toDate = document.getElementById('wastageToDate').value;
+  
+  if (!fromDate || !toDate) {
+    window.formValidator.showToast('Please select both dates', 'error');
+    return;
+  }
+  
+  const wastageLog = window.appState.getState('wastageLog') || [];
+  const filtered = wastageLog.filter(waste => {
+    const wasteDate = new Date(waste.timestamp).toISOString().split('T')[0];
+    return wasteDate >= fromDate && wasteDate <= toDate;
+  });
+  
+  renderWastageTable(filtered);
+  
+  if (filtered.length === 0) {
+    window.formValidator.showToast('No wastage found in selected date range', 'error');
+  }
+}
+
+function showAllWastage() {
+  document.getElementById('wastageFromDate').value = '';
+  document.getElementById('wastageToDate').value = '';
+  renderWastageTable();
+}
 
 // Initialize
 window.addEventListener('load', () => {
@@ -1751,6 +1886,7 @@ window.addEventListener('load', () => {
   renderInventory();
   renderEquipmentGrid();
   renderMaintenanceLog();
+  renderWastageTable();
   
   const today = new Date();
   const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
