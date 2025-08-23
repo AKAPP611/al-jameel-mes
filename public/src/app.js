@@ -1,7 +1,7 @@
-// app.js - Complete version with cache busting
-const APP_VERSION = '1.2.0'; // Increment this when making changes
+// app.js - Complete version with cache busting (Fixed - No top-level await)
+const APP_VERSION = '1.2.1'; // Increment this when making changes
 
-// Dynamic imports with cache busting
+// Dynamic imports with cache busting - moved inside functions
 async function loadView(viewPath) {
   try {
     const module = await import(`${viewPath}?v=${APP_VERSION}&t=${Date.now()}`);
@@ -12,12 +12,6 @@ async function loadView(viewPath) {
     return import(viewPath);
   }
 }
-
-// Load views with cache busting
-const FactorySelectView = (await loadView('./views/factory-select.js')).FactorySelectView;
-const PistachioHome = (await loadView('./views/pistachio-home.js')).PistachioHome;
-const PistachioShift = (await loadView('./views/pistachio-shift.js')).PistachioShift;
-const MaterialsView = (await loadView('./views/materials.js')).MaterialsView;
 
 const i18n = {
   en: {
@@ -249,8 +243,8 @@ function ensureBackButton() {
   return __backBtn;
 }
 
-/* Main Render Function with enhanced error handling */
-function render() {
+/* Main Render Function with enhanced error handling and dynamic imports */
+async function render() {
   try {
     const mount = document.getElementById('app');
     if (!mount) {
@@ -269,21 +263,41 @@ function render() {
       backBtn.innerHTML = `← ${t('back')}`;
     }
 
-    // Route to appropriate view
+    // Show loading indicator while loading views
+    mount.innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <div style="display: inline-block; width: 32px; height: 32px; border: 3px solid #f3f3f3; border-top: 3px solid #a32034; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p>Loading...</p>
+      </div>
+    `;
+
+    // Route to appropriate view with dynamic imports
     try {
       switch(route) {
         case '#/':
         case '#/select':
-          FactorySelectView(mount, { t });
+          {
+            const { FactorySelectView } = await loadView('./views/factory-select.js');
+            FactorySelectView(mount, { t });
+          }
           break;
         case '#/pistachio':
-          PistachioHome(mount, { t });
+          {
+            const { PistachioHome } = await loadView('./views/pistachio-home.js');
+            PistachioHome(mount, { t });
+          }
           break;
         case '#/shift/new':
-          PistachioShift(mount, { t });
+          {
+            const { PistachioShift } = await loadView('./views/pistachio-shift.js');
+            PistachioShift(mount, { t });
+          }
           break;
         case '#/materials':
-          MaterialsView(mount, { t });
+          {
+            const { MaterialsView } = await loadView('./views/materials.js');
+            MaterialsView(mount, { t });
+          }
           break;
         default:
           mount.innerHTML = `
@@ -305,6 +319,10 @@ function render() {
             <button onclick="window.location.reload()" class="btn">Try Again</button>
             <button onclick="clearCacheAndReload()" class="ghost">Clear Cache</button>
           </div>
+          <details style="margin-top: 1rem;">
+            <summary>Technical Details</summary>
+            <pre style="background: #f5f5f5; padding: 0.5rem; font-size: 12px; white-space: pre-wrap;">${e.stack}</pre>
+          </details>
         </div>
       `;
     }
@@ -381,7 +399,7 @@ window.addEventListener('error', (e) => {
   
   // Show user-friendly error for critical failures
   const app = document.getElementById('app');
-  if (app && e.error.message.includes('import')) {
+  if (app && e.error && e.error.message.includes('import')) {
     app.innerHTML = `
       <div class="card" style="border-color: #fecaca; background: #fef2f2;">
         <h3 style="color: #dc2626;">Loading Error</h3>
@@ -396,6 +414,17 @@ window.addEventListener('unhandledrejection', (e) => {
   console.error('Unhandled promise rejection:', e.reason);
 });
 
+// Add loading animation styles
+const loadingStyle = document.createElement('style');
+loadingStyle.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(loadingStyle);
+
 // Version info for debugging
 console.log('App Version:', APP_VERSION);
 console.log('Build Time:', new Date().toISOString());
+console.log('Browser support - Top-level await:', 'supported' in window ? 'yes' : 'no');
