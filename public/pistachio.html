@@ -268,12 +268,13 @@
 
   <div class="container">
     <div class="nav-buttons">
-      <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
-      <button class="nav-btn" onclick="showSection('production')">New Production</button>
-      <button class="nav-btn" onclick="showSection('records')">View Records</button>
-      <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
-      <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
-    </div>
+  <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="showSection('production')">New Production</button>
+  <button class="nav-btn" onclick="showSection('records')">View Records</button>
+  <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
+  <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
+  <button class="nav-btn" onclick="showSection('reports')">Reports</button>
+</div>
 
     <!-- Dashboard Section -->
     <section id="dashboard" class="section active">
@@ -672,6 +673,66 @@
         </table>
       </div>
     </section>
+    <!-- Reports Section -->
+<section id="reports" class="section">
+  <h2 style="margin-bottom: 1rem;">📊 Production Reports</h2>
+  
+  <div class="materials-section">
+    <h3>Report Generator</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>From Date</label>
+        <input id="reportFromDate" type="date">
+      </div>
+      <div class="form-group">
+        <label>To Date</label>
+        <input id="reportToDate" type="date">
+      </div>
+      <div class="form-group">
+        <label>Product Line</label>
+        <select id="reportBrand">
+          <option value="all">All Brands</option>
+          <option value="Golden Hill">Golden Hill</option>
+          <option value="Extra">Extra</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button onclick="loadAvailableLots()" style="width: 100%;">Load Available Lots</button>
+      </div>
+    </div>
+    
+    <div class="form-group" style="margin-top: 1rem;">
+      <label>Select Lots (multi-select with search)</label>
+      <div id="lotSelector" class="lot-selector">
+        <div class="search-box">
+          <input id="lotSearch" type="text" placeholder="Search lots..." onkeyup="filterLots()">
+        </div>
+        <div class="lot-options" id="lotOptions" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
+          <p style="color: #666; text-align: center; padding: 1rem;">Click "Load Available Lots" to see options</p>
+        </div>
+        <div class="selected-lots" id="selectedLots" style="margin-top: 0.5rem;">
+          <strong>Selected:</strong> <span id="selectedLotsDisplay">None</span>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 1.5rem;">
+      <button onclick="generateReport()" style="margin-right: 1rem;">Generate Report</button>
+      <button onclick="printReport()" class="btn-secondary" id="printButton" disabled>Print Report</button>
+    </div>
+  </div>
+  
+  <!-- Report Preview Area -->
+  <div id="reportPreview" style="display: none; margin-top: 2rem;">
+    <div style="text-align: right; margin-bottom: 1rem;">
+      <button onclick="printReport()">Print Report</button>
+    </div>
+    <div id="reportContent" class="report-content">
+      <!-- Report content will be generated here -->
+    </div>
+  </div>
+</section>
 
     <!-- Inventory Section -->
     <section id="inventory" class="section">
