@@ -1498,9 +1498,13 @@ function handleLogin(event) {
 }
 
 function logout() {
+  window.appState.setState('currentUser', null);
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+}
 
 // Navigation
-// Navigation
+function showSection(sectionId) {
 function showSection(sectionId) {
   // Check admin access for restricted sections
   if (sectionId === 'itemprices') {
