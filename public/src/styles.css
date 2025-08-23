@@ -723,3 +723,148 @@ html[dir="rtl"] .pistachio-icon-large {
     background: white;
   }
 }
+/* Add these styles to your public/src/styles.css */
+
+/* ===== Touch Device Enhancements ===== */
+
+/* Improve touch targets for all interactive elements */
+a, button, input, select, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(163, 32, 52, 0.2);
+}
+
+/* Ensure minimum touch target size */
+.btn, .ghost, .pill, .back-link {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Back link specific improvements */
+.back-link {
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.back-link:hover,
+.back-link:focus,
+.back-link:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Improve button responsiveness on touch */
+.btn:active, .ghost:active, .pill:active {
+  transform: translateY(1px) scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* ===== Mobile/Tablet Specific Styles ===== */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  /* Increase padding for better touch targets */
+  .btn, .ghost {
+    padding: 12px 20px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Improve header spacing */
+  .header-row {
+    gap: 0.5rem;
+    padding: 8px 0;
+  }
+  
+  /* Better language switch layout */
+  .lang-switch {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .pill {
+    padding: 8px 12px;
+    min-width: 48px;
+    font-size: 14px;
+  }
+  
+  /* Improve card interactions */
+  .factory-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .factory-card:active {
+    transform: translateY(2px) scale(0.98);
+  }
+  
+  /* Prevent text selection on interactive elements */
+  .btn, .ghost, .pill, .back-link, .factory-card {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
+/* ===== iOS Specific Fixes ===== */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  input, select, textarea {
+    font-size: 16px !important; /* Prevent zoom */
+  }
+  
+  .btn, .ghost, .pill {
+    -webkit-appearance: none;
+    border-radius: 8px; /* iOS tends to override border-radius */
+  }
+  
+  /* Fix iOS button styling issues */
+  button {
+    -webkit-appearance: none;
+  }
+}
+
+/* ===== Android Specific Fixes ===== */
+@media screen and (-webkit-min-device-pixel-ratio: 1) and (max-width: 768px) {
+  /* Android Chrome specific improvements */
+  .back-link, .btn, .ghost {
+    -webkit-tap-highlight-color: rgba(163, 32, 52, 0.2);
+    tap-highlight-color: rgba(163, 32, 52, 0.2);
+  }
+}
+
+/* ===== Loading State for Navigation ===== */
+.back-link.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.back-link.loading::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Accessibility Improvements ===== */
+@media (prefers-reduced-motion: reduce) {
+  .back-link, .btn, .ghost, .pill, .factory-card {
+    transition: none;
+    animation: none;
+  }
+}
