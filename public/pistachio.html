@@ -3253,6 +3253,26 @@ window.addEventListener('load', () => {
   showAdminControls();
 });
 </script>
-
+// Enhanced back link handling - add this to pistachio.html
+document.addEventListener('DOMContentLoaded', function() {
+  const backLinks = document.querySelectorAll('a[href*="index.html"]');
+  
+  backLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Back link clicked');
+      
+      // Try multiple navigation methods
+      window.location.href = './index.html';
+      
+      // Fallback
+      setTimeout(() => {
+        if (window.location.href.includes('pistachio.html')) {
+          window.location.replace('./index.html');
+        }
+      }, 500);
+    });
+  });
+});
 </body>
 </html>
