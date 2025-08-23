@@ -1938,7 +1938,309 @@ function showAllWastage() {
   document.getElementById('wastageToDate').value = '';
   renderWastageTable();
 }
+// ===== REPORTS FUNCTIONALITY =====
+let availableLots = [];
+let selectedLotsList = [];
 
+function loadAvailableLots() {
+  const fromDate = document.getElementById('reportFromDate').value;
+  const toDate = document.getElementById('reportToDate').value;
+  const brand = document.getElementById('reportBrand').value;
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  // Filter records based on date and brand
+  let filteredRecords = productionRecords.filter(record => {
+    let dateMatch = true;
+    let brandMatch = true;
+    
+    if (fromDate || toDate) {
+      const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+      if (fromDate && recordDate < fromDate) dateMatch = false;
+      if (toDate && recordDate > toDate) dateMatch = false;
+    }
+    
+    if (brand !== 'all' && record.brand !== brand) {
+      brandMatch = false;
+    }
+    
+    return dateMatch && brandMatch;
+  });
+  
+  // Extract unique lots
+  availableLots = [...new Set(filteredRecords.map(record => ({
+    lot: record.lot,
+    brand: record.brand,
+    date: new Date(record.timestamp).toLocaleDateString(),
+    finished: record.finishedKg,
+    rejects: record.rejectsKg
+  })))];
+  
+  renderLotOptions();
+  window.formValidator.showToast(`Found ${availableLots.length} lots`, 'success');
+}
+
+function renderLotOptions() {
+  const container = document.getElementById('lotOptions');
+  
+  if (availableLots.length === 0) {
+    container.innerHTML = '<p style="color: #666; text-align: center; padding: 1rem;">No lots found for the selected criteria</p>';
+    return;
+  }
+  
+  container.innerHTML = availableLots.map(lotData => `
+    <div class="lot-option" onclick="toggleLot('${lotData.lot}')">
+      <input type="checkbox" ${selectedLotsList.includes(lotData.lot) ? 'checked' : ''}>
+      <div>
+        <strong>${lotData.lot}</strong> - ${lotData.brand}<br>
+        <small>${lotData.date} • ${lotData.finished}kg finished • ${lotData.rejects}kg rejects</small>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterLots() {
+  const searchTerm = document.getElementById('lotSearch').value.toLowerCase();
+  const lotOptions = document.querySelectorAll('.lot-option');
+  
+  lotOptions.forEach(option => {
+    const lotText = option.textContent.toLowerCase();
+    option.style.display = lotText.includes(searchTerm) ? 'block' : 'none';
+  });
+}
+
+function toggleLot(lotNumber) {
+  if (selectedLotsList.includes(lotNumber)) {
+    selectedLotsList = selectedLotsList.filter(lot => lot !== lotNumber);
+  } else {
+    selectedLotsList.push(lotNumber);
+  }
+  
+  updateSelectedDisplay();
+  renderLotOptions(); // Re-render to update checkboxes
+}
+
+function updateSelectedDisplay() {
+  const display = document.getElementById('selectedLotsDisplay');
+  display.textContent = selectedLotsList.length > 0 ? selectedLotsList.join(', ') : 'None';
+}
+
+function generateReport() {
+  if (selectedLotsList.length === 0) {
+    window.formValidator.showToast('Please select at least one lot', 'error');
+    return;
+  }
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  const wastageLog = window.appState.getState('wastageLog') || [];
+  
+  // Filter records for selected lots
+  const selectedRecords = productionRecords.filter(record => 
+    selectedLotsList.includes(record.lot)
+  );
+  
+  const selectedWastage = wastageLog.filter(waste => 
+    selectedLotsList.includes(waste.lot)
+  );
+  
+  generateReportHTML(selectedRecords, selectedWastage);
+  
+  document.getElementById('reportPreview').style.display = 'block';
+  document.getElementById('printButton').disabled = false;
+}
+
+function generateReportHTML(records, wastageData) {
+  const reportContent = document.getElementById('reportContent');
+  
+  // Calculate totals
+  const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
+  const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
+  const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
+  const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
+  const totalWasteCost = wastageData.reduce((sum, w) => sum + w.estimatedCost, 0);
+  
+  const reportHTML = `
+    <div class="report-header">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="color: var(--primary); margin: 0;">Al Jameel MES</h1>
+          <h2 style="margin: 0.5rem 0 0 0;">Pistachio Production Report</h2>
+        </div>
+        <div style="text-align: right;">
+          <p><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+          <p><strong>Lots:</strong> ${selectedLotsList.length}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="report-summary">
+      <div class="summary-card">
+        <div>Total Finished</div>
+        <div class="summary-value">${totalFinished} kg</div>
+      </div>
+      <div class="summary-card">
+        <div>Total Rejects</div>
+        <div class="summary-value">${totalRejects} kg</div>
+      </div>
+      <div class="summary-card">
+        <div>Average Efficiency</div>
+        <div class="summary-value">${avgEfficiency}%</div>
+      </div>
+      <div class="summary-card">
+        <div>Total Waste Cost</div>
+        <div class="summary-value">$${totalWasteCost.toFixed(2)}</div>
+      </div>
+    </div>
+    
+    <!-- Production Volume Chart -->
+    <div class="chart-container">
+      <h3>Production Volume by Lot</h3>
+      ${generateProductionChart(records)}
+    </div>
+    
+    <!-- Wastage Chart -->
+    <div class="chart-container">
+      <h3>Wastage Analysis by Lot</h3>
+      ${generateWastageChart(wastageData)}
+    </div>
+    
+    <!-- Detailed Records Table -->
+    <div class="report-page">
+      <h3>Detailed Production Records</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <thead>
+          <tr style="background: var(--primary); color: white;">
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">Date</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">Lot</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">Brand</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">Raw Input</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">18-21 kg</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">21-25 kg</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">Finished</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">Rejects</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd;">Efficiency</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${records.map(record => `
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.rawInput}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.kg1821 || 0}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.kg2125 || 0}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.finishedKg}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.rejectsKg}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.efficiency}%</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Wastage Details -->
+    ${wastageData.length > 0 ? `
+      <div class="report-page">
+        <h3>Wastage Details</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+          <thead>
+            <tr style="background: var(--primary); color: white;">
+              <th style="padding: 0.75rem; border: 1px solid #ddd;">Date</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd;">Lot</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd;">Brand</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd;">Bags Wasted</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd;">Boxes Wasted</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd;">Est. Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${wastageData.map(waste => `
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(waste.timestamp).toLocaleDateString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.lot}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.brand}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.bagsWasted}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.boxesWasted}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">$${waste.estimatedCost.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : ''}
+    
+    <div class="report-footer">
+      Al Jameel MES - Pistachio Production Management System | Generated: ${new Date().toLocaleDateString()}
+    </div>
+  `;
+  
+  reportContent.innerHTML = reportHTML;
+}
+
+function generateProductionChart(records) {
+  if (records.length === 0) return '<div class="chart-placeholder">No production data available</div>';
+  
+  // Simple horizontal bar chart using CSS
+  const maxValue = Math.max(...records.map(r => r.finishedKg));
+  
+  return `
+    <div style="padding: 1rem;">
+      ${records.map(record => {
+        const percentage = (record.finishedKg / maxValue) * 100;
+        return `
+          <div style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <span><strong>${record.lot}</strong></span>
+              <span>${record.finishedKg} kg</span>
+            </div>
+            <div style="background: #e9ecef; height: 20px; border-radius: 10px; overflow: hidden;">
+              <div style="background: var(--primary); height: 100%; width: ${percentage}%; border-radius: 10px;"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function generateWastageChart(wastageData) {
+  if (wastageData.length === 0) return '<div class="chart-placeholder">No wastage data available</div>';
+  
+  const maxValue = Math.max(...wastageData.map(w => w.estimatedCost));
+  
+  return `
+    <div style="padding: 1rem;">
+      ${wastageData.map(waste => {
+        const percentage = (waste.estimatedCost / maxValue) * 100;
+        return `
+          <div style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <span><strong>${waste.lot}</strong></span>
+              <span>$${waste.estimatedCost.toFixed(2)}</span>
+            </div>
+            <div style="background: #e9ecef; height: 20px; border-radius: 10px; overflow: hidden;">
+              <div style="background: #dc3545; height: 100%; width: ${percentage}%; border-radius: 10px;"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function printReport() {
+  window.print();
+}
+
+// Initialize report dates
+function initializeReportDates() {
+  const today = new Date();
+  const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+  
+  document.getElementById('reportToDate').value = today.toISOString().split('T')[0];
+  document.getElementById('reportFromDate').value = monthAgo.toISOString().split('T')[0];
+}
 // Initialize
 window.addEventListener('load', () => {
   setupProductionValidation();
@@ -1948,6 +2250,7 @@ window.addEventListener('load', () => {
   renderEquipmentGrid();
   renderMaintenanceLog();
   renderWastageTable();
+  initializeReportDates();  // <-- ADD THIS LINE
   
   const today = new Date();
   const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
