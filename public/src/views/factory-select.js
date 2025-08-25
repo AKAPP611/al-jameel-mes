@@ -91,7 +91,11 @@ function renderCards(grid, factories, prod, qc) {
     const p = prod[f.key] || { actualKg: 0, targetKg: 0, efficiency: 0, rejectRate: 0 };
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
-    
+    const href = f.key === 'Pistachio'
+  ? './pistachio.html'
+  : (f.key === 'Walnut' 
+     ? './walnut.html' 
+     : `#/dashboard?factory=${encodeURIComponent(f.key)}`);
     // Factory icons
     let iconMarkup = '';
 
