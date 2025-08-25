@@ -1,68 +1,599 @@
-/* Basic QC-specific styles */
+/* QC Receiving Inspection Styles - Add to public/src/qc-styles.css */
 
-:root {
-  --qc-pass: #22c55e;
-  --qc-warning: #f59e0b;
-  --qc-fail: #ef4444;
+.qc-inspection-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
-/* QC-specific color variations for KPIs */
-.kpi.qc-pass::before {
-  background: var(--qc-pass);
+/* Header Section */
+.inspection-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid var(--primary);
 }
 
-.kpi.qc-warning::before {
-  background: var(--qc-warning);
+.header-logo img {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.kpi.qc-fail::before {
-  background: var(--qc-fail);
+.header-info h1 {
+  margin: 0 0 1rem 0;
+  color: var(--primary);
+  font-size: 1.75rem;
+  font-weight: 900;
+  text-align: center;
 }
 
-/* QC activity styling */
+.document-info {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.info-row input {
+  border: none;
+  border-bottom: 1px solid #ddd;
+  padding: 2px 4px;
+  font-size: 0.9rem;
+  max-width: 120px;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.header-actions button {
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+}
+
+/* Section Styling */
+.inspection-section {
+  margin-bottom: 2rem;
+  background: #fafbfc;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.section-title {
+  margin: 0 0 1rem 0;
+  color: var(--primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* Storage Conditions */
+.storage-conditions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.storage-option label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.storage-option input[type="radio"]:checked + strong,
+.storage-option label:has(input[type="radio"]:checked) {
+  border-color: var(--primary);
+  background-color: rgba(163, 32, 52, 0.05);
+}
+
+/* Properties Tables */
+.properties-table,
+.foreign-matter-table {
+  display: grid;
+  gap: 0.5rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.property-header,
+.matter-header {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.property-row,
+.matter-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.property-row:last-child,
+.matter-row:last-child {
+  border-bottom: none;
+}
+
+.property-row span:first-child,
+.matter-row span:first-child {
+  font-weight: 500;
+}
+
+.property-row input[type="text"],
+.matter-row select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.property-row label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-weight: normal;
+}
+
+.property-row input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+/* Physical Properties */
+.physical-props {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.prop-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.damage-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.damage-input input[readonly] {
+  background-color: #f8f9fa;
+  max-width: 80px;
+}
+
+/* Chemical Properties */
+.chemical-props {
+  display: grid;
+  gap: 1rem;
+}
+
+.chem-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.chem-row label {
+  font-weight: 600;
+}
+
+.test-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.test-input input {
+  max-width: 100px;
+}
+
+.test-input span {
+  font-size: 0.9rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Photo Upload Section */
+.photo-upload-section {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+  border-color: var(--primary);
+  background-color: rgba(163, 32, 52, 0.02);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-icon {
+  font-size: 2rem;
+}
+
+.upload-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.photo-item {
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  background: white;
+}
+
+.photo-item img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.photo-info {
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+}
+
+.photo-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.photo-delete:hover {
+  background: #dc2626;
+}
+
+.template-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.photo-tag {
+  background: var(--accent);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Evaluation Section */
+.evaluation-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.sample-info,
+.additional-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Final Decision */
+.final-decision {
+  background: #f0f9ff;
+  border-color: #0ea5e9;
+}
+
+.decision-container {
+  display: grid;
+  gap: 1rem;
+}
+
+.decision-options {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.decision-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border: 3px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.decision-option.accepted {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.decision-option.rejected {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.decision-option input[type="radio"]:checked ~ .decision-text,
+.decision-option:has(input[type="radio"]:checked) {
+  color: white;
+}
+
+.decision-option.accepted:has(input[type="radio"]:checked) {
+  background: #22c55e;
+  border-color: #16a34a;
+}
+
+.decision-option.rejected:has(input[type="radio"]:checked) {
+  background: #ef4444;
+  border-color: #dc2626;
+}
+
+.decision-option input[type="radio"] {
+  transform: scale(1.3);
+}
+
+.rejection-reason {
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+}
+
+/* Inspector Information */
+.inspector-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.inspector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.action-buttons button {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+}
+
+/* QC Activity Items */
 .qc-activity-item {
   padding: 0.75rem;
   background: #f8f9fa;
   border-radius: 0.5rem;
   margin-bottom: 0.5rem;
   border-left: 4px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.qc-activity-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .qc-activity-item.pass {
-  border-left-color: var(--qc-pass);
+  border-left-color: #22c55e;
+  background: rgba(34, 197, 94, 0.05);
 }
 
 .qc-activity-item.warning {
-  border-left-color: var(--qc-warning);
+  border-left-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
 }
 
 .qc-activity-item.fail {
-  border-left-color: var(--qc-fail);
+  border-left-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
 }
 
-/* Make QC cards more interactive */
-.factory-card {
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .qc-inspection-container {
+    padding: 1rem;
+  }
+  
+  .inspection-header {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .property-header,
+  .matter-header,
+  .property-row,
+  .matter-row {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+  
+  .storage-conditions {
+    grid-template-columns: 1fr;
+  }
+  
+  .decision-options {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .chem-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .test-input {
+    justify-content: space-between;
+  }
+  
+  .inspector-info {
+    grid-template-columns: 1fr;
+  }
 }
 
-.factory-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
-}
-
-/* QC-specific button styling */
-.qc-btn-pass {
-  background: var(--qc-pass);
-  color: white;
-}
-
-.qc-btn-warning {
-  background: var(--qc-warning);
-  color: white;
-}
-
-.qc-btn-fail {
-  background: var(--qc-fail);
-  color: white;
+/* Print Styles */
+@media print {
+  .qc-inspection-container {
+    box-shadow: none;
+    max-width: none;
+    padding: 1rem;
+  }
+  
+  .header-actions,
+  .action-buttons {
+    display: none;
+  }
+  
+  .inspection-section {
+    break-inside: avoid;
+    background: white !important;
+  }
+  
+  .section-title {
+    color: black !important;
+    border-bottom-color: #333 !important;
+  }
+  
+  .property-header,
+  .matter-header {
+    background: #f0f0f0 !important;
+    color: black !important;
+  }
+  
+  .photo-grid {
+    display: none;
+  }
+  
+  .upload-area {
+    display: none;
+  }
+  
+  @page {
+    margin: 1in;
+    size: A4;
+  }
 }
