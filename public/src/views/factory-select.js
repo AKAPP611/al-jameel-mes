@@ -91,11 +91,14 @@ function renderCards(grid, factories, prod, qc) {
     const p = prod[f.key] || { actualKg: 0, targetKg: 0, efficiency: 0, rejectRate: 0 };
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
+    
+    // Keep only this href declaration
     const href = f.key === 'Pistachio'
-  ? './pistachio.html'
-  : (f.key === 'Walnut' 
-     ? './walnut.html' 
-     : `#/dashboard?factory=${encodeURIComponent(f.key)}`);
+      ? './pistachio.html'
+      : (f.key === 'Walnut' 
+         ? './walnut.html' 
+         : `#/dashboard?factory=${encodeURIComponent(f.key)}`);
+    
     // Factory icons
     let iconMarkup = '';
 
@@ -107,10 +110,7 @@ function renderCards(grid, factories, prod, qc) {
       iconMarkup = '🌿';
     }
 
-    // Navigation links
-    const href = f.key === 'Pistachio'
-      ? './pistachio.html'
-      : `#/dashboard?factory=${encodeURIComponent(f.key)}`;
+    // REMOVED the second declaration of href
 
     return Card({
       icon: iconMarkup,
@@ -119,6 +119,7 @@ function renderCards(grid, factories, prod, qc) {
       href,
       content: `
         <div class="grid grid-3" aria-label="Key performance indicators">
+          <!-- Rest of the code -->
           ${KpiTile({ 
             label: getText('efficiency'), 
             value: `${p.efficiency}%`, 
