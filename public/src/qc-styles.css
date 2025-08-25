@@ -1,1 +1,15 @@
+/* QC-specific additions to your existing styles */
+:root {
+  --qc-pass: #22c55e;
+  --qc-warn: #f59e0b; 
+  --qc-fail: #ef4444;
+}
 
+.qc-pass { color: var(--qc-pass); }
+.qc-warn { color: var(--qc-warn); }
+.qc-fail { color: var(--qc-fail); }
+
+.qc-metric {
+  border-left: 4px solid var(--qc-pass);
+  padding-left: 1rem;
+}
