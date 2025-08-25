@@ -1,15 +1,68 @@
-/* QC-specific additions to your existing styles */
+/* Basic QC-specific styles */
+
 :root {
   --qc-pass: #22c55e;
-  --qc-warn: #f59e0b; 
+  --qc-warning: #f59e0b;
   --qc-fail: #ef4444;
 }
 
-.qc-pass { color: var(--qc-pass); }
-.qc-warn { color: var(--qc-warn); }
-.qc-fail { color: var(--qc-fail); }
+/* QC-specific color variations for KPIs */
+.kpi.qc-pass::before {
+  background: var(--qc-pass);
+}
 
-.qc-metric {
-  border-left: 4px solid var(--qc-pass);
-  padding-left: 1rem;
+.kpi.qc-warning::before {
+  background: var(--qc-warning);
+}
+
+.kpi.qc-fail::before {
+  background: var(--qc-fail);
+}
+
+/* QC activity styling */
+.qc-activity-item {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-left: 4px solid var(--border);
+}
+
+.qc-activity-item.pass {
+  border-left-color: var(--qc-pass);
+}
+
+.qc-activity-item.warning {
+  border-left-color: var(--qc-warning);
+}
+
+.qc-activity-item.fail {
+  border-left-color: var(--qc-fail);
+}
+
+/* Make QC cards more interactive */
+.factory-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.factory-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* QC-specific button styling */
+.qc-btn-pass {
+  background: var(--qc-pass);
+  color: white;
+}
+
+.qc-btn-warning {
+  background: var(--qc-warning);
+  color: white;
+}
+
+.qc-btn-fail {
+  background: var(--qc-fail);
+  color: white;
 }
