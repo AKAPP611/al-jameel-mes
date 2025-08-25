@@ -2,15 +2,16 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Quality Control - Al Jameel MES</title>
+  <meta name="theme-color" content="#a32034" />
   <link rel="stylesheet" href="./src/styles.css" />
   <link rel="stylesheet" href="./src/qc-styles.css" />
 </head>
 <body>
   <div class="bg-hero" aria-hidden="true"></div>
-  
-  <header class="app-header">
+
+  <header class="app-header" role="banner">
     <div class="container header-row">
       <div class="brand-lockup">
         <a href="./index.html" class="back-link">← Back to MES</a>
@@ -19,14 +20,45 @@
     </div>
   </header>
 
-  <main id="app" class="container"></main>
+  <main id="app" class="container" role="main" tabindex="-1"></main>
 
-  <script type="module" src="./src/app.js"></script>
+  <footer class="app-footer" role="contentinfo">
+    <div class="container footer-row">
+      <span id="todayDate"></span>
+      <span>QC System v1.0</span>
+    </div>
+  </footer>
+
   <script type="module">
-    // Load QC dashboard
-    import { QCDashboard } from './src/views/qc-dashboard.js';
-    const app = document.getElementById('app');
-    QCDashboard(app, {});
+    // Simple QC app loader
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Load QC dashboard
+        const { QCDashboard } = await import('./src/views/qc-dashboard.js');
+        const app = document.getElementById('app');
+        QCDashboard(app, {});
+        
+        // Set today's date
+        document.getElementById('todayDate').textContent = 
+          new Date().toLocaleDateString('en-US', { dateStyle: 'medium' });
+          
+      } catch (error) {
+        console.error('Failed to load QC dashboard:', error);
+        document.getElementById('app').innerHTML = `
+          <div class="card" style="border-color: #fecaca; background: #fef2f2;">
+            <h3 style="color: #dc2626;">QC System Error</h3>
+            <p>Failed to load QC dashboard. Please check:</p>
+            <ul>
+              <li>Make sure qc-dashboard.js exists in src/views/</li>
+              <li>Check browser console for errors</li>
+              <li>Ensure you're running from a web server</li>
+            </ul>
+            <p><strong>Error:</strong> ${error.message}</p>
+            <button onclick="window.location.reload()" class="btn">Reload Page</button>
+          </div>
+        `;
+      }
+    });
   </script>
 </body>
 </html>
