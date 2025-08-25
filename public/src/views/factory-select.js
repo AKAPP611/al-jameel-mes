@@ -1,4 +1,4 @@
-// factory-select.js - Factory selection view (Clean version without extra text)
+// factory-select.js - Factory selection view with QC integration
 import { t as getText } from '../app.js';
 
 // Inline components
@@ -50,6 +50,14 @@ const productionData = {
   Cardamom: { actualKg: 3100, targetKg: 4000, efficiency: 78, rejectRate: 0.9 }
 };
 
+// QC data for Quality Control dashboard
+const qcData = {
+  todayInspections: 25,
+  passRate: 94.2,
+  pendingTests: 6,
+  criticalIssues: 1
+};
+
 export function FactorySelectView(mount) {
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
@@ -66,18 +74,20 @@ export function FactorySelectView(mount) {
         <div class="skel skel-card"></div>
         <div class="skel skel-card"></div>
         <div class="skel skel-card"></div>
+        <div class="skel skel-card"></div>
       </div>
     </section>
   `;
 
-  // Simulate loading delay then render cards
+  // Simulate loading delay then render cards with QC
   setTimeout(() => {
-    renderCards(mount.querySelector('#factoryGrid'), factories, productionData);
+    renderCards(mount.querySelector('#factoryGrid'), factories, productionData, qcData);
   }, 500);
 }
 
-function renderCards(grid, factories, prod) {
-  const cards = factories.map(f => {
+function renderCards(grid, factories, prod, qc) {
+  // Generate factory cards
+  const factoryCards = factories.map(f => {
     const p = prod[f.key] || { actualKg: 0, targetKg: 0, efficiency: 0, rejectRate: 0 };
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
@@ -86,12 +96,12 @@ function renderCards(grid, factories, prod) {
     let iconMarkup = '';
 
     if (f.key === 'Pistachio') {
-  iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 40px; height: 40px; margin-right: 8px;">';
-} else if (f.key === 'Walnut') {
-  iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="" style="width: 40px; height: 40px; margin-right: 8px;">';
-} else if (f.key === 'Cardamom') {
-  iconMarkup = '🌿';
-}
+      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 40px; height: 40px; margin-right: 8px;" onerror="this.outerHTML=\'🥜\'">';
+    } else if (f.key === 'Walnut') {
+      iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="" style="width: 40px; height: 40px; margin-right: 8px;" onerror="this.outerHTML=\'🌰\'">';
+    } else if (f.key === 'Cardamom') {
+      iconMarkup = '🌿';
+    }
 
     // Navigation links
     const href = f.key === 'Pistachio'
@@ -123,7 +133,37 @@ function renderCards(grid, factories, prod) {
         </div>
       `
     });
-  }).join('');
+  });
 
-  grid.innerHTML = cards;
+  // Generate QC card
+  const qcPassRateClass = qc.passRate >= 95 ? 'ok' : (qc.passRate >= 90 ? 'warn' : 'bad');
+  const qcCard = Card({
+    icon: '🔬',
+    title: 'Quality Control',
+    subtitle: `Today: ${qc.todayInspections} inspections`,
+    href: './qc.html',
+    content: `
+      <div class="grid grid-3" aria-label="QC overview">
+        ${KpiTile({ 
+          label: 'Pass Rate', 
+          value: `${qc.passRate}%`, 
+          state: qcPassRateClass 
+        })}
+        ${KpiTile({ 
+          label: 'Pending Tests', 
+          value: `${qc.pendingTests}`, 
+          state: qc.pendingTests === 0 ? 'ok' : 'warn' 
+        })}
+        ${KpiTile({ 
+          label: 'Critical Issues', 
+          value: `${qc.criticalIssues}`, 
+          state: qc.criticalIssues === 0 ? 'ok' : 'bad' 
+        })}
+      </div>
+    `
+  });
+
+  // Combine all cards and render
+  const allCards = factoryCards.concat(qcCard);
+  grid.innerHTML = allCards.join('');
 }
