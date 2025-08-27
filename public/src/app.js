@@ -4,10 +4,11 @@ const APP_VERSION = '1.2.1'; // Increment this when making changes
 // Dynamic imports with cache busting - moved inside functions
 async function loadView(viewPath) {
   try {
+    console.log('Loading view:', viewPath); // Add this line
     const module = await import(`${viewPath}?v=${APP_VERSION}&t=${Date.now()}`);
     return module;
   } catch (error) {
-    console.error(`Failed to load view: ${viewPath}`, error);
+    console.error(`Failed to load view: ${viewPath}`, error); // This will show which file fails
     // Fallback: try without cache busting
     return import(viewPath);
   }
