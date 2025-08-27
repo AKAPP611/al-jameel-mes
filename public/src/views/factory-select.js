@@ -62,11 +62,9 @@ export function FactorySelectView(mount) {
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
       <div style="text-align:center">
-       
-<img src="./logo.ico" alt="Al Jameel Logo" 
-     style="width:64px; height:64px; margin-bottom:0.5rem;" 
-     onerror="this.style.display='none'">
-     
+        <img src="./logo.ico" alt="Al Jameel Logo" 
+             style="width:64px; height:64px; margin-bottom:0.5rem;" 
+             onerror="this.style.display='none'">
         <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
         <p class="section-sub">Pick a workspace to view today's performance.</p>
       </div>
@@ -92,18 +90,20 @@ function renderCards(grid, factories, prod, qc) {
     const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
     const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
     
-    // Keep only this href declaration
-    const href = f.key === 'Pistachio'
-      ? './pistachio.html'
-      : (f.key === 'Walnut' 
-         ? './walnut.html' 
-         : (f.key === 'Cardamom' 
-        ? './cardamom.html'
-         : `#/dashboard?factory=${encodeURIComponent(f.key)}`);
+    // Determine href for each factory
+    let href = '#/';
+    if (f.key === 'Pistachio') {
+      href = './pistachio.html';
+    } else if (f.key === 'Walnut') {
+      href = './walnut.html';
+    } else if (f.key === 'Cardamom') {
+      href = './cardamom.html';
+    } else {
+      href = `#/dashboard?factory=${encodeURIComponent(f.key)}`;
+    }
     
     // Factory icons
     let iconMarkup = '';
-
     if (f.key === 'Pistachio') {
       iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 40px; height: 40px; margin-right: 8px;" onerror="this.outerHTML=\'🥜\'">';
     } else if (f.key === 'Walnut') {
@@ -112,16 +112,13 @@ function renderCards(grid, factories, prod, qc) {
       iconMarkup = '🌿';
     }
 
-    // REMOVED the second declaration of href
-
     return Card({
       icon: iconMarkup,
       title: f.name,
       subtitle: `${getText('today')}: ${p.actualKg.toLocaleString()} kg`,
-      href,
+      href: href,
       content: `
         <div class="grid grid-3" aria-label="Key performance indicators">
-          <!-- Rest of the code -->
           ${KpiTile({ 
             label: getText('efficiency'), 
             value: `${p.efficiency}%`, 
