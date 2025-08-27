@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Cardamom Production – Al Jameel MES</title>
+  <style>
+    :root {
+      --primary: #228B22;     /* Forest Green for cardamom */
+      --accent: #32CD32;      /* Lime Green */
+      --text: #2f2a28;
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 { font-size: 1.5rem; }
+    .back-link { 
+      color: white; 
+      text-decoration: none; 
+      background: rgba(255,255,255,0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      margin-right: 1rem;
+    }
+
+    /* Cardamom icon styling */
+    .cardamom-brand-icon {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      margin-right: 0.75rem;
+      vertical-align: middle;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .nav-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .nav-btn:hover { opacity: 0.9; }
+    .nav-btn.active { background: var(--accent); color: var(--text); }
+
+    .section {
+      display: none;
+      background: var(--surface);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .section.active { display: block; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      text-align: center;
+      border: 2px solid var(--accent);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    input, select {
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover { opacity: 0.9; }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--primary);
+      color: white;
+    }
+
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+
+    .login-form {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .summary-box {
+      background: #f0fff0;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      border: 1px solid #98fb98;
+      font-weight: 600;
+    }
+
+    .warning-box {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .materials-section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    /* Section header with cardamom image */
+    .section-header-with-image {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-header-with-image img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      margin-right: 1rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
+    /* Product grid for multiple product types */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .product-card {
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .product-card label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .product-card input {
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    /* Metrics grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      border: 1px solid #dee2e6;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .product-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Print-specific styles */
+    @media print {
+      .chart-container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+  <a href="./index.html" style="position: absolute; top: 20px; left: 20px; color: var(--primary); text-decoration: none; z-index: 10;">← Back to MES</a>
+  <div class="login-form">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">🌿</div>
+      <h2 style="color: var(--primary); margin: 0;">Cardamom Production Login</h2>
+    </div>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Username</label>
+        <input id="loginUsername" type="text" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="loginPassword" type="password" required>
+      </div>
+      <button type="submit" style="width: 100%; margin-top: 1rem;">Login</button>
+    </form>
+    <div style="margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem;">
+      <p><strong>Demo Credentials:</strong></p>
+      <p>Admin: admin / admin123</p>
+      <p>Operator: operator / op123</p>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp" style="display: none;">
+  <header class="header">
+    <div style="display: flex; align-items: center;">
+      <a href="./index.html" class="back-link">← Back to MES</a>
+      <span style="font-size: 2.5rem; margin-right: 0.75rem;">🌿</span>
+      <h1>Cardamom Production Management</h1>
+    </div>
+    <div>
+      <span id="userDisplay">User</span>
+      <button onclick="logout()" style="margin-left: 1rem; background: rgba(255,255,255,0.2);">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <div class="container">
+   <div class="nav-buttons">
+  <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="showSection('production')">New Production</button>
+  <button class="nav-btn" onclick="showSection('records')">View Records</button>
+  <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
+  <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
+  <button class="nav-btn" onclick="showSection('reports')">Reports</button>
+  <button class="nav-btn" id="itemPricesBtn" onclick="showSection('itemprices')" style="display: none;">Item Prices</button>
+</div>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="section active">
+      <div class="section-header-with-image">
+        <span style="font-size: 3rem; margin-right: 1rem;">🌿</span>
+        <h2>Production Dashboard</h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Total Finished (kg)</div>
+          <div class="stat-value" id="kpiFinished">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Efficiency (%)</div>
+          <div class="stat-value" id="kpiEff">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Total Batches</div>
+          <div class="stat-value" id="kpiBatches">0</div>
+        </div>
+      </div>
+      <p>KPIs update automatically when you submit production records. Note: Cardamom processing generates no rejects.</p>
+    </section>
+
+    <!-- Production Entry Section -->
+    <section id="production" class="section">
+      <div class="section-header-with-image">
+        <span style="font-size: 3rem; margin-right: 1rem;">🌿</span>
+        <h2>New Production Entry</h2>
+      </div>
+      
+      <div class="warning-box">
+        <strong>Note:</strong> Cardamom processing produces no rejects. All raw material becomes finished product.
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Raw Material Bag Size</label>
+          <select id="bagSize" onchange="updateRawInputDefault()">
+            <option value="500">Big Bag (500 kg)</option>
+            <option value="525">Big Bag (525 kg)</option>
+            <option value="550">Big Bag (550 kg)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Number of Bags</label>
+          <input id="numBags" type="number" min="0" step="1" value="1" onchange="updateRawInputDefault()">
+        </div>
+        <div class="form-group">
+          <label>Lot Number</label>
+          <input id="lotNo" type="text" placeholder="e.g., CD-240315-01">
+        </div>
+        <div class="form-group">
+          <label>Actual Raw Input (kg)</label>
+          <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+      </div>
+
+      <!-- Final Goods Output -->
+      <h3>Final Goods Output</h3>
+      <div class="product-grid">
+        <div class="product-card">
+          <label>FLG (5kg)</label>
+          <input id="product_FLG" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>GLG (5kg)</label>
+          <input id="product_GLG" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>MLG (5kg)</label>
+          <input id="product_MLG" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>SLG (5kg)</label>
+          <input id="product_SLG" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>JPB (5kg)</label>
+          <input id="product_JPB" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>MPB (5kg)</label>
+          <input id="product_MPB" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>P4 (3kg)</label>
+          <input id="product_P4" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>TRIPS (5kg)</label>
+          <input id="product_TRIPS" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>MYQ (5kg)</label>
+          <input id="product_MYQ" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>SP (5kg)</label>
+          <input id="product_SP" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>SEED (5kg)</label>
+          <input id="product_SEED" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>SEED CLUSTER (5kg)</label>
+          <input id="product_SEED_CLUSTER" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>MTG (3kg)</label>
+          <input id="product_MTG" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="product-card">
+          <label>STG (10kg)</label>
+          <input id="product_STG" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+      </div>
+
+      <!-- Materials -->
+      <div class="materials-section">
+        <h3>Packaging Materials Usage</h3>
+        <div id="inventoryStatus" style="background: #e8f5e8; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem;">
+          <strong>Current Stock:</strong> 
+          <span id="currentMasterBoxLarge">0</span> Master Box (Large), 
+          <span id="currentMasterBoxSmall">0</span> Master Box (Small), 
+          <span id="currentStandardBox">0</span> Standard Box
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Master Box (Large) Used</label>
+            <input id="masterBoxLargeUsed" type="number" min="0" step="1" value="0">
+            <small style="color: #666;">8 × 5kg Inner Boxes = 40kg</small>
+          </div>
+          <div class="form-group">
+            <label>Master Box (Small) Used</label>
+            <input id="masterBoxSmallUsed" type="number" min="0" step="1" value="0">
+            <small style="color: #666;">8 × 3kg Inner Boxes = 24kg</small>
+          </div>
+          <div class="form-group">
+            <label>Standard Box Used</label>
+            <input id="standardBoxUsed" type="number" min="0" step="1" value="0">
+            <small style="color: #666;">4 × 5kg Pouches = 20kg</small>
+          </div>
+          <div class="form-group">
+            <label>Master Box (Large) Wasted</label>
+            <input id="masterBoxLargeWasted" type="number" min="0" step="1" value="0">
+          </div>
+          <div class="form-group">
+            <label>Master Box (Small) Wasted</label>
+            <input id="masterBoxSmallWasted" type="number" min="0" step="1" value="0">
+          </div>
+          <div class="form-group">
+            <label>Standard Box Wasted</label>
+            <input id="standardBoxWasted" type="number" min="0" step="1" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <button onclick="submitProduction()">Submit Production</button>
+        <button class="btn-secondary" onclick="clearForm()">Clear Form</button>
+      </div>
+
+      <div class="summary-box" id="productionSummary">
+        Finished: 0 kg • Raw Input: 0 kg • Efficiency: 100% (No rejects in cardamom processing)
+      </div>
+    </section>
+
+    <!-- Records Section -->
+    <section id="records" class="section">
+      <h2 style="margin-bottom: 1rem;">📋 Production Records</h2>
+      <div style="overflow-x: auto;">
+        <table id="recordsTable">
+         <thead>
+  <tr>
+    <th>Timestamp</th>
+    <th>Lot</th>
+    <th>Bag Size (kg)</th>
+    <th>Bags Used</th>
+    <th>Raw Input (kg)</th>
+    <th>Finished Products</th>
+    <th>Total Finished (kg)</th>
+    <th>Material Balance</th>
+    <th>Efficiency (%)</th>
+  </tr>
+</thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Inventory Section -->
+    <section id="inventory" class="section">
+      <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Master Box (Large)</div>
+          <div class="stat-value" id="invMasterBoxLarge">0</div>
+          <div style="font-size: 0.8rem; color: #666;">8 × 5kg Inner Boxes = 40kg</div>
+        </div>
+        <div class="stat-card">
+          <div>Master Box (Small)</div>
+          <div class="stat-value" id="invMasterBoxSmall">0</div>
+          <div style="font-size: 0.8rem; color: #666;">8 × 3kg Inner Boxes = 24kg</div>
+        </div>
+        <div class="stat-card">
+          <div>Standard Box</div>
+          <div class="stat-value" id="invStandardBox">0</div>
+          <div style="font-size: 0.8rem; color: #666;">4 × 5kg Pouches = 20kg</div>
+        </div>
+      </div>
+
+      <div class="materials-section">
+        <h3>Stock Adjustment</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Item</label>
+            <select id="invItem">
+              <option value="masterBoxLarge">Master Box (Large) - 40kg</option>
+              <option value="masterBoxSmall">Master Box (Small) - 24kg</option>
+              <option value="standardBox">Standard Box - 20kg</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Action</label>
+            <select id="invAction">
+              <option value="add">Add Stock</option>
+              <option value="remove">Remove Stock</option>
+              <option value="set">Set Exact Amount</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input id="invQuantity" type="number" min="0" step="1" value="0">
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input id="invNotes" type="text" placeholder="Reason for adjustment">
+          </div>
+        </div>
+        <button onclick="adjustInventory()">Update Inventory</button>
+      </div>
+
+      <h3>Stock Movement Log</h3>
+      <div style="overflow-x: auto;">
+        <table id="inventoryTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Item</th>
+              <th>Action</th>
+              <th>Quantity</th>
+              <th>Result</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Maintenance Section -->
+    <section id="maintenance" class="section">
+      <h2 style="margin-bottom: 1rem;">🔧 Equipment Maintenance</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Total Equipment</div>
+          <div class="stat-value" id="totalEquipment">25</div>
+        </div>
+        <div class="stat-card">
+          <div>Operational</div>
+          <div class="stat-value" id="operationalEquipment" style="color: #22c55e;">25</div>
+        </div>
+        <div class="stat-card">
+          <div>Critical Down (P1-3)</div>
+          <div class="stat-value" id="criticalDown" style="color: #ef4444;">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Minor Issues (P5+)</div>
+          <div class="stat-value" id="minorIssues" style="color: #f59e0b;">0</div>
+        </div>
+      </div>
+
+      <!-- Equipment grid will be populated by JavaScript -->
+      <h3>Equipment Status (<span id="shownCount">25</span> shown)</h3>
+      <div id="equipmentGrid" class="stats-grid" style="margin-bottom: 2rem;">
+        <!-- Equipment cards will be populated here -->
+      </div>
+
+      <div class="materials-section">
+        <h3>Update Equipment Status</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Equipment</label>
+            <select id="equipmentSelect">
+              <option value="CL1">CL1 - Primary Cleaner (P1)</option>
+              <option value="CL2">CL2 - Secondary Cleaner (P1)</option>
+              <option value="GD1">GD1 - Grade Sorter 1 (P1)</option>
+              <option value="GD2">GD2 - Grade Sorter 2 (P1)</option>
+              <option value="GD3">GD3 - Grade Sorter 3 (P1)</option>
+              <option value="CS1">CS1 - Color Sorter 1 (P3)</option>
+              <option value="CS2">CS2 - Color Sorter 2 (P3)</option>
+              <option value="WS1">WS1 - Weight Sorter 1 (P3)</option>
+              <option value="WS2">WS2 - Weight Sorter 2 (P3)</option>
+              <option value="PK1">PK1 - Packaging Unit 1 (P1)</option>
+              <option value="PK2">PK2 - Packaging Unit 2 (P1)</option>
+              <option value="CV1">CV1 - Conveyor Belt 1 (P5)</option>
+              <option value="CV2">CV2 - Conveyor Belt 2 (P5)</option>
+              <option value="CV3">CV3 - Conveyor Belt 3 (P5)</option>
+              <option value="CV4">CV4 - Conveyor Belt 4 (P5)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="equipmentStatus">
+              <option value="operational" style="color: #22c55e;">Operational</option>
+              <option value="maintenance" style="color: #f59e0b;">Maintenance Due</option>
+              <option value="attention" style="color: #f97316;">Needs Attention</option>
+              <option value="down" style="color: #ef4444;">Down/Broken</option>
+              <option value="offline" style="color: #6b7280;">Offline</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Problem Description</label>
+            <input id="problemDescription" type="text" placeholder="Describe the issue or maintenance needed">
+          </div>
+          <div class="form-group">
+            <label>Maintenance Cost ($)</label>
+            <input id="maintenanceCost" type="number" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <button onclick="updateEquipmentStatus()">Update Status</button>
+      </div>
+
+      <h3>Maintenance Log</h3>
+      <div style="overflow-x: auto;">
+        <table id="maintenanceTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Equipment</th>
+              <th>Priority</th>
+              <th>Status Change</th>
+              <th>Problem</th>
+              <th>Cost ($)</th>
+              <th>Downtime (hrs)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- Reports Section -->
+    <section id="reports" class="section">
+      <h2 style="margin-bottom: 1rem;">📊 Production Reports</h2>
+      
+      <div class="materials-section">
+        <h3>Report Generator</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>From Date</label>
+            <input id="reportFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="reportToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>Product Type</label>
+            <select id="reportProductType">
+              <option value="all">All Products</option>
+              <option value="FLG">FLG (5kg)</option>
+              <option value="GLG">GLG (5kg)</option>
+              <option value="MLG">MLG (5kg)</option>
+              <option value="SLG">SLG (5kg)</option>
+              <option value="JPB">JPB (5kg)</option>
+              <option value="MPB">MPB (5kg)</option>
+              <option value="P4">P4 (3kg)</option>
+              <option value="TRIPS">TRIPS (5kg)</option>
+              <option value="MYQ">MYQ (5kg)</option>
+              <option value="SP">SP (5kg)</option>
+              <option value="SEED">SEED (5kg)</option>
+              <option value="SEED CLUSTER">SEED CLUSTER (5kg)</option>
+              <option value="MTG">MTG (3kg)</option>
+              <option value="STG">STG (10kg)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Bag Size</label>
+            <select id="reportBagSize">
+              <option value="all">All Bag Sizes</option>
+              <option value="500">500 kg</option>
+              <option value="525">525 kg</option>
+              <option value="550">550 kg</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem;">
+          <button onclick="generateReport()" style="margin-right: 1rem;">Generate Report</button>
+          <button onclick="printReport()" class="btn-secondary" id="printButton" disabled>Print Report</button>
+        </div>
+      </div>
+      
+      <!-- Report Preview Area -->
+      <div id="reportPreview" style="display: none; margin-top: 2rem;">
+        <div style="text-align: right; margin-bottom: 1rem;">
+          <button onclick="printReport()">Print Report</button>
+        </div>
+        <div id="reportContent" class="report-content">
+          <!-- Report content will be generated here -->
+        </div>
+      </div>
+    </section>
+    
+    <!-- Item Prices Section -->
+    <section id="itemprices" class="section">
+      <h2 style="margin-bottom: 1rem;">💰 Item Prices Management</h2>
+      
+      <div class="warning-box" style="background: #fff3cd; border: 1px solid #ffeeba;">
+        <strong>Admin Only:</strong> Changes to pricing affect all future calculations and reports.
+      </div>
+
+      <!-- Current Item Prices -->
+      <div class="materials-section">
+        <h3>Current Item Prices</h3>
+        <div style="overflow-x: auto;">
+          <table id="itemPricesTable">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Unit</th>
+                <th>Unit Price ($)</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Updated By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add/Edit Item Form -->
+      <div class="materials-section">
+        <h3 id="itemFormTitle">Add New Item</h3>
+        <form id="itemPriceForm" onsubmit="saveItemPrice(event)">
+          <input type="hidden" id="editItemId" value="">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Item Name</label>
+              <input id="itemName" type="text" required placeholder="e.g., Master Box (Large)">
+            </div>
+            <div class="form-group">
+              <label>Unit</label>
+              <input id="itemUnit" type="text" required placeholder="e.g., piece, kg, box">
+            </div>
+            <div class="form-group">
+              <label>Unit Price ($)</label>
+              <input id="itemPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="itemStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <button type="submit" id="saveItemBtn">Add Item</button>
+            <button type="button" class="btn-secondary" onclick="cancelItemEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+ 
+<script>
+// ===== STATE MANAGEMENT =====
+class AppState {
+  constructor() {
+    this.data = {
+      productionRecords: [],
+      inventoryLog: [],
+      maintenanceLog: [],
+      itemPrices: [
+        {
+          id: 'master_box_large',
+          name: 'Master Box (Large)',
+          unit: 'piece',
+          price: 3.50,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'master_box_small',
+          name: 'Master Box (Small)',
+          unit: 'piece', 
+          price: 2.25,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'standard_box',
+          name: 'Standard Box',
+          unit: 'piece',
+          price: 1.75,
+          status: 'active', 
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        }
+      ],
+      priceAuditLog: [],
+      currentInventory: {
+        masterBoxLarge: 0,
+        masterBoxSmall: 0,
+        standardBox: 0
+      },
+      equipment: [], // Will be populated in the initialization
+      currentUser: null
+    };
+    this.listeners = {};
+    this.loadFromStorage();
+  }
+
+  subscribe(key, callback) {
+    if (!this.listeners[key]) {
+      this.listeners[key] = [];
+    }
+    this.listeners[key].push(callback);
+  }
+
+  setState(key, value) {
+    this.data[key] = value;
+    this.saveToStorage();
+    this.notify(key, value);
+  }
+
+  getState(key) {
+    return this.data[key];
+  }
+
+  notify(key, value) {
+    if (this.listeners[key]) {
+      this.listeners[key].forEach(callback => callback(value));
+    }
+  }
+
+  addToArray(key, item) {
+    if (Array.isArray(this.data[key])) {
+      this.data[key].push(item);
+      this.saveToStorage();
+      this.notify(key, this.data[key]);
+    }
+  }
+
+  updateInventory(item, action, quantity) {
+    const current = this.data.currentInventory[item] || 0;
+    let newValue;
+
+    switch(action) {
+      case 'add':
+        newValue = current + quantity;
+        break;
+      case 'remove':
+        newValue = Math.max(0, current - quantity);
+        break;
+      case 'set':
+        newValue = Math.max(0, quantity);
+        break;
+      default:
+        return false;
+    }
+
+    this.data.currentInventory[item] = newValue;
+    this.saveToStorage();
+    this.notify('currentInventory', this.data.currentInventory);
+    return true;
+  }
+
+  saveToStorage() {
+    try {
+      localStorage.setItem('cardamom_mes_data', JSON.stringify(this.data));
+    } catch (e) {
+      console.warn('Could not save to localStorage:', e);
+    }
+  }
+
+  loadFromStorage() {
+    try {
+      const saved = localStorage.getItem('cardamom_mes_data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        this.data = { ...this.data, ...parsed };
+      }
+    } catch (e) {
+      console.warn('Could not load from localStorage:', e);
+    }
+  }
+
+  getItemPrice(itemId) {
+    const item = this.data.itemPrices.find(item => item.id === itemId && item.status === 'active');
+    return item ? item.price : 0;
+  }
+}
+
+// ===== INITIALIZE GLOBAL OBJECTS =====
+window.appState = new AppState();
+
+// Initialize with sample equipment for cardamom processing
+const equipmentData = [
+  {code: "CL1", name: "Primary Cleaner", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "CL2", name: "Secondary Cleaner", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "GD1", name: "Grade Sorter 1", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "GD2", name: "Grade Sorter 2", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "GD3", name: "Grade Sorter 3", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "CS1", name: "Color Sorter 1", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "CS2", name: "Color Sorter 2", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "WS1", name: "Weight Sorter 1", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "WS2", name: "Weight Sorter 2", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "PK1", name: "Packaging Unit 1", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "PK2", name: "Packaging Unit 2", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "CV1", name: "Conveyor Belt 1", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "CV2", name: "Conveyor Belt 2", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "CV3", name: "Conveyor Belt 3", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "CV4", name: "Conveyor Belt 4", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0}
+];
+
+// Initialize equipment data in state
+window.appState.setState('equipment', equipmentData);
+
+// User management
+const users = { admin: 'admin123', operator: 'op123' };
+
+// Product weights configuration
+const productWeights = {
+  'FLG': 5,
+  'GLG': 5,
+  'MLG': 5,
+  'SLG': 5,
+  'JPB': 5,
+  'MPB': 5,
+  'P4': 3,
+  'TRIPS': 5,
+  'MYQ': 5,
+  'SP': 5,
+  'SEED': 5,
+  'SEED_CLUSTER': 5,
+  'MTG': 3,
+  'STG': 10
+};
+
+// ===== FUNCTIONS =====
+function handleLogin(event) {
+  event.preventDefault();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  if (users[username] && users[username] === password) {
+    window.appState.setState('currentUser', username);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('userDisplay').textContent = username;
+    
+    showAdminControls();
+    
+    updateDashboard();
+    renderRecords();
+    renderInventory();
+    renderEquipmentGrid();
+    
+    if (username === 'admin') {
+      renderItemPricesTable();
+    }
+  } else {
+    alert('Invalid credentials');
+  }
+}
+
+function logout() {
+  window.appState.setState('currentUser', null);
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+}
+
+function showSection(sectionId) {
+  // Check admin access for restricted sections
+  if (sectionId === 'itemprices') {
+    const currentUser = window.appState.getState('currentUser');
+    if (currentUser !== 'admin') {
+      alert('Access denied: Admin only section');
+      return;
+    }
+  }
+  
+  document.querySelectorAll('.section').forEach(section => {
+    section.classList.remove('active');
+  });
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  document.getElementById(sectionId).classList.add('active');
+  event.target.classList.add('active');
+  
+  // Load section-specific data when switching
+  if (sectionId === 'itemprices') {
+    renderItemPricesTable();
+  }
+}
+
+function updateRawInputDefault() {
+  const bagSize = parseInt(document.getElementById('bagSize').value);
+  const numBags = parseInt(document.getElementById('numBags').value) || 1;
+  const calculatedInput = bagSize * numBags;
+  
+  document.getElementById('rawInput').value = calculatedInput;
+  updateSummary();
+}
+
+function updateSummary() {
+  let totalFinishedKg = 0;
+  
+  // Calculate total finished weight from all products
+  Object.keys(productWeights).forEach(productKey => {
+    const inputId = `product_${productKey}`;
+    const quantity = parseInt(document.getElementById(inputId)?.value) || 0;
+    const weight = productWeights[productKey];
+    totalFinishedKg += quantity * weight;
+  });
+  
+  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
+  
+  // Cardamom has 100% efficiency (no rejects)
+  const efficiency = 100;
+  const materialBalance = totalFinishedKg - rawInput;
+  
+  document.getElementById('productionSummary').textContent = 
+    `Finished: ${totalFinishedKg} kg • Raw Input: ${rawInput} kg • Material Balance: ${materialBalance > 0 ? '+' : ''}${materialBalance} kg • Efficiency: ${efficiency}%`;
+}
+
+function clearForm() {
+  document.querySelectorAll('#production input[type="number"]').forEach(input => {
+    input.value = 0;
+  });
+  document.getElementById('lotNo').value = '';
+  document.getElementById('numBags').value = 1;
+  updateRawInputDefault();
+  updateSummary();
+}
+
+function submitProduction() {
+  const bagSize = parseInt(document.getElementById('bagSize').value);
+  const numBags = parseInt(document.getElementById('numBags').value) || 1;
+  const lotNo = document.getElementById('lotNo').value;
+  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
+  
+  if (!lotNo) {
+    alert('Please enter a lot number');
+    return;
+  }
+  
+  if (rawInput === 0) {
+    alert('Please enter raw input weight');
+    return;
+  }
+  
+  // Collect product quantities
+  const products = {};
+  let totalFinishedKg = 0;
+  let hasProducts = false;
+  
+  Object.keys(productWeights).forEach(productKey => {
+    const inputId = `product_${productKey}`;
+    const quantity = parseInt(document.getElementById(inputId)?.value) || 0;
+    if (quantity > 0) {
+      products[productKey] = quantity;
+      totalFinishedKg += quantity * productWeights[productKey];
+      hasProducts = true;
+    }
+  });
+  
+  if (!hasProducts) {
+    alert('Please enter at least one product quantity');
+    return;
+  }
+  
+  // Material usage
+  const masterBoxLargeUsed = parseInt(document.getElementById('masterBoxLargeUsed').value) || 0;
+  const masterBoxSmallUsed = parseInt(document.getElementById('masterBoxSmallUsed').value) || 0;
+  const standardBoxUsed = parseInt(document.getElementById('standardBoxUsed').value) || 0;
+  
+  const masterBoxLargeWasted = parseInt(document.getElementById('masterBoxLargeWasted').value) || 0;
+  const masterBoxSmallWasted = parseInt(document.getElementById('masterBoxSmallWasted').value) || 0;
+  const standardBoxWasted = parseInt(document.getElementById('standardBoxWasted').value) || 0;
+  
+  // Check inventory
+  const currentInventory = window.appState.getState('currentInventory');
+  const totalMasterBoxLargeNeeded = masterBoxLargeUsed + masterBoxLargeWasted;
+  const totalMasterBoxSmallNeeded = masterBoxSmallUsed + masterBoxSmallWasted;
+  const totalStandardBoxNeeded = standardBoxUsed + standardBoxWasted;
+  
+  if (totalMasterBoxLargeNeeded > currentInventory.masterBoxLarge) {
+    alert(`Insufficient Master Box (Large)! Required: ${totalMasterBoxLargeNeeded}, Available: ${currentInventory.masterBoxLarge}`);
+    return;
+  }
+  
+  if (totalMasterBoxSmallNeeded > currentInventory.masterBoxSmall) {
+    alert(`Insufficient Master Box (Small)! Required: ${totalMasterBoxSmallNeeded}, Available: ${currentInventory.masterBoxSmall}`);
+    return;
+  }
+  
+  if (totalStandardBoxNeeded > currentInventory.standardBox) {
+    alert(`Insufficient Standard Box! Required: ${totalStandardBoxNeeded}, Available: ${currentInventory.standardBox}`);
+    return;
+  }
+  
+  // Calculate efficiency (always 100% for cardamom)
+  const efficiency = 100;
+  
+  // Create production record
+  const record = {
+    timestamp: new Date().toISOString(),
+    bagSize,
+    numBags,
+    lot: lotNo,
+    rawInput,
+    products,
+    totalFinishedKg,
+    efficiency,
+    materials: {
+      masterBoxLargeUsed,
+      masterBoxSmallUsed,
+      standardBoxUsed,
+      masterBoxLargeWasted,
+      masterBoxSmallWasted,
+      standardBoxWasted
+    }
+  };
+  
+  // Add to production records
+  window.appState.addToArray('productionRecords', record);
+  
+  // Update inventory
+  window.appState.updateInventory('masterBoxLarge', 'remove', totalMasterBoxLargeNeeded);
+  window.appState.updateInventory('masterBoxSmall', 'remove', totalMasterBoxSmallNeeded);
+  window.appState.updateInventory('standardBox', 'remove', totalStandardBoxNeeded);
+  
+  // Add inventory log entries
+  if (totalMasterBoxLargeNeeded > 0) {
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: 'Master Box (Large)',
+      action: 'remove',
+      quantity: totalMasterBoxLargeNeeded,
+      result: window.appState.getState('currentInventory').masterBoxLarge,
+      notes: 'Auto: Production submission'
+    });
+  }
+  
+  if (totalMasterBoxSmallNeeded > 0) {
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: 'Master Box (Small)',
+      action: 'remove',
+      quantity: totalMasterBoxSmallNeeded,
+      result: window.appState.getState('currentInventory').masterBoxSmall,
+      notes: 'Auto: Production submission'
+    });
+  }
+  
+  if (totalStandardBoxNeeded > 0) {
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: 'Standard Box',
+      action: 'remove',
+      quantity: totalStandardBoxNeeded,
+      result: window.appState.getState('currentInventory').standardBox,
+      notes: 'Auto: Production submission'
+    });
+  }
+  
+  alert('Production record submitted successfully!');
+  clearForm();
+  updateDashboard();
+  renderRecords();
+  renderInventory();
+}
+
+// Dashboard updates
+function updateDashboard() {
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  let totalFinished = 0;
+  let totalBatches = productionRecords.length;
+  
+  productionRecords.forEach(record => {
+    totalFinished += record.totalFinishedKg;
+  });
+  
+  // Efficiency is always 100% for cardamom (no rejects)
+  const efficiency = 100;
+  
+  document.getElementById('kpiFinished').textContent = totalFinished;
+  document.getElementById('kpiEff').textContent = efficiency;
+  document.getElementById('kpiBatches').textContent = totalBatches;
+}
+
+// Records rendering
+function renderRecords() {
+  const tbody = document.querySelector('#recordsTable tbody');
+  tbody.innerHTML = '';
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  productionRecords.slice().reverse().forEach(record => {
+    const row = document.createElement('tr');
+    
+    // Create products summary
+    const productsArray = Object.entries(record.products).map(([key, qty]) => `${key}: ${qty}`);
+    const productsText = productsArray.join(', ');
+    
+    const materialBalance = record.totalFinishedKg - record.rawInput;
+    const balanceColor = materialBalance >= 0 ? '#22c55e' : '#ef4444';
+
+    row.innerHTML = `
+      <td>${new Date(record.timestamp).toLocaleString()}</td>
+      <td>${record.lot}</td>
+      <td>${record.bagSize}</td>
+      <td>${record.numBags}</td>
+      <td>${record.rawInput}</td>
+      <td style="font-size: 0.8rem;">${productsText}</td>
+      <td><strong>${record.totalFinishedKg}</strong></td>
+      <td style="color: ${balanceColor}; font-weight: bold;">${materialBalance > 0 ? '+' : ''}${materialBalance} kg</td>
+      <td>${record.efficiency}%</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Inventory management
+function renderInventory() {
+  const currentInventory = window.appState.getState('currentInventory') || {};
+  
+  document.getElementById('invMasterBoxLarge').textContent = currentInventory.masterBoxLarge || 0;
+  document.getElementById('invMasterBoxSmall').textContent = currentInventory.masterBoxSmall || 0;
+  document.getElementById('invStandardBox').textContent = currentInventory.standardBox || 0;
+  
+  // Update current stock display in production form
+  if (document.getElementById('currentMasterBoxLarge')) {
+    document.getElementById('currentMasterBoxLarge').textContent = currentInventory.masterBoxLarge || 0;
+    document.getElementById('currentMasterBoxSmall').textContent = currentInventory.masterBoxSmall || 0;
+    document.getElementById('currentStandardBox').textContent = currentInventory.standardBox || 0;
+  }
+  
+  // Render inventory log
+  const tbody = document.querySelector('#inventoryTable tbody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    
+    const inventoryLog = window.appState.getState('inventoryLog') || [];
+    inventoryLog.slice().reverse().forEach(log => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${new Date(log.timestamp).toLocaleString()}</td>
+        <td>${log.item}</td>
+        <td>${log.action}</td>
+        <td>${log.quantity}</td>
+        <td>${log.result}</td>
+        <td>${log.notes}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+}
+
+function adjustInventory() {
+  const item = document.getElementById('invItem').value;
+  const action = document.getElementById('invAction').value;
+  const quantity = parseInt(document.getElementById('invQuantity').value) || 0;
+  const notes = document.getElementById('invNotes').value;
+  
+  if (quantity <= 0 && action !== 'set') {
+    alert('Please enter a valid quantity');
+    return;
+  }
+  
+  let itemName;
+  switch(item) {
+    case 'masterBoxLarge':
+      itemName = 'Master Box (Large)';
+      break;
+    case 'masterBoxSmall':
+      itemName = 'Master Box (Small)';
+      break;
+    case 'standardBox':
+      itemName = 'Standard Box';
+      break;
+  }
+  
+  const success = window.appState.updateInventory(item, action, quantity);
+  
+  if (success) {
+    const result = window.appState.getState('currentInventory')[item];
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: itemName,
+      action,
+      quantity,
+      result,
+      notes
+    });
+    
+    document.getElementById('invQuantity').value = 0;
+    document.getElementById('invNotes').value = '';
+    alert('Inventory updated successfully');
+  } else {
+    alert('Failed to update inventory');
+  }
+  
+  renderInventory();
+}
+
+// Equipment management
+function renderEquipmentGrid() {
+  const equipment = window.appState.getState('equipment');
+  const grid = document.getElementById('equipmentGrid');
+  
+  const equipmentCards = equipment.map(eq => {
+    const statusColors = {
+      operational: '#22c55e',
+      maintenance: '#f59e0b', 
+      attention: '#f97316',
+      down: '#ef4444',
+      offline: '#6b7280'
+    };
+    
+    const statusLabels = {
+      operational: 'Operational',
+      maintenance: 'Maintenance Due',
+      attention: 'Needs Attention', 
+      down: 'Down/Broken',
+      offline: 'Offline'
+    };
+    
+    return `
+      <div class="stat-card" style="border-left: 5px solid ${statusColors[eq.status]};">
+        <div style="font-weight: bold; font-size: 1.1rem;">${eq.code}</div>
+        <div style="margin: 0.5rem 0; color: ${statusColors[eq.status]}; font-weight: 600;">
+          ${statusLabels[eq.status]}
+        </div>
+        <div style="font-size: 0.9rem; color: #666;">
+          ${eq.name}
+        </div>
+        <div style="font-size: 0.8rem; color: #666;">Priority ${eq.priority}</div>
+        ${eq.problem ? `<div style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">${eq.problem}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  
+  grid.innerHTML = equipmentCards;
+  
+  const operational = equipment.filter(e => e.status === 'operational').length;
+  const criticalDown = equipment.filter(e => e.priority <= 3 && e.status !== 'operational').length;
+  const minorIssues = equipment.filter(e => e.priority >= 5 && e.status !== 'operational').length;
+  
+  document.getElementById('operationalEquipment').textContent = operational;
+  document.getElementById('criticalDown').textContent = criticalDown;
+  document.getElementById('minorIssues').textContent = minorIssues;
+  document.getElementById('shownCount').textContent = equipment.length;
+}
+
+function updateEquipmentStatus() {
+  const equipmentCode = document.getElementById('equipmentSelect').value;
+  const newStatus = document.getElementById('equipmentStatus').value;
+  const problem = document.getElementById('problemDescription').value;
+  const cost = parseFloat(document.getElementById('maintenanceCost').value) || 0;
+  
+  const equipment = window.appState.getState('equipment');
+  const equipmentItem = equipment.find(e => e.code === equipmentCode);
+  if (!equipmentItem) return;
+  
+  const oldStatus = equipmentItem.status;
+  
+  let downtimeHours = 0;
+  if (oldStatus !== 'operational' && newStatus === 'operational') {
+    const downStart = new Date(equipmentItem.lastUpdate);
+    const now = new Date();
+    downtimeHours = Math.round((now - downStart) / (1000 * 60 * 60) * 10) / 10;
+  }
+  
+  equipmentItem.status = newStatus;
+  equipmentItem.problem = problem;
+  equipmentItem.lastUpdate = new Date().toISOString();
+  if (newStatus === 'operational') {
+    equipmentItem.downtime = 0;
+  }
+  
+  window.appState.setState('equipment', equipment);
+  
+  window.appState.addToArray('maintenanceLog', {
+    timestamp: new Date().toISOString(),
+    equipment: `${equipmentCode} - ${equipmentItem.name}`,
+    priority: equipmentItem.priority,
+    statusChange: `${oldStatus} → ${newStatus}`,
+    problem: problem || 'Status update',
+    cost: cost,
+    downtime: downtimeHours
+  });
+  
+  document.getElementById('problemDescription').value = '';
+  document.getElementById('maintenanceCost').value = 0;
+  
+  alert('Equipment status updated successfully!');
+  renderEquipmentGrid();
+  renderMaintenanceTable();
+}
+
+function renderMaintenanceTable() {
+  const tbody = document.querySelector('#maintenanceTable tbody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = '';
+  
+  const maintenanceLog = window.appState.getState('maintenanceLog') || [];
+  maintenanceLog.slice().reverse().forEach(log => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.equipment}</td>
+      <td style="color: ${log.priority <= 3 ? '#ef4444' : '#22c55e'}; font-weight: bold;">P${log.priority || 'N/A'}</td>
+      <td>${log.statusChange}</td>
+      <td>${log.problem}</td>
+      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.downtime > 0 ? log.downtime : '-'}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Report generation
+function generateReport() {
+  const fromDate = document.getElementById('reportFromDate').value;
+  const toDate = document.getElementById('reportToDate').value;
+  const productType = document.getElementById('reportProductType').value;
+  const bagSize = document.getElementById('reportBagSize').value;
+  
+  if (!fromDate || !toDate) {
+    alert('Please select both From and To dates');
+    return;
+  }
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  let filteredRecords = productionRecords.filter(record => {
+    const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+    let matchesProduct = true;
+    let matchesBagSize = true;
+    
+    if (productType !== 'all') {
+      matchesProduct = record.products[productType] > 0;
+    }
+    
+    if (bagSize !== 'all' && record.bagSize != bagSize) {
+      matchesBagSize = false;
+    }
+    
+    return recordDate >= fromDate && recordDate <= toDate && matchesProduct && matchesBagSize;
+  });
+  
+  if (filteredRecords.length === 0) {
+    alert('No production records found matching the criteria');
+    return;
+  }
+  
+  // Generate report content
+  const reportContent = document.getElementById('reportContent');
+  
+  // Calculate metrics
+  const totalRawInput = filteredRecords.reduce((sum, r) => sum + r.rawInput, 0);
+  const totalFinished = filteredRecords.reduce((sum, r) => sum + r.totalFinishedKg, 0);
+  const totalBatches = filteredRecords.length;
+  
+  // Product statistics
+  const productStats = {};
+  filteredRecords.forEach(record => {
+    Object.entries(record.products).forEach(([product, quantity]) => {
+      if (!productStats[product]) {
+        productStats[product] = { 
+          totalQuantity: 0, 
+          totalWeight: 0,
+          batches: 0
+        };
+      }
+      productStats[product].totalQuantity += quantity;
+      productStats[product].totalWeight += quantity * productWeights[product];
+      productStats[product].batches += 1;
+    });
+  });
+  
+  // Create report HTML
+  reportContent.innerHTML = `
+    <div style="padding: 2rem;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--primary);">🌿 Cardamom Production Report</h1>
+        <h3>Period: ${new Date(fromDate).toLocaleDateString()} - ${new Date(toDate).toLocaleDateString()}</h3>
+      </div>
+      
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-value">${totalFinished.toLocaleString()}</div>
+          <div class="metric-label">Total Finished (kg)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${totalRawInput.toLocaleString()}</div>
+          <div class="metric-label">Raw Input (kg)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">100%</div>
+          <div class="metric-label">Efficiency (No Rejects)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">${totalBatches}</div>
+          <div class="metric-label">Production Batches</div>
+        </div>
+      </div>
+      
+      <h2 style="margin-top: 2rem;">Production by Product Type</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+        <thead>
+          <tr style="background: var(--primary); color: white;">
+            <th style="padding: 0.75rem; text-align: left;">Product</th>
+            <th style="padding: 0.75rem; text-align: right;">Quantity (Units)</th>
+            <th style="padding: 0.75rem; text-align: right;">Weight (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Batches</th>
+            <th style="padding: 0.75rem; text-align: right;">% of Total Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.entries(productStats).map(([product, data]) => `
+            <tr>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;"><strong>${product}</strong> (${productWeights[product]}kg units)</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.totalQuantity.toLocaleString()}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.totalWeight.toLocaleString()}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.batches}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${Math.round((data.totalWeight / totalFinished) * 100)}%</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      
+      <h2 style="margin-top: 2rem;">Detailed Production Records</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+        <thead>
+          <tr style="background: var(--primary); color: white;">
+            <th style="padding: 0.75rem; text-align: left;">Date</th>
+            <th style="padding: 0.75rem; text-align: left;">Lot</th>
+            <th style="padding: 0.75rem; text-align: right;">Bag Size (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Bags Used</th>
+            <th style="padding: 0.75rem; text-align: right;">Raw Input (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Finished (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Material Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(record => {
+            const materialBalance = record.totalFinishedKg - record.rawInput;
+            const balanceColor = materialBalance >= 0 ? '#22c55e' : '#ef4444';
+            return `
+            <tr>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${new Date(record.timestamp).toLocaleDateString()}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${record.lot}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.bagSize}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.numBags}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.rawInput}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.totalFinishedKg}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right; color: ${balanceColor}; font-weight: bold;">${materialBalance > 0 ? '+' : ''}${materialBalance} kg</td>
+            </tr>
+          `;}).join('')}
+        </tbody>
+      </table>
+      
+      <div style="margin-top: 3rem; text-align: center; font-size: 0.9rem; color: #6c757d;">
+        <p>Report generated on ${new Date().toLocaleString()}</p>
+        <p>Al Jameel Manufacturing Execution System - Cardamom Production Line</p>
+        <p><em>Note: Cardamom processing produces zero rejects - 100% efficiency maintained</em></p>
+      </div>
+    </div>
+  `;
+  
+  // Show report and enable print button
+  document.getElementById('reportPreview').style.display = 'block';
+  document.getElementById('printButton').disabled = false;
+}
+
+function printReport() {
+  window.print();
+}
+
+// Item prices management
+function showAdminControls() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser === 'admin') {
+    document.getElementById('itemPricesBtn').style.display = 'block';
+  } else {
+    document.getElementById('itemPricesBtn').style.display = 'none';
+  }
+}
+
+function renderItemPricesTable() {
+  const tbody = document.querySelector('#itemPricesTable tbody');
+  if (!tbody) return;
+  
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  tbody.innerHTML = '';
+  
+  itemPrices.forEach(item => {
+    const row = document.createElement('tr');
+    const statusColor = item.status === 'active' ? '#22c55e' : '#6b7280';
+    
+    row.innerHTML = `
+      <td><strong>${item.name}</strong></td>
+      <td>${item.unit}</td>
+      <td>$${item.price.toFixed(2)}</td>
+      <td style="color: ${statusColor}; font-weight: bold;">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</td>
+      <td>${new Date(item.lastUpdated).toLocaleDateString()}</td>
+      <td>${item.updatedBy}</td>
+      <td>
+        <button onclick="editItemPrice('${item.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</button>
+        <button onclick="toggleItemStatus('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" class="btn-secondary">
+          ${item.status === 'active' ? 'Deactivate' : 'Activate'}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function editItemPrice(itemId) {
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    document.getElementById('editItemId').value = itemId;
+    document.getElementById('itemName').value = item.name;
+    document.getElementById('itemUnit').value = item.unit;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemStatus').value = item.status;
+    
+    document.getElementById('itemFormTitle').textContent = 'Edit Item Price';
+    document.getElementById('saveItemBtn').textContent = 'Update Item';
+  }
+}
+
+function saveItemPrice(event) {
+  event.preventDefault();
+  
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    alert('Access denied: Admin only');
+    return;
+  }
+  
+  const itemId = document.getElementById('editItemId').value;
+  const itemData = {
+    name: document.getElementById('itemName').value,
+    unit: document.getElementById('itemUnit').value,
+    price: parseFloat(document.getElementById('itemPrice').value),
+    status: document.getElementById('itemStatus').value
+  };
+  
+  if (itemId) {
+    // Update existing item
+    const itemPrices = window.appState.getState('itemPrices');
+    const item = itemPrices.find(item => item.id === itemId);
+    if (item) {
+      item.name = itemData.name;
+      item.unit = itemData.unit;
+      item.price = itemData.price;
+      item.status = itemData.status;
+      item.lastUpdated = new Date().toISOString();
+      item.updatedBy = currentUser;
+      window.appState.setState('itemPrices', itemPrices);
+      
+      alert('Item updated successfully!');
+    }
+  } else {
+    // Add new item
+    const newItem = {
+      id: itemData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+      name: itemData.name,
+      unit: itemData.unit,
+      price: itemData.price,
+      status: itemData.status || 'active',
+      category: 'packaging',
+      lastUpdated: new Date().toISOString(),
+      updatedBy: currentUser
+    };
+    
+    const itemPrices = window.appState.getState('itemPrices');
+    itemPrices.push(newItem);
+    window.appState.setState('itemPrices', itemPrices);
+    
+    alert('New item added successfully!');
+  }
+  
+  cancelItemEdit();
+  renderItemPricesTable();
+}
+
+function cancelItemEdit() {
+  document.getElementById('itemPriceForm').reset();
+  document.getElementById('editItemId').value = '';
+  document.getElementById('itemFormTitle').textContent = 'Add New Item';
+  document.getElementById('saveItemBtn').textContent = 'Add Item';
+}
+
+function toggleItemStatus(itemId) {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    alert('Access denied: Admin only');
+    return;
+  }
+  
+  const itemPrices = window.appState.getState('itemPrices');
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    item.status = item.status === 'active' ? 'inactive' : 'active';
+    item.lastUpdated = new Date().toISOString();
+    item.updatedBy = currentUser;
+    
+    window.appState.setState('itemPrices', itemPrices);
+    alert(`Item ${item.status === 'active' ? 'activated' : 'deactivated'}!`);
+    renderItemPricesTable();
+  }
+}
+
+// Initialize
+window.addEventListener('load', () => {
+  // Set up inventory with some initial values for testing
+  const currentInventory = window.appState.getState('currentInventory');
+  if (currentInventory.masterBoxLarge === 0) {
+    window.appState.updateInventory('masterBoxLarge', 'set', 100);
+    window.appState.updateInventory('masterBoxSmall', 'set', 100);
+    window.appState.updateInventory('standardBox', 'set', 100);
+  }
+  
+  // Set up today's date
+  const today = new Date();
+  const fromDate = new Date();
+  fromDate.setDate(today.getDate() - 30);
+  
+  if (document.getElementById('reportFromDate')) {
+    document.getElementById('reportFromDate').value = fromDate.toISOString().split('T')[0];
+    document.getElementById('reportToDate').value = today.toISOString().split('T')[0];
+  }
+  
+  // Initialize
+  updateRawInputDefault();
+  renderEquipmentGrid();
+  renderMaintenanceTable();
+});
+</script>
+</body>
+</html>
