@@ -97,6 +97,8 @@ function renderCards(grid, factories, prod, qc) {
       ? './pistachio.html'
       : (f.key === 'Walnut' 
          ? './walnut.html' 
+         : (f.key === 'Cardamom' 
+        ? './cardamom.html'
          : `#/dashboard?factory=${encodeURIComponent(f.key)}`);
     
     // Factory icons
