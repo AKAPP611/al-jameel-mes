@@ -361,12 +361,9 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Product Type</label>
-          <select id="productType">
-            <option>Half Kernel</option>
-            <option>Quarter</option>
-            <option>Large Pieces</option>
-            <option>Amber</option>
+          <label>Raw Material Type</label>
+          <select id="rawMaterialType">
+            <option>Walnut Inshell</option>
           </select>
         </div>
         <div class="form-group">
@@ -393,20 +390,41 @@
         </div>
       </div>
 
-      <!-- Final Goods Output -->
-      <h3>Final Goods Output</h3>
+      <!-- Product Type Outputs -->
+      <h3>Product Type Outputs (kg)</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Half Kernel (kg)</label>
+          <input id="halfKernel" type="number" min="0" step="0.1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Quarter (kg)</label>
+          <input id="quarter" type="number" min="0" step="0.1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Large Pieces (kg)</label>
+          <input id="largePieces" type="number" min="0" step="0.1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Amber (kg)</label>
+          <input id="amber" type="number" min="0" step="0.1" value="0" onchange="updateSummary()">
+        </div>
+      </div>
+
+      <!-- Packaging Output -->
+      <h3>Packaging Output</h3>
       <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
         <div class="form-group">
           <label>5kg Pouches</label>
-          <input id="pouches5kg" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+          <input id="pouches5kg" type="number" min="0" step="1" value="0">
         </div>
         <div class="form-group">
           <label>10kg Pouches</label>
-          <input id="pouches10kg" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+          <input id="pouches10kg" type="number" min="0" step="1" value="0">
         </div>
         <div class="form-group">
           <label>10kg Boxes</label>
-          <input id="boxes10kg" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+          <input id="boxes10kg" type="number" min="0" step="1" value="0">
         </div>
       </div>
 
@@ -477,16 +495,18 @@
   <tr>
     <th>Timestamp</th>
     <th>Brand</th>
-    <th>Product Type</th>
+    <th>Raw Material</th>
     <th>Lot</th>
     <th>Raw Input (kg)</th>
+    <th>Half Kernel (kg)</th>
+    <th>Quarter (kg)</th>
+    <th>Large Pieces (kg)</th>
+    <th>Amber (kg)</th>
     <th>5kg Pouches</th>
     <th>10kg Pouches</th>
     <th>10kg Boxes</th>
-    <th>Finished (kg)</th>
+    <th>Total Finished (kg)</th>
     <th>Rejects (kg)</th>
-    <th>Total Output (kg)</th>
-    <th>Material Gain/Loss</th>
     <th>Efficiency (%)</th>
   </tr>
 </thead>
@@ -785,16 +805,6 @@
               <option value="all">All Brands</option>
               <option value="Al Jameel">Al Jameel</option>
               <option value="Abu Taj">Abu Taj</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Product Type</label>
-            <select id="reportProductType">
-              <option value="all">All Types</option>
-              <option value="Half Kernel">Half Kernel</option>
-              <option value="Quarter">Quarter</option>
-              <option value="Large Pieces">Large Pieces</option>
-              <option value="Amber">Amber</option>
             </select>
           </div>
         </div>
@@ -1285,12 +1295,14 @@ function updateInventoryDisplay() {
 }
 
 function updateSummary() {
-  const pouches5kg = parseInt(document.getElementById('pouches5kg').value) || 0;
-  const pouches10kg = parseInt(document.getElementById('pouches10kg').value) || 0;
-  const boxes10kg = parseInt(document.getElementById('boxes10kg').value) || 0;
+  // Get product type quantities
+  const halfKernel = parseFloat(document.getElementById('halfKernel').value) || 0;
+  const quarter = parseFloat(document.getElementById('quarter').value) || 0;
+  const largePieces = parseFloat(document.getElementById('largePieces').value) || 0;
+  const amber = parseFloat(document.getElementById('amber').value) || 0;
   
-  // Calculate total finished weight (5kg pouches + 10kg pouches + 10kg boxes)
-  const finishedKg = (pouches5kg * 5) + (pouches10kg * 10) + (boxes10kg * 10);
+  // Calculate total finished weight from product types
+  const finishedKg = halfKernel + quarter + largePieces + amber;
   
   // Calculate rejects
   const rejectsKg = parseInt(document.getElementById('rejWalnutShell').value) || 0;
@@ -1316,21 +1328,28 @@ function clearForm() {
 
 function submitProduction() {
   const brand = document.getElementById('brand').value;
-  const productType = document.getElementById('productType').value;
+  const rawMaterialType = document.getElementById('rawMaterialType').value; // "Walnut Inshell"
   const supplier = document.getElementById('supplier').value;
   const rawFormat = document.getElementById('rawFormat').value;
   const lotNo = document.getElementById('lotNo').value;
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   
+  // Get product type quantities
+  const halfKernel = parseFloat(document.getElementById('halfKernel').value) || 0;
+  const quarter = parseFloat(document.getElementById('quarter').value) || 0;
+  const largePieces = parseFloat(document.getElementById('largePieces').value) || 0;
+  const amber = parseFloat(document.getElementById('amber').value) || 0;
+  
+  // Get packaging quantities
   const pouches5kg = parseInt(document.getElementById('pouches5kg').value) || 0;
   const pouches10kg = parseInt(document.getElementById('pouches10kg').value) || 0;
   const boxes10kg = parseInt(document.getElementById('boxes10kg').value) || 0;
   
-  // Calculate total finished weight
-  const finishedKg = (pouches5kg * 5) + (pouches10kg * 10) + (boxes10kg * 10);
+  // Calculate total finished weight from product types
+  const finishedKg = halfKernel + quarter + largePieces + amber;
   
   if (finishedKg === 0) {
-    alert('Please enter finished goods quantities');
+    alert('Please enter finished goods quantities for at least one product type');
     return;
   }
   
@@ -1355,48 +1374,22 @@ function submitProduction() {
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
   
-  // Update inventory based on brand and product type
-  let pouch5kgType, pouch10kgType, boxType;
+  // Update inventory based on brand and mixed product types
+  let pouch5kgType, pouch10kgType;
   
   if (brand === 'Al Jameel') {
     pouch5kgType = 'alJameel5kg';
     pouch10kgType = 'alJameel10kg';
-    
-    switch(productType) {
-      case 'Half Kernel':
-        boxType = 'alJameelHalfBoxes';
-        break;
-      case 'Quarter':
-        boxType = 'alJameelQuarterBoxes';
-        break;
-      case 'Large Pieces':
-        boxType = 'alJameelLargeBoxes';
-        break;
-      case 'Amber':
-        boxType = 'alJameelAmberBoxes';
-        break;
-    }
   } else { // Abu Taj
     pouch5kgType = 'abuTaj5kg';
     pouch10kgType = 'abuTaj10kg';
-    
-    switch(productType) {
-      case 'Half Kernel':
-        boxType = 'abuTajHalfBoxes';
-        break;
-      case 'Quarter':
-        boxType = 'abuTajQuarterBoxes';
-        break;
-      case 'Large Pieces':
-        boxType = 'abuTajLargeBoxes';
-        break;
-      case 'Amber':
-        boxType = 'abuTajAmberBoxes';
-        break;
-    }
   }
   
-  // Check inventory
+  // For mixed product types, we need to handle different box types
+  // We'll assume proportional usage based on product quantities
+  const totalProductWeight = halfKernel + quarter + largePieces + amber;
+  
+  // Check inventory for pouches
   const currentInventory = window.appState.getState('currentInventory');
   const totalPouches5kgNeeded = pouches5kgUsed + pouches5kgWasted;
   const totalPouches10kgNeeded = pouches10kgUsed + pouches10kgWasted;
@@ -1412,8 +1405,15 @@ function submitProduction() {
     return;
   }
   
-  if (totalBoxesNeeded > currentInventory[boxType]) {
-    alert(`Insufficient boxes! Required: ${totalBoxesNeeded}, Available: ${currentInventory[boxType]}`);
+  // For simplicity, let's check total box availability across all types
+  const totalBoxInventory = (brand === 'Al Jameel' ? 
+    currentInventory.alJameelHalfBoxes + currentInventory.alJameelQuarterBoxes + 
+    currentInventory.alJameelLargeBoxes + currentInventory.alJameelAmberBoxes :
+    currentInventory.abuTajHalfBoxes + currentInventory.abuTajQuarterBoxes + 
+    currentInventory.abuTajLargeBoxes + currentInventory.abuTajAmberBoxes);
+    
+  if (totalBoxesNeeded > totalBoxInventory) {
+    alert(`Insufficient boxes! Required: ${totalBoxesNeeded}, Available: ${totalBoxInventory}`);
     return;
   }
   
@@ -1421,11 +1421,17 @@ function submitProduction() {
   const record = {
     timestamp: new Date().toISOString(),
     brand,
-    productType,
+    rawMaterialType, // "Walnut Inshell"
     supplier,
     rawFormat,
     lot: lotNo,
     rawInput,
+    // Product type outputs (kg)
+    halfKernel,
+    quarter,
+    largePieces,
+    amber,
+    // Packaging outputs
     pouches5kg,
     pouches10kg,
     boxes10kg,
@@ -1448,7 +1454,25 @@ function submitProduction() {
   // Update inventory
   window.appState.updateInventory(pouch5kgType, 'remove', totalPouches5kgNeeded);
   window.appState.updateInventory(pouch10kgType, 'remove', totalPouches10kgNeeded);
-  window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
+  
+  // For boxes, we'll deduct proportionally from each type based on product quantities
+  if (totalBoxesNeeded > 0 && totalProductWeight > 0) {
+    const boxTypes = brand === 'Al Jameel' ? 
+      ['alJameelHalfBoxes', 'alJameelQuarterBoxes', 'alJameelLargeBoxes', 'alJameelAmberBoxes'] :
+      ['abuTajHalfBoxes', 'abuTajQuarterBoxes', 'abuTajLargeBoxes', 'abuTajAmberBoxes'];
+    
+    const productQuantities = [halfKernel, quarter, largePieces, amber];
+    
+    for (let i = 0; i < boxTypes.length; i++) {
+      if (productQuantities[i] > 0) {
+        const proportion = productQuantities[i] / totalProductWeight;
+        const boxesToRemove = Math.floor(totalBoxesNeeded * proportion);
+        if (boxesToRemove > 0) {
+          window.appState.updateInventory(boxTypes[i], 'remove', boxesToRemove);
+        }
+      }
+    }
+  }
   
   // Add inventory log entries
   window.appState.addToArray('inventoryLog', {
@@ -1471,11 +1495,11 @@ function submitProduction() {
   
   window.appState.addToArray('inventoryLog', {
     timestamp: new Date().toISOString(),
-    item: `${brand} ${productType} Boxes`,
+    item: `${brand} Mixed Product Boxes`,
     action: 'remove',
     quantity: totalBoxesNeeded,
-    result: window.appState.getState('currentInventory')[boxType],
-    notes: 'Auto: Production submission'
+    result: 'Mixed allocation',
+    notes: 'Auto: Production submission - mixed products'
   });
   
   alert('Production record submitted successfully!');
@@ -1514,24 +1538,22 @@ function renderRecords() {
   const productionRecords = window.appState.getState('productionRecords') || [];
   productionRecords.slice().reverse().forEach(record => {
     const row = document.createElement('tr');
-    const totalOutput = record.finishedKg + record.rejectsKg;
-    const materialGain = totalOutput - record.rawInput;
-    const gainPercent = record.rawInput > 0 ? ((materialGain / record.rawInput) * 100).toFixed(1) : 0;
-    const gainColor = materialGain > 0 ? '#22c55e' : '#ef4444';
-
+    
     row.innerHTML = `
       <td>${new Date(record.timestamp).toLocaleString()}</td>
       <td>${record.brand}</td>
-      <td>${record.productType}</td>
+      <td>${record.rawMaterialType || 'Walnut Inshell'}</td>
       <td>${record.lot}</td>
       <td>${record.rawInput}</td>
+      <td>${record.halfKernel || 0}</td>
+      <td>${record.quarter || 0}</td>
+      <td>${record.largePieces || 0}</td>
+      <td>${record.amber || 0}</td>
       <td>${record.pouches5kg || 0}</td>
       <td>${record.pouches10kg || 0}</td>
       <td>${record.boxes10kg || 0}</td>
       <td>${record.finishedKg}</td>
       <td>${record.rejectsKg}</td>
-      <td>${totalOutput}</td>
-      <td style="color: ${gainColor}; font-weight: bold;">${materialGain > 0 ? '+' : ''}${materialGain} (${gainPercent > 0 ? '+' : ''}${gainPercent}%)</td>
       <td>${record.efficiency}%</td>
     `;
     tbody.appendChild(row);
@@ -1560,48 +1582,27 @@ function renderInventory() {
   // Update current stock display in production form
   if (document.getElementById('currentPouches5kg')) {
     const brand = document.getElementById('brand').value;
-    const productType = document.getElementById('productType').value;
     
     if (brand === 'Al Jameel') {
       document.getElementById('currentPouches5kg').textContent = currentInventory.alJameel5kg || 0;
       document.getElementById('currentPouches10kg').textContent = currentInventory.alJameel10kg || 0;
       
-      let boxCount = 0;
-      switch(productType) {
-        case 'Half Kernel':
-          boxCount = currentInventory.alJameelHalfBoxes || 0;
-          break;
-        case 'Quarter':
-          boxCount = currentInventory.alJameelQuarterBoxes || 0;
-          break;
-        case 'Large Pieces':
-          boxCount = currentInventory.alJameelLargeBoxes || 0;
-          break;
-        case 'Amber':
-          boxCount = currentInventory.alJameelAmberBoxes || 0;
-          break;
-      }
-      document.getElementById('currentBoxes').textContent = boxCount;
+      // Show total boxes for mixed products
+      const totalBoxes = (currentInventory.alJameelHalfBoxes || 0) + 
+                        (currentInventory.alJameelQuarterBoxes || 0) + 
+                        (currentInventory.alJameelLargeBoxes || 0) + 
+                        (currentInventory.alJameelAmberBoxes || 0);
+      document.getElementById('currentBoxes').textContent = totalBoxes;
     } else { // Abu Taj
       document.getElementById('currentPouches5kg').textContent = currentInventory.abuTaj5kg || 0;
       document.getElementById('currentPouches10kg').textContent = currentInventory.abuTaj10kg || 0;
       
-      let boxCount = 0;
-      switch(productType) {
-        case 'Half Kernel':
-          boxCount = currentInventory.abuTajHalfBoxes || 0;
-          break;
-        case 'Quarter':
-          boxCount = currentInventory.abuTajQuarterBoxes || 0;
-          break;
-        case 'Large Pieces':
-          boxCount = currentInventory.abuTajLargeBoxes || 0;
-          break;
-        case 'Amber':
-          boxCount = currentInventory.abuTajAmberBoxes || 0;
-          break;
-      }
-      document.getElementById('currentBoxes').textContent = boxCount;
+      // Show total boxes for mixed products
+      const totalBoxes = (currentInventory.abuTajHalfBoxes || 0) + 
+                        (currentInventory.abuTajQuarterBoxes || 0) + 
+                        (currentInventory.abuTajLargeBoxes || 0) + 
+                        (currentInventory.abuTajAmberBoxes || 0);
+      document.getElementById('currentBoxes').textContent = totalBoxes;
     }
   }
   
@@ -1898,7 +1899,6 @@ function generateReport() {
   const fromDate = document.getElementById('reportFromDate').value;
   const toDate = document.getElementById('reportToDate').value;
   const brand = document.getElementById('reportBrand').value;
-  const productType = document.getElementById('reportProductType').value;
   
   if (!fromDate || !toDate) {
     alert('Please select both From and To dates');
@@ -1909,17 +1909,12 @@ function generateReport() {
   let filteredRecords = productionRecords.filter(record => {
     const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
     let matchesBrand = true;
-    let matchesType = true;
     
     if (brand !== 'all' && record.brand !== brand) {
       matchesBrand = false;
     }
     
-    if (productType !== 'all' && record.productType !== productType) {
-      matchesType = false;
-    }
-    
-    return recordDate >= fromDate && recordDate <= toDate && matchesBrand && matchesType;
+    return recordDate >= fromDate && recordDate <= toDate && matchesBrand;
   });
   
   if (filteredRecords.length === 0) {
@@ -1945,13 +1940,19 @@ function generateReport() {
     brandStats[record.brand].count += 1;
   });
   
-  const productStats = {};
+  // Calculate product type statistics
+  const productTypeStats = {
+    'Half Kernel': 0,
+    'Quarter': 0,
+    'Large Pieces': 0,
+    'Amber': 0
+  };
+  
   filteredRecords.forEach(record => {
-    if (!productStats[record.productType]) {
-      productStats[record.productType] = { finished: 0, count: 0 };
-    }
-    productStats[record.productType].finished += record.finishedKg;
-    productStats[record.productType].count += 1;
+    if (record.halfKernel) productTypeStats['Half Kernel'] += record.halfKernel;
+    if (record.quarter) productTypeStats['Quarter'] += record.quarter;
+    if (record.largePieces) productTypeStats['Large Pieces'] += record.largePieces;
+    if (record.amber) productTypeStats['Amber'] += record.amber;
   });
   
   // Create report HTML
@@ -2009,17 +2010,15 @@ function generateReport() {
           <tr style="background: var(--primary); color: white;">
             <th style="padding: 0.75rem; text-align: left;">Product Type</th>
             <th style="padding: 0.75rem; text-align: right;">Production (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Number of Runs</th>
-            <th style="padding: 0.75rem; text-align: right;">Percentage</th>
+            <th style="padding: 0.75rem; text-align: right;">Percentage of Total</th>
           </tr>
         </thead>
         <tbody>
-          ${Object.entries(productStats).map(([type, data]) => `
+          ${Object.entries(productTypeStats).map(([type, quantity]) => `
             <tr>
               <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${type}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.finished.toLocaleString()}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.count}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${Math.round((data.finished / totalFinished) * 100)}%</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${quantity.toFixed(1)}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${quantity > 0 ? Math.round((quantity / totalFinished) * 100) : 0}%</td>
             </tr>
           `).join('')}
         </tbody>
@@ -2032,9 +2031,12 @@ function generateReport() {
             <th style="padding: 0.75rem; text-align: left;">Date</th>
             <th style="padding: 0.75rem; text-align: left;">Lot</th>
             <th style="padding: 0.75rem; text-align: left;">Brand</th>
-            <th style="padding: 0.75rem; text-align: left;">Product Type</th>
             <th style="padding: 0.75rem; text-align: right;">Raw Input (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Finished (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Half Kernel (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Quarter (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Large Pieces (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Amber (kg)</th>
+            <th style="padding: 0.75rem; text-align: right;">Total Finished (kg)</th>
             <th style="padding: 0.75rem; text-align: right;">Efficiency (%)</th>
           </tr>
         </thead>
@@ -2044,8 +2046,11 @@ function generateReport() {
               <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${new Date(record.timestamp).toLocaleDateString()}</td>
               <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${record.lot}</td>
               <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${record.brand}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${record.productType}</td>
               <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.rawInput}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.halfKernel || 0}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.quarter || 0}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.largePieces || 0}</td>
+              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.amber || 0}</td>
               <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.finishedKg}</td>
               <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.efficiency}%</td>
             </tr>
@@ -2237,7 +2242,6 @@ window.addEventListener('load', () => {
   
   // Set up event handlers
   document.getElementById('brand').addEventListener('change', updateInventoryDisplay);
-  document.getElementById('productType').addEventListener('change', updateInventoryDisplay);
   document.getElementById('supplier').addEventListener('change', updateRawFormat);
   
   // Initialize
