@@ -591,7 +591,17 @@
           <div><strong>Total Containers:</strong> <span id="selectedLotContainers">-</span></div>
         </div>
       </div>
-
+<h3>Final Goods Output</h3>
+<div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+  <div class="form-group">
+    <label>18-21 Size (kg)</label>
+    <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+  </div>
+  <div class="form-group">
+    <label>21-25 Size (kg)</label>
+    <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+  </div>
+</div>
       <!-- Materials -->
       <div class="materials-section">
         <h3>Materials Usage</h3>
@@ -1289,23 +1299,23 @@ class AppState {
   }
 
   addToArray(key, item) {
-    if (Array.isArray(this.data[key])) {
-      this.data[key].push(item);
+  if (Array.isArray(this.data[key])) {
+    this.data[key].push(item);
+    this.saveToStorage();
+    this.notify(key, this.data[key]);
+  }
+}
+
+updateArrayItem(key, id, updater) {
+  if (Array.isArray(this.data[key])) {
+    const index = this.data[key].findIndex(item => item.id === id);
+    if (index !== -1) {
+      this.data[key][index] = updater(this.data[key][index]);
       this.saveToStorage();
       this.notify(key, this.data[key]);
     }
-     updateArrayItem(key, id, updater) {
-    if (Array.isArray(this.data[key])) {
-      const index = this.data[key].findIndex(item => item.id === id);
-      if (index !== -1) {
-        this.data[key][index] = updater(this.data[key][index]);
-        this.saveToStorage();
-        this.notify(key, this.data[key]);
-      }
-    }
   }
-  }
-
+}
   updateInventory(item, action, quantity) {
     const current = this.data.currentInventory[item] || 0;
     let newValue;
@@ -1881,9 +1891,10 @@ function updateLotInfo() {
     lotDisplay.style.display = 'block';
     
     // Auto-set brand
-    document.getElementById('brand').value = selectedLot.brand;
+    // TODO: Add logic here if you want to auto-set the brand based on the selected lot
   }
-}
+} // <- Missing closing brace for the if statement and function
+
 function updateInventoryDisplay() {
   renderInventory();
 }
@@ -1918,7 +1929,6 @@ function clearForm() {
   document.querySelectorAll('#production input[type="number"]').forEach(input => {
     input.value = 0;
   });
-  document.getElementById('lotNo').value = '';
   updateSummary();
 }
 
