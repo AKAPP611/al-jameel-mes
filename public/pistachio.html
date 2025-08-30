@@ -1766,7 +1766,7 @@ function showSection(sectionId) {
 
 // Form handling
 function updateFormVisibility() {
-  const runType = document.getElementById('runType').value;
+  
   const rejectsSection = document.getElementById('rejectsSection');
   
   if (runType === 'huller') {
@@ -1918,22 +1918,7 @@ function updateInventoryDisplay() {
   renderInventory();
 }
 
-function updateSummary() {
-  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
-  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const finishedKg = kg1821 + kg2125;
-  
-  const runType = document.getElementById('runType').value;
-  let rejectsKg = 0;
-  
-  if (runType === 'huller') {
-    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
-                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
-    rejectsKg = rejectIds.reduce((sum, id) => {
-      return sum + (parseInt(document.getElementById(id).value) || 0);
-    }, 0);
-  }
-  function updateSummary() {
+ffunction updateSummary() {
   const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
   const finishedKg = kg1821 + kg2125;
@@ -1957,6 +1942,22 @@ function updateSummary() {
   
   document.getElementById('productionSummary').textContent = 
     `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
+}
+
+function autoCalculateMaterials() {
+  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
+  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
+  const totalKg = kg1821 + kg2125;
+  
+  // Each vacuum bag holds 10kg
+  const requiredBags = Math.ceil(totalKg / 10);
+  
+  // Each box typically holds 12 bags (adjust as needed)
+  const requiredBoxes = Math.ceil(requiredBags / 12);
+  
+  // Auto-fill the materials fields
+  document.getElementById('bagsUsed').value = requiredBags;
+  document.getElementById('boxesUsed').value = requiredBoxes;
 }
 
 function autoCalculateMaterials() {
