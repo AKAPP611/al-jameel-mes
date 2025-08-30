@@ -528,7 +528,7 @@
 
       <!-- Packaging Output -->
       <h3>Packaging Output</h3>
-      <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="form-grid">
         <div class="form-group">
           <label>5kg Pouches</label>
           <input id="pouches5kg" type="number" min="0" step="1" value="0">
@@ -536,10 +536,6 @@
         <div class="form-group">
           <label>10kg Pouches</label>
           <input id="pouches10kg" type="number" min="0" step="1" value="0">
-        </div>
-        <div class="form-group">
-          <label>10kg Boxes</label>
-          <input id="boxes10kg" type="number" min="0" step="1" value="0">
         </div>
       </div>
 
@@ -649,7 +645,6 @@
     <th>Amber (kg)</th>
     <th>5kg Pouches</th>
     <th>10kg Pouches</th>
-    <th>10kg Boxes</th>
     <th>Total Finished (kg)</th>
     <th>Rejects (kg)</th>
     <th>Efficiency (%)</th>
@@ -1570,7 +1565,6 @@ function submitProduction() {
   // Get packaging quantities
   const pouches5kg = parseInt(document.getElementById('pouches5kg').value) || 0;
   const pouches10kg = parseInt(document.getElementById('pouches10kg').value) || 0;
-  const boxes10kg = parseInt(document.getElementById('boxes10kg').value) || 0;
   
   // Calculate total finished weight from product types
   const finishedKg = halfKernel + quarter + largePieces + amber;
@@ -1689,7 +1683,6 @@ function submitProduction() {
     // Packaging outputs
     pouches5kg,
     pouches10kg,
-    boxes10kg,
     finishedKg,
     rejectsKg,
     efficiency,
@@ -1848,7 +1841,6 @@ function renderRecords() {
       <td>${record.amber || 0}</td>
       <td>${record.pouches5kg || 0}</td>
       <td>${record.pouches10kg || 0}</td>
-      <td>${record.boxes10kg || 0}</td>
       <td>${record.finishedKg}</td>
       <td>${record.rejectsKg}</td>
       <td>${record.efficiency}%</td>
