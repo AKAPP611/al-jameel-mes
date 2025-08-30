@@ -277,6 +277,133 @@
       font-weight: 500;
     }
 
+    /* Professional Chart Styling */
+    .chart-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      page-break-inside: avoid;
+    }
+
+    .chart-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .pie-chart-container {
+      text-align: center;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+
+    .bar-chart-container {
+      padding: 1rem;
+    }
+
+    .bar-item {
+      margin-bottom: 1rem;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .bar-track {
+      background: #e9ecef;
+      height: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 0.5rem;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      .chart-container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+      
+      .chart-grid {
+        page-break-inside: avoid;
+      }
+      
+      .pie-chart-container,
+      .bar-chart-container {
+        page-break-inside: avoid;
+      }
+    }
+
+    /* Export button styling */
+    .export-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .export-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      border-radius: 0.375rem;
+    }
+
+    .export-btn-pdf {
+      background: #dc2626;
+      color: white;
+    }
+
+    .export-btn-excel {
+      background: #059669;
+      color: white;
+    }
+
     /* Responsive design */
     @media (max-width: 768px) {
       .product-grid {
@@ -285,14 +412,6 @@
       
       .form-grid {
         grid-template-columns: 1fr;
-      }
-    }
-
-    /* Print-specific styles */
-    @media print {
-      .chart-container {
-        box-shadow: none;
-        border: 1px solid #ddd;
       }
     }
   </style>
@@ -366,14 +485,14 @@
         </div>
         <div class="stat-card">
           <div>Efficiency (%)</div>
-          <div class="stat-value" id="kpiEff">0</div>
+          <div class="stat-value" id="kpiEff">100</div>
         </div>
         <div class="stat-card">
           <div>Total Batches</div>
           <div class="stat-value" id="kpiBatches">0</div>
         </div>
       </div>
-      <p>KPIs update automatically when you submit production records. Note: Cardamom processing generates no rejects.</p>
+      <p>KPIs update automatically when you submit production records. Note: Cardamom processing generates no rejects - 100% efficiency maintained.</p>
     </section>
 
     <!-- Production Entry Section -->
@@ -566,6 +685,36 @@
         </div>
       </div>
 
+      <!-- Inventory Export Section -->
+      <div class="materials-section" style="margin-bottom: 1rem;">
+        <h3>Export Inventory Reports</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Export Type</label>
+            <select id="inventoryExportType">
+              <option value="current">Current Stock Levels</option>
+              <option value="movements">Stock Movement Log</option>
+              <option value="full">Complete Inventory Report</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>From Date (for movements)</label>
+            <input id="inventoryExportFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date (for movements)</label>
+            <input id="inventoryExportToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <div class="export-buttons">
+              <button onclick="exportInventoryPDF()" class="export-btn export-btn-pdf">Export PDF</button>
+              <button onclick="exportInventoryExcel()" class="export-btn export-btn-excel">Export Excel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="materials-section">
         <h3>Stock Adjustment</h3>
         <div class="form-grid">
@@ -622,11 +771,11 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div>Total Equipment</div>
-          <div class="stat-value" id="totalEquipment">25</div>
+          <div class="stat-value" id="totalEquipment">15</div>
         </div>
         <div class="stat-card">
           <div>Operational</div>
-          <div class="stat-value" id="operationalEquipment" style="color: #22c55e;">25</div>
+          <div class="stat-value" id="operationalEquipment" style="color: #22c55e;">15</div>
         </div>
         <div class="stat-card">
           <div>Critical Down (P1-3)</div>
@@ -638,8 +787,56 @@
         </div>
       </div>
 
+      <!-- Filters -->
+      <div class="materials-section" style="margin-bottom: 1rem;">
+        <h3>Equipment Filters</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Priority Level</label>
+            <select id="priorityFilter" onchange="filterEquipment()">
+              <option value="all">All Priorities</option>
+              <option value="1">Priority 1 (Critical)</option>
+              <option value="3">Priority 3 (High)</option>
+              <option value="5">Priority 5 (Medium)</option>
+              <option value="7">Priority 7 (Low)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Equipment Type</label>
+            <select id="typeFilter" onchange="filterEquipment()">
+              <option value="all">All Types</option>
+              <option value="cleaner">Cleaners</option>
+              <option value="sorter">Sorters</option>
+              <option value="conveyor">Conveyors</option>
+              <option value="packaging">Packaging</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="statusFilter" onchange="filterEquipment()">
+              <option value="all">All Status</option>
+              <option value="operational">Operational Only</option>
+              <option value="issues">Issues Only</option>
+              <option value="down">Down/Broken Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sort By</label>
+            <select id="sortBy">
+              <option value="priority">Priority Level</option>
+              <option value="code">Equipment Code</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="filterEquipment()" style="width: 100%;">Apply Filters</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Equipment grid will be populated by JavaScript -->
-      <h3>Equipment Status (<span id="shownCount">25</span> shown)</h3>
+      <h3>Equipment Status (<span id="shownCount">15</span> shown)</h3>
       <div id="equipmentGrid" class="stats-grid" style="margin-bottom: 2rem;">
         <!-- Equipment cards will be populated here -->
       </div>
@@ -690,6 +887,23 @@
       </div>
 
       <h3>Maintenance Log</h3>
+      <div class="materials-section" style="margin-bottom: 1rem;">
+        <h4>Export Maintenance Cost Report</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>From Date</label>
+            <input id="exportFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="exportToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="exportMaintenanceReport()" style="width: 100%;">Export Cost Report</button>
+          </div>
+        </div>
+      </div>
       <div style="overflow-x: auto;">
         <table id="maintenanceTable">
           <thead>
@@ -744,13 +958,23 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Bag Size</label>
-            <select id="reportBagSize">
-              <option value="all">All Bag Sizes</option>
-              <option value="500">500 kg</option>
-              <option value="525">525 kg</option>
-              <option value="550">550 kg</option>
-            </select>
+            <label>&nbsp;</label>
+            <button onclick="loadAvailableLots()" style="width: 100%;">Load Available Lots</button>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Select Lots (multi-select with search)</label>
+          <div id="lotSelector" class="lot-selector">
+            <div class="search-box">
+              <input id="lotSearch" type="text" placeholder="Search lots..." onkeyup="filterLots()">
+            </div>
+            <div class="lot-options" id="lotOptions" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
+              <p style="color: #666; text-align: center; padding: 1rem;">Click "Load Available Lots" to see options</p>
+            </div>
+            <div class="selected-lots" id="selectedLots" style="margin-top: 0.5rem;">
+              <strong>Selected:</strong> <span id="selectedLotsDisplay">None</span>
+            </div>
           </div>
         </div>
         
@@ -1385,12 +1609,337 @@ function adjustInventory() {
   renderInventory();
 }
 
+// ===== INVENTORY EXPORT FUNCTIONS =====
+
+function exportInventoryPDF() {
+  const exportType = document.getElementById('inventoryExportType').value;
+  const fromDate = document.getElementById('inventoryExportFromDate').value;
+  const toDate = document.getElementById('inventoryExportToDate').value;
+  
+  let reportHTML = '';
+  const currentDate = new Date().toLocaleString();
+  
+  if (exportType === 'current' || exportType === 'full') {
+    reportHTML += generateCurrentStockHTML();
+  }
+  
+  if (exportType === 'movements' || exportType === 'full') {
+    reportHTML += generateStockMovementsHTML(fromDate, toDate);
+  }
+  
+  // Create a new window for printing
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Inventory Report - Al Jameel MES</title>
+      <style>
+        @media print {
+          body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+          .no-print { display: none !important; }
+          .page-break { page-break-before: always; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+          th { background: #228B22; color: white; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .section-title { font-size: 1.2em; font-weight: bold; margin: 20px 0 10px 0; color: #228B22; }
+        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        th { background: #228B22; color: white; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .section-title { font-size: 1.2em; font-weight: bold; margin: 20px 0 10px 0; color: #228B22; }
+        .print-button { margin: 20px 0; text-align: center; }
+        .print-button button { padding: 10px 20px; background: #228B22; color: white; border: none; border-radius: 5px; cursor: pointer; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Al Jameel MES - Cardamom Inventory Report</h1>
+        <p><strong>Export Type:</strong> ${getExportTypeLabel(exportType)}</p>
+        <p><strong>Generated:</strong> ${currentDate}</p>
+        ${(fromDate || toDate) ? `<p><strong>Date Range:</strong> ${fromDate || 'Start'} to ${toDate || 'End'}</p>` : ''}
+      </div>
+      
+      <div class="print-button no-print">
+        <button onclick="window.print()">Print Report</button>
+        <button onclick="window.close()" style="margin-left: 10px; background: #6b7280;">Close</button>
+      </div>
+      
+      ${reportHTML}
+      
+      <div style="margin-top: 40px; text-align: center; border-top: 2px solid #228B22; padding-top: 20px;">
+        <p><strong>Al Jameel MES - Cardamom Production Management System</strong></p>
+        <p>Confidential Report - Generated: ${currentDate}</p>
+      </div>
+    </body>
+    </html>
+  `);
+  
+  printWindow.document.close();
+  printWindow.focus();
+}
+
+function exportInventoryExcel() {
+  const exportType = document.getElementById('inventoryExportType').value;
+  const fromDate = document.getElementById('inventoryExportFromDate').value;
+  const toDate = document.getElementById('inventoryExportToDate').value;
+  
+  let csvContent = '\ufeff'; // BOM for proper encoding
+  const currentDate = new Date().toLocaleString();
+  
+  // Header information
+  csvContent += `Al Jameel MES - Cardamom Inventory Export\n`;
+  csvContent += `Export Type: ${getExportTypeLabel(exportType)}\n`;
+  csvContent += `Generated: ${currentDate}\n`;
+  if (fromDate || toDate) {
+    csvContent += `Date Range: ${fromDate || 'Start'} to ${toDate || 'End'}\n`;
+  }
+  csvContent += '\n';
+  
+  if (exportType === 'current' || exportType === 'full') {
+    csvContent += generateCurrentStockCSV();
+    csvContent += '\n';
+  }
+  
+  if (exportType === 'movements' || exportType === 'full') {
+    csvContent += generateStockMovementsCSV(fromDate, toDate);
+  }
+  
+  // Create and download the file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `cardamom_inventory_report_${exportType}_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  alert('Inventory report exported successfully!');
+}
+
+function generateCurrentStockHTML() {
+  const currentInventory = window.appState.getState('currentInventory');
+  
+  const inventoryItems = [
+    { name: 'Master Box (Large)', key: 'masterBoxLarge', category: 'Packaging', description: '8 × 5kg Inner Boxes = 40kg' },
+    { name: 'Master Box (Small)', key: 'masterBoxSmall', category: 'Packaging', description: '8 × 3kg Inner Boxes = 24kg' },
+    { name: 'Standard Box', key: 'standardBox', category: 'Packaging', description: '4 × 5kg Pouches = 20kg' }
+  ];
+  
+  let html = '<div class="section-title">Current Stock Levels</div>';
+  html += '<table>';
+  html += '<thead><tr><th>Item Name</th><th>Category</th><th>Current Stock</th><th>Description</th><th>Status</th></tr></thead>';
+  html += '<tbody>';
+  
+  inventoryItems.forEach(item => {
+    const quantity = currentInventory[item.key] || 0;
+    const status = quantity === 0 ? 'Out of Stock' : quantity < 20 ? 'Low Stock' : 'In Stock';
+    const statusColor = quantity === 0 ? '#ef4444' : quantity < 20 ? '#f59e0b' : '#22c55e';
+    
+    html += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.category}</td>
+        <td style="text-align: right; font-weight: bold;">${quantity.toLocaleString()}</td>
+        <td>${item.description}</td>
+        <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
+      </tr>
+    `;
+  });
+  
+  html += '</tbody></table>';
+  
+  // Add summary totals
+  const totalItems = Object.values(currentInventory).reduce((sum, qty) => sum + (qty || 0), 0);
+  
+  html += `
+    <div style="margin-top: 20px; padding: 15px; background: #f0fff0; border-radius: 5px;">
+      <strong>Summary Totals:</strong><br>
+      Total Master Box (Large): ${(currentInventory.masterBoxLarge || 0).toLocaleString()}<br>
+      Total Master Box (Small): ${(currentInventory.masterBoxSmall || 0).toLocaleString()}<br>
+      Total Standard Box: ${(currentInventory.standardBox || 0).toLocaleString()}<br>
+      Total Items: ${totalItems.toLocaleString()}
+    </div>
+  `;
+  
+  return html;
+}
+
+function generateStockMovementsHTML(fromDate, toDate) {
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
+  
+  let filteredLog = inventoryLog;
+  if (fromDate || toDate) {
+    filteredLog = inventoryLog.filter(log => {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      let include = true;
+      if (fromDate && logDate < fromDate) include = false;
+      if (toDate && logDate > toDate) include = false;
+      return include;
+    });
+  }
+  
+  let html = '<div class="section-title page-break">Stock Movement Log';
+  if (fromDate || toDate) {
+    html += ` (${fromDate || 'Start'} to ${toDate || 'End'})`;
+  }
+  html += '</div>';
+  
+  if (filteredLog.length === 0) {
+    html += '<p>No stock movements found for the selected period.</p>';
+    return html;
+  }
+  
+  html += '<table>';
+  html += '<thead><tr><th>Date & Time</th><th>Item</th><th>Action</th><th>Quantity</th><th>Result</th><th>Notes</th></tr></thead>';
+  html += '<tbody>';
+  
+  filteredLog.slice().reverse().forEach(log => {
+    const actionColor = log.action === 'add' ? '#22c55e' : log.action === 'remove' ? '#ef4444' : '#6b7280';
+    html += `
+      <tr>
+        <td>${new Date(log.timestamp).toLocaleString()}</td>
+        <td>${log.item}</td>
+        <td style="color: ${actionColor}; font-weight: bold;">${log.action.toUpperCase()}</td>
+        <td style="text-align: right;">${log.quantity.toLocaleString()}</td>
+        <td style="text-align: right; font-weight: bold;">${log.result.toLocaleString()}</td>
+        <td>${log.notes}</td>
+      </tr>
+    `;
+  });
+  
+  html += '</tbody></table>';
+  
+  // Add movement summary
+  const addTotal = filteredLog.filter(log => log.action === 'add').reduce((sum, log) => sum + log.quantity, 0);
+  const removeTotal = filteredLog.filter(log => log.action === 'remove').reduce((sum, log) => sum + log.quantity, 0);
+  
+  html += `
+    <div style="margin-top: 20px; padding: 15px; background: #f0fff0; border-radius: 5px;">
+      <strong>Movement Summary:</strong><br>
+      Total Records: ${filteredLog.length.toLocaleString()}<br>
+      Total Added: ${addTotal.toLocaleString()}<br>
+      Total Removed: ${removeTotal.toLocaleString()}<br>
+      Net Change: ${(addTotal - removeTotal).toLocaleString()}
+    </div>
+  `;
+  
+  return html;
+}
+
+function generateCurrentStockCSV() {
+  const currentInventory = window.appState.getState('currentInventory');
+  
+  const inventoryItems = [
+    { name: 'Master Box (Large)', key: 'masterBoxLarge', category: 'Packaging', description: '8 × 5kg Inner Boxes = 40kg' },
+    { name: 'Master Box (Small)', key: 'masterBoxSmall', category: 'Packaging', description: '8 × 3kg Inner Boxes = 24kg' },
+    { name: 'Standard Box', key: 'standardBox', category: 'Packaging', description: '4 × 5kg Pouches = 20kg' }
+  ];
+  
+  let csv = 'CURRENT STOCK LEVELS\n';
+  csv += 'Item Name,Category,Current Stock,Description,Status\n';
+  
+  inventoryItems.forEach(item => {
+    const quantity = currentInventory[item.key] || 0;
+    const status = quantity === 0 ? 'Out of Stock' : quantity < 20 ? 'Low Stock' : 'In Stock';
+    csv += `"${item.name}","${item.category}",${quantity},"${item.description}","${status}"\n`;
+  });
+  
+  return csv;
+}
+
+function generateStockMovementsCSV(fromDate, toDate) {
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
+  
+  let filteredLog = inventoryLog;
+  if (fromDate || toDate) {
+    filteredLog = inventoryLog.filter(log => {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      let include = true;
+      if (fromDate && logDate < fromDate) include = false;
+      if (toDate && logDate > toDate) include = false;
+      return include;
+    });
+  }
+  
+  let csv = 'STOCK MOVEMENT LOG\n';
+  csv += 'Date & Time,Item,Action,Quantity,Result,Notes\n';
+  
+  filteredLog.slice().reverse().forEach(log => {
+    csv += `"${new Date(log.timestamp).toLocaleString()}","${log.item}","${log.action.toUpperCase()}",${log.quantity},${log.result},"${log.notes}"\n`;
+  });
+  
+  return csv;
+}
+
+function getExportTypeLabel(type) {
+  switch(type) {
+    case 'current': return 'Current Stock Levels';
+    case 'movements': return 'Stock Movement Log';
+    case 'full': return 'Complete Inventory Report';
+    default: return 'Inventory Report';
+  }
+}
+
 // Equipment management
-function renderEquipmentGrid() {
+function filterEquipment() {
+  const priorityFilter = document.getElementById('priorityFilter').value;
+  const typeFilter = document.getElementById('typeFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+  const sortBy = document.getElementById('sortBy').value;
+  
   const equipment = window.appState.getState('equipment');
+  let filteredEquipment = [...equipment];
+  
+  if (priorityFilter !== 'all') {
+    filteredEquipment = filteredEquipment.filter(eq => eq.priority == priorityFilter);
+  }
+  
+  if (typeFilter !== 'all') {
+    filteredEquipment = filteredEquipment.filter(eq => {
+      switch(typeFilter) {
+        case 'cleaner': return eq.code.startsWith('CL');
+        case 'sorter': return eq.code.startsWith('GD') || eq.code.startsWith('CS') || eq.code.startsWith('WS');
+        case 'conveyor': return eq.code.startsWith('CV');
+        case 'packaging': return eq.code.startsWith('PK');
+        default: return true;
+      }
+    });
+  }
+  
+  if (statusFilter !== 'all') {
+    if (statusFilter === 'operational') {
+      filteredEquipment = filteredEquipment.filter(eq => eq.status === 'operational');
+    } else if (statusFilter === 'issues') {
+      filteredEquipment = filteredEquipment.filter(eq => ['maintenance', 'attention'].includes(eq.status));
+    } else if (statusFilter === 'down') {
+      filteredEquipment = filteredEquipment.filter(eq => ['down', 'offline'].includes(eq.status));
+    }
+  }
+  
+  filteredEquipment.sort((a, b) => {
+    switch(sortBy) {
+      case 'priority': return a.priority - b.priority;
+      case 'code': return a.code.localeCompare(b.code);
+      case 'status': 
+        const statusOrder = {operational: 0, maintenance: 1, attention: 2, down: 3, offline: 4};
+        return statusOrder[a.status] - statusOrder[b.status];
+      default: return 0;
+    }
+  });
+  
+  renderFilteredEquipment(filteredEquipment);
+}
+
+function renderFilteredEquipment(filteredList) {
   const grid = document.getElementById('equipmentGrid');
   
-  const equipmentCards = equipment.map(eq => {
+  const equipmentCards = filteredList.map(eq => {
     const statusColors = {
       operational: '#22c55e',
       maintenance: '#f59e0b', 
@@ -1423,6 +1972,12 @@ function renderEquipmentGrid() {
   }).join('');
   
   grid.innerHTML = equipmentCards;
+  document.getElementById('shownCount').textContent = filteredList.length;
+}
+
+function renderEquipmentGrid() {
+  const equipment = window.appState.getState('equipment');
+  renderFilteredEquipment(equipment);
   
   const operational = equipment.filter(e => e.status === 'operational').length;
   const criticalDown = equipment.filter(e => e.priority <= 3 && e.status !== 'operational').length;
@@ -1431,7 +1986,6 @@ function renderEquipmentGrid() {
   document.getElementById('operationalEquipment').textContent = operational;
   document.getElementById('criticalDown').textContent = criticalDown;
   document.getElementById('minorIssues').textContent = minorIssues;
-  document.getElementById('shownCount').textContent = equipment.length;
 }
 
 function updateEquipmentStatus() {
@@ -1502,162 +2056,595 @@ function renderMaintenanceTable() {
   });
 }
 
-// Report generation
-function generateReport() {
-  const fromDate = document.getElementById('reportFromDate').value;
-  const toDate = document.getElementById('reportToDate').value;
-  const productType = document.getElementById('reportProductType').value;
-  const bagSize = document.getElementById('reportBagSize').value;
+function exportMaintenanceReport() {
+  const fromDate = document.getElementById('exportFromDate').value;
+  const toDate = document.getElementById('exportToDate').value;
   
   if (!fromDate || !toDate) {
     alert('Please select both From and To dates');
     return;
   }
   
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  let filteredRecords = productionRecords.filter(record => {
-    const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
-    let matchesProduct = true;
-    let matchesBagSize = true;
-    
-    if (productType !== 'all') {
-      matchesProduct = record.products[productType] > 0;
-    }
-    
-    if (bagSize !== 'all' && record.bagSize != bagSize) {
-      matchesBagSize = false;
-    }
-    
-    return recordDate >= fromDate && recordDate <= toDate && matchesProduct && matchesBagSize;
+  const maintenanceLog = window.appState.getState('maintenanceLog') || [];
+  const filtered = maintenanceLog.filter(log => {
+    const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+    return logDate >= fromDate && logDate <= toDate;
   });
   
-  if (filteredRecords.length === 0) {
-    alert('No production records found matching the criteria');
+  if (filtered.length === 0) {
+    alert('No maintenance records found in the selected date range');
     return;
   }
   
-  // Generate report content
-  const reportContent = document.getElementById('reportContent');
+  // Calculate totals
+  const totalCost = filtered.reduce((sum, log) => sum + (log.cost || 0), 0);
+  const totalDowntime = filtered.reduce((sum, log) => sum + (log.downtime || 0), 0);
   
-  // Calculate metrics
-  const totalRawInput = filteredRecords.reduce((sum, r) => sum + r.rawInput, 0);
-  const totalFinished = filteredRecords.reduce((sum, r) => sum + r.totalFinishedKg, 0);
-  const totalBatches = filteredRecords.length;
+  // Generate CSV content
+  let csvContent = '\ufeff'; // BOM for proper encoding
+  csvContent += `Al Jameel MES - Cardamom Maintenance Cost Report\n`;
+  csvContent += `Period: ${fromDate} to ${toDate}\n`;
+  csvContent += `Generated: ${new Date().toLocaleString()}\n\n`;
   
-  // Product statistics
-  const productStats = {};
-  filteredRecords.forEach(record => {
-    Object.entries(record.products).forEach(([product, quantity]) => {
-      if (!productStats[product]) {
-        productStats[product] = { 
-          totalQuantity: 0, 
-          totalWeight: 0,
-          batches: 0
-        };
-      }
-      productStats[product].totalQuantity += quantity;
-      productStats[product].totalWeight += quantity * productWeights[product];
-      productStats[product].batches += 1;
-    });
+  csvContent += 'MAINTENANCE COST SUMMARY\n';
+  csvContent += `Total Maintenance Cost: $${totalCost.toFixed(2)}\n`;
+  csvContent += `Total Downtime Hours: ${totalDowntime.toFixed(1)}\n`;
+  csvContent += `Total Records: ${filtered.length}\n\n`;
+  
+  csvContent += 'DETAILED MAINTENANCE LOG\n';
+  csvContent += 'Timestamp,Equipment,Priority,Status Change,Problem,Cost ($),Downtime (hrs)\n';
+  
+  filtered.forEach(log => {
+    csvContent += `"${new Date(log.timestamp).toLocaleString()}","${log.equipment}","P${log.priority}","${log.statusChange}","${log.problem}","${(log.cost || 0).toFixed(2)}","${(log.downtime || 0).toFixed(1)}"\n`;
   });
   
-  // Create report HTML
-  reportContent.innerHTML = `
-    <div style="padding: 2rem;">
-      <div style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="color: var(--primary);">🌿 Cardamom Production Report</h1>
-        <h3>Period: ${new Date(fromDate).toLocaleDateString()} - ${new Date(toDate).toLocaleDateString()}</h3>
-      </div>
-      
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-value">${totalFinished.toLocaleString()}</div>
-          <div class="metric-label">Total Finished (kg)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value">${totalRawInput.toLocaleString()}</div>
-          <div class="metric-label">Raw Input (kg)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value">100%</div>
-          <div class="metric-label">Efficiency (No Rejects)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value">${totalBatches}</div>
-          <div class="metric-label">Production Batches</div>
-        </div>
-      </div>
-      
-      <h2 style="margin-top: 2rem;">Production by Product Type</h2>
-      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-        <thead>
-          <tr style="background: var(--primary); color: white;">
-            <th style="padding: 0.75rem; text-align: left;">Product</th>
-            <th style="padding: 0.75rem; text-align: right;">Quantity (Units)</th>
-            <th style="padding: 0.75rem; text-align: right;">Weight (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Batches</th>
-            <th style="padding: 0.75rem; text-align: right;">% of Total Weight</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${Object.entries(productStats).map(([product, data]) => `
-            <tr>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;"><strong>${product}</strong> (${productWeights[product]}kg units)</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.totalQuantity.toLocaleString()}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.totalWeight.toLocaleString()}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.batches}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${Math.round((data.totalWeight / totalFinished) * 100)}%</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      
-      <h2 style="margin-top: 2rem;">Detailed Production Records</h2>
-      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-        <thead>
-          <tr style="background: var(--primary); color: white;">
-            <th style="padding: 0.75rem; text-align: left;">Date</th>
-            <th style="padding: 0.75rem; text-align: left;">Lot</th>
-            <th style="padding: 0.75rem; text-align: right;">Bag Size (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Bags Used</th>
-            <th style="padding: 0.75rem; text-align: right;">Raw Input (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Finished (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Material Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filteredRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(record => {
-            const materialBalance = record.totalFinishedKg - record.rawInput;
-            const balanceColor = materialBalance >= 0 ? '#22c55e' : '#ef4444';
-            return `
-            <tr>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${new Date(record.timestamp).toLocaleDateString()}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${record.lot}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.bagSize}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.numBags}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.rawInput}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.totalFinishedKg}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right; color: ${balanceColor}; font-weight: bold;">${materialBalance > 0 ? '+' : ''}${materialBalance} kg</td>
-            </tr>
-          `;}).join('')}
-        </tbody>
-      </table>
-      
-      <div style="margin-top: 3rem; text-align: center; font-size: 0.9rem; color: #6c757d;">
-        <p>Report generated on ${new Date().toLocaleString()}</p>
-        <p>Al Jameel Manufacturing Execution System - Cardamom Production Line</p>
-        <p><em>Note: Cardamom processing produces zero rejects - 100% efficiency maintained</em></p>
+  // Create and download the file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `cardamom_maintenance_report_${fromDate}_${toDate}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  alert(`Maintenance report exported successfully!\nTotal Cost: $${totalCost.toFixed(2)}\nTotal Downtime: ${totalDowntime.toFixed(1)} hours`);
+}
+
+// ===== REPORTS FUNCTIONALITY =====
+let availableLots = [];
+let selectedLotsList = [];
+
+function loadAvailableLots() {
+  const fromDate = document.getElementById('reportFromDate').value;
+  const toDate = document.getElementById('reportToDate').value;
+  const productType = document.getElementById('reportProductType').value;
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  // Filter records based on date and product type
+  let filteredRecords = productionRecords.filter(record => {
+    let dateMatch = true;
+    let productMatch = true;
+    
+    if (fromDate || toDate) {
+      const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+      if (fromDate && recordDate < fromDate) dateMatch = false;
+      if (toDate && recordDate > toDate) dateMatch = false;
+    }
+    
+    if (productType !== 'all' && record.products && !record.products[productType]) {
+      productMatch = false;
+    }
+    
+    return dateMatch && productMatch;
+  });
+  
+  // Extract unique lots with details
+  availableLots = filteredRecords.map(record => ({
+    lot: record.lot,
+    date: new Date(record.timestamp).toLocaleDateString(),
+    finished: record.totalFinishedKg,
+    bagSize: record.bagSize,
+    numBags: record.numBags
+  })).filter((lot, index, self) => 
+    index === self.findIndex((l) => l.lot === lot.lot)
+  );
+  
+  renderLotOptions();
+  alert(`Found ${availableLots.length} lots`);
+}
+
+function renderLotOptions() {
+  const container = document.getElementById('lotOptions');
+  
+  if (availableLots.length === 0) {
+    container.innerHTML = '<p style="color: #666; text-align: center; padding: 1rem;">No lots found for the selected criteria</p>';
+    return;
+  }
+  
+  container.innerHTML = availableLots.map(lotData => `
+    <div class="lot-option" onclick="toggleLot('${lotData.lot}')" style="padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; cursor: pointer; border-radius: 0.25rem;">
+      <input type="checkbox" ${selectedLotsList.includes(lotData.lot) ? 'checked' : ''}>
+      <div>
+        <strong>${lotData.lot}</strong><br>
+        <small>${lotData.date} • ${lotData.finished}kg finished • ${lotData.bagSize}kg bags (${lotData.numBags} bags)</small>
       </div>
     </div>
-  `;
+  `).join('');
+}
+
+function filterLots() {
+  const searchTerm = document.getElementById('lotSearch').value.toLowerCase();
+  const lotOptions = document.querySelectorAll('.lot-option');
   
-  // Show report and enable print button
+  lotOptions.forEach(option => {
+    const lotText = option.textContent.toLowerCase();
+    option.style.display = lotText.includes(searchTerm) ? 'block' : 'none';
+  });
+}
+
+function toggleLot(lotNumber) {
+  if (selectedLotsList.includes(lotNumber)) {
+    selectedLotsList = selectedLotsList.filter(lot => lot !== lotNumber);
+  } else {
+    selectedLotsList.push(lotNumber);
+  }
+  
+  updateSelectedDisplay();
+  renderLotOptions(); // Re-render to update checkboxes
+}
+
+function updateSelectedDisplay() {
+  const display = document.getElementById('selectedLotsDisplay');
+  display.textContent = selectedLotsList.length > 0 ? selectedLotsList.join(', ') : 'None';
+}
+
+// Report generation
+function generateReport() {
+  if (selectedLotsList.length === 0) {
+    alert('Please select at least one lot');
+    return;
+  }
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  // Filter records for selected lots
+  const selectedRecords = productionRecords.filter(record => 
+    selectedLotsList.includes(record.lot)
+  );
+  
+  generateReportHTML(selectedRecords);
+  
   document.getElementById('reportPreview').style.display = 'block';
   document.getElementById('printButton').disabled = false;
 }
 
+function generateReportHTML(records) {
+  const reportContent = document.getElementById('reportContent');
+  
+  // Calculate comprehensive metrics
+  const totalFinished = records.reduce((sum, r) => sum + r.totalFinishedKg, 0);
+  const totalRawInput = records.reduce((sum, r) => sum + r.rawInput, 0);
+  const efficiency = 100; // Cardamom always has 100% efficiency
+  
+  // Product analysis
+  const productStats = {};
+  records.forEach(record => {
+    if (record.products) {
+      Object.entries(record.products).forEach(([product, quantity]) => {
+        if (!productStats[product]) {
+          productStats[product] = { 
+            totalQuantity: 0, 
+            totalWeight: 0,
+            batches: 0
+          };
+        }
+        productStats[product].totalQuantity += quantity;
+        productStats[product].totalWeight += quantity * productWeights[product];
+        productStats[product].batches += 1;
+      });
+    }
+  });
+
+  // Materials usage analysis
+  const materialsAnalysis = {
+    masterBoxLargeUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.masterBoxLargeUsed) || 0), 0),
+    masterBoxSmallUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.masterBoxSmallUsed) || 0), 0),
+    standardBoxUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.standardBoxUsed) || 0), 0),
+    masterBoxLargeWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.masterBoxLargeWasted) || 0), 0),
+    masterBoxSmallWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.masterBoxSmallWasted) || 0), 0),
+    standardBoxWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.standardBoxWasted) || 0), 0)
+  };
+
+  // Get pricing information
+  const getItemPrice = (itemId) => window.appState.getItemPrice(itemId) || 0;
+  
+  // Calculate costs
+  const materialCosts = {
+    masterBoxLargeUsed: materialsAnalysis.masterBoxLargeUsed * getItemPrice('master_box_large'),
+    masterBoxSmallUsed: materialsAnalysis.masterBoxSmallUsed * getItemPrice('master_box_small'),
+    standardBoxUsed: materialsAnalysis.standardBoxUsed * getItemPrice('standard_box'),
+    masterBoxLargeWasted: materialsAnalysis.masterBoxLargeWasted * getItemPrice('master_box_large'),
+    masterBoxSmallWasted: materialsAnalysis.masterBoxSmallWasted * getItemPrice('master_box_small'),
+    standardBoxWasted: materialsAnalysis.standardBoxWasted * getItemPrice('standard_box')
+  };
+
+  const totalWasted = materialsAnalysis.masterBoxLargeWasted + materialsAnalysis.masterBoxSmallWasted + 
+                     materialsAnalysis.standardBoxWasted;
+  const totalWastageCost = materialCosts.masterBoxLargeWasted + materialCosts.masterBoxSmallWasted + 
+                          materialCosts.standardBoxWasted;
+
+  const reportHTML = `
+    <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #228B22 0%, #32CD32 100%); color: white; border-radius: 0.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="margin: 0; font-size: 2rem;">Al Jameel MES</h1>
+          <h2 style="margin: 0.5rem 0 0 0; font-size: 1.5rem; opacity: 0.9;">🌿 Cardamom Production Report</h2>
+        </div>
+        <div style="text-align: right;">
+          <p style="margin: 0.25rem 0;"><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+          <p style="margin: 0.25rem 0;"><strong>Lots Analyzed:</strong> ${selectedLotsList.length}</p>
+          <p style="margin: 0.25rem 0;"><strong>Total Records:</strong> ${records.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive Summary Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">${totalFinished.toLocaleString()}</div>
+        <div class="metric-label">Total Finished (kg)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${totalRawInput.toLocaleString()}</div>
+        <div class="metric-label">Total Raw Input (kg)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${efficiency}%</div>
+        <div class="metric-label">Efficiency (No Rejects)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${records.length}</div>
+        <div class="metric-label">Production Batches</div>
+      </div>
+    </div>
+
+    <!-- Professional Charts Grid -->
+    <div class="chart-grid">
+      <!-- Product Distribution Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Product Distribution</div>
+        <div class="pie-chart-container">
+          ${generateProductPieChart(productStats)}
+        </div>
+      </div>
+
+      <!-- Materials Usage Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Packaging Materials Usage</div>
+        <div class="pie-chart-container">
+          ${generateMaterialsPieChart(materialsAnalysis)}
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Type Distribution Bar Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Product Type Distribution Analysis</div>
+      <div class="bar-chart-container">
+        ${generateProductBarChart(productStats)}
+      </div>
+    </div>
+
+    <!-- Materials Usage and Cost Analysis -->
+    <div class="chart-container">
+      <div class="chart-title">Materials Usage & Cost Analysis</div>
+      
+      <!-- Materials Analysis Table -->
+      <div style="margin-bottom: 2rem;">
+        <h4 style="color: var(--primary); margin-bottom: 1rem;">Packaging Materials Usage</h4>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: var(--primary); color: white;">
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Material Type</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Used (qty)</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Unit Price</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Used Cost</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Wasted (qty)</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Wastage Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">Master Box (Large)</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.masterBoxLargeUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice('master_box_large').toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${materialCosts.masterBoxLargeUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.masterBoxLargeWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${materialCosts.masterBoxLargeWasted.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">Master Box (Small)</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.masterBoxSmallUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice('master_box_small').toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${materialCosts.masterBoxSmallUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.masterBoxSmallWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${materialCosts.masterBoxSmallWasted.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">Standard Box</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.standardBoxUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice('standard_box').toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${materialCosts.standardBoxUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.standardBoxWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${materialCosts.standardBoxWasted.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Total Wastage Loss Summary -->
+      <div style="background: #fff3cd; padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #f59e0b; margin-bottom: 1rem;">
+        <h4 style="color: #856404; margin: 0 0 1rem 0; display: flex; align-items: center;">
+          <span style="font-size: 1.5rem; margin-right: 0.5rem;">⚠️</span>
+          Total Material Wastage Loss Summary
+        </h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <p style="margin: 0.5rem 0; font-weight: 600; color: #856404;">
+              <strong>Total Materials Wasted:</strong> ${totalWasted.toLocaleString()} units
+            </p>
+            <p style="margin: 0.5rem 0; font-weight: 600; color: #856404;">
+              <strong>Total Wastage Cost:</strong> $${totalWastageCost.toFixed(2)}
+            </p>
+          </div>
+          <div style="font-size: 0.9rem; color: #856404;">
+            <p style="margin: 0.25rem 0;">Master Box (Large): ${materialsAnalysis.masterBoxLargeWasted} units ($${materialCosts.masterBoxLargeWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Master Box (Small): ${materialsAnalysis.masterBoxSmallWasted} units ($${materialCosts.masterBoxSmallWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Standard Box: ${materialsAnalysis.standardBoxWasted} units ($${materialCosts.standardBoxWasted.toFixed(2)})</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Production Volume by Lot -->
+    <div class="chart-container">
+      <div class="chart-title">Production Volume by Lot</div>
+      <div class="bar-chart-container">
+        ${generateLotProductionBarChart(records)}
+      </div>
+    </div>
+
+    <!-- Detailed Data Tables -->
+    <div class="chart-container">
+      <div class="chart-title">Detailed Production Records</div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+          <thead>
+            <tr style="background: var(--primary); color: white;">
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Bag Size</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Bags Used</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Material Balance</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Efficiency</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${records.map(record => {
+              const materialBalance = record.totalFinishedKg - record.rawInput;
+              const balanceColor = materialBalance >= 0 ? '#22c55e' : '#ef4444';
+              return `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.bagSize}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.numBags}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;"><strong>${record.totalFinishedKg.toLocaleString()}</strong></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: ${balanceColor}; font-weight: bold;">${materialBalance > 0 ? '+' : ''}${materialBalance} kg</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600;">${record.efficiency}%</td>
+              </tr>
+            `;}).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-top: 3rem; padding: 1.5rem; background: #f0fff0; border-radius: 0.5rem; text-align: center; border-top: 3px solid var(--primary);">
+      <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Cardamom Production Management System</p>
+      <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()} | Confidential Report</p>
+      <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #228B22; font-style: italic;">🌿 Premium Cardamom Processing - Zero Waste Production (100% Efficiency)</p>
+    </div>
+  `;
+  
+  reportContent.innerHTML = reportHTML;
+}
+
+// Professional Chart Generation Functions
+function generatePieChart(data, size = 200) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  const radius = size / 2 - 10;
+  const centerX = size / 2;
+  const centerY = size / 2;
+  
+  let currentAngle = -90; // Start at top
+  let paths = '';
+  let legends = '';
+  
+  data.forEach((item, index) => {
+    if (item.value > 0) {
+      const percentage = (item.value / total) * 100;
+      const angle = (item.value / total) * 360;
+      const endAngle = currentAngle + angle;
+      
+      // Calculate path for pie slice
+      const startAngleRad = (currentAngle * Math.PI) / 180;
+      const endAngleRad = (endAngle * Math.PI) / 180;
+      
+      const x1 = centerX + radius * Math.cos(startAngleRad);
+      const y1 = centerY + radius * Math.sin(startAngleRad);
+      const x2 = centerX + radius * Math.cos(endAngleRad);
+      const y2 = centerY + radius * Math.sin(endAngleRad);
+      
+      const largeArcFlag = angle > 180 ? 1 : 0;
+      
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+      
+      paths += `<path d="${pathData}" fill="${item.color}" stroke="#fff" stroke-width="2" opacity="0.9"/>`;
+      
+      legends += `
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${item.color};"></div>
+          <span>${item.label}: ${item.value.toLocaleString()} (${percentage.toFixed(1)}%)</span>
+        </div>
+      `;
+      
+      currentAngle = endAngle;
+    }
+  });
+  
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="margin: 0 auto; display: block;">
+      ${paths}
+    </svg>
+    <div class="chart-legend">${legends}</div>
+  `;
+}
+
+function generateProductPieChart(productStats) {
+  const colors = ['#228B22', '#32CD32', '#98FB98', '#90EE90', '#00FF7F', '#00FA9A', '#ADFF2F', '#9AFF9A'];
+  const data = Object.entries(productStats).map(([product, stats], index) => ({
+    label: product,
+    value: stats.totalWeight,
+    color: colors[index % colors.length]
+  }));
+  
+  return generatePieChart(data, 200);
+}
+
+function generateMaterialsPieChart(materialsAnalysis) {
+  const data = [
+    { label: 'Master Box (Large)', value: materialsAnalysis.masterBoxLargeUsed, color: '#228B22' },
+    { label: 'Master Box (Small)', value: materialsAnalysis.masterBoxSmallUsed, color: '#32CD32' },
+    { label: 'Standard Box', value: materialsAnalysis.standardBoxUsed, color: '#98FB98' }
+  ];
+  
+  return generatePieChart(data, 200);
+}
+
+function generateBarChart(data) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const maxValue = Math.max(...data.map(item => item.value));
+  if (maxValue === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  return data.map(item => {
+    const percentage = (item.value / maxValue) * 100;
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${item.label}</span>
+          <span style="font-weight: 700; color: ${item.color};">${item.value.toLocaleString()}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: ${item.color}; width: ${percentage}%;">
+            ${percentage > 20 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function generateProductBarChart(productStats) {
+  const colors = ['#228B22', '#32CD32', '#98FB98', '#90EE90', '#00FF7F', '#00FA9A', '#ADFF2F', '#9AFF9A'];
+  const data = Object.entries(productStats).map(([product, stats], index) => ({
+    label: `${product} (${productWeights[product]}kg)`,
+    value: stats.totalWeight,
+    color: colors[index % colors.length]
+  }));
+  
+  return generateBarChart(data);
+}
+
+function generateLotProductionBarChart(records) {
+  if (!records || records.length === 0) return '<div class="chart-placeholder">No production data available</div>';
+  
+  const maxValue = Math.max(...records.map(r => r.totalFinishedKg));
+  if (maxValue === 0) return '<div class="chart-placeholder">No production data to display</div>';
+  
+  // Sort records by production volume for better visualization
+  const sortedRecords = [...records].sort((a, b) => b.totalFinishedKg - a.totalFinishedKg);
+  
+  return sortedRecords.map((record, index) => {
+    const percentage = (record.totalFinishedKg / maxValue) * 100;
+    const color = getGradientColor(index, sortedRecords.length);
+    
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${record.lot}</span>
+          <span style="font-weight: 700; color: ${color};">${record.totalFinishedKg.toLocaleString()} kg</span>
+        </div>
+        <div class="bar-label" style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">
+          <span>${record.bagSize}kg bags (${record.numBags} bags) • ${new Date(record.timestamp).toLocaleDateString()}</span>
+          <span>Efficiency: ${record.efficiency}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: linear-gradient(90deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%); width: ${percentage}%;">
+            ${percentage > 15 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Helper function to generate gradient colors for bars
+function getGradientColor(index, total) {
+  const colors = ['#228B22', '#32CD32', '#98FB98', '#90EE90', '#00FF7F', '#00FA9A', '#ADFF2F', '#9AFF9A'];
+  return colors[index % colors.length];
+}
+
+// Helper function to adjust color brightness
+function adjustBrightness(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+    (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+}
+
 function printReport() {
   window.print();
+}
+
+// Initialize report dates
+function initializeReportDates() {
+  const today = new Date();
+  const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+  
+  document.getElementById('reportToDate').value = today.toISOString().split('T')[0];
+  document.getElementById('reportFromDate').value = monthAgo.toISOString().split('T')[0];
 }
 
 // Item prices management
@@ -1809,11 +2796,24 @@ window.addEventListener('load', () => {
     window.appState.updateInventory('standardBox', 'set', 100);
   }
   
-  // Set up today's date
+  // Set up today's date for export forms
   const today = new Date();
   const fromDate = new Date();
   fromDate.setDate(today.getDate() - 30);
   
+  // Initialize inventory export dates
+  if (document.getElementById('inventoryExportFromDate')) {
+    document.getElementById('inventoryExportFromDate').value = fromDate.toISOString().split('T')[0];
+    document.getElementById('inventoryExportToDate').value = today.toISOString().split('T')[0];
+  }
+  
+  // Initialize maintenance export dates
+  if (document.getElementById('exportFromDate')) {
+    document.getElementById('exportFromDate').value = fromDate.toISOString().split('T')[0];
+    document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
+  }
+  
+  // Initialize report dates
   if (document.getElementById('reportFromDate')) {
     document.getElementById('reportFromDate').value = fromDate.toISOString().split('T')[0];
     document.getElementById('reportToDate').value = today.toISOString().split('T')[0];
@@ -1823,6 +2823,7 @@ window.addEventListener('load', () => {
   updateRawInputDefault();
   renderEquipmentGrid();
   renderMaintenanceTable();
+  initializeReportDates();
 });
 </script>
 </body>
