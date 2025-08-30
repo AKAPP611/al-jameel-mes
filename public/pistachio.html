@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Pistachio Production – Al Jameel MES</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary: #a32034;
@@ -632,10 +634,12 @@
 
       <!-- Report Preview Area -->
       <div id="lotReportPreview" style="display: none; margin-top: 2rem;">
-        <div style="text-align: right; margin-bottom: 1rem;">
-          <button onclick="printLotReport()">Print Report</button>
-        </div>
-        <div id="lotReportContent" class="report-content">
+  <div style="text-align: right; margin-bottom: 1rem;">
+    <button onclick="printLotReport()">🖨️ Print Report</button>
+    <button onclick="exportLotReportPDF()" class="btn-secondary">📄 Export PDF</button>
+    <button onclick="exportLotReportExcel()" class="btn-secondary">📊 Export Excel</button>
+  </div>
+  <div id="lotReportContent" class="report-content">
           <!-- Lot report content will be generated here -->
         </div>
       </div>
@@ -689,6 +693,8 @@
           </div>
         </div>
         <button onclick="adjustInventory()">Update Inventory</button>
+        <button class="btn-secondary" onclick="exportInventoryExcel()">📊 Export Excel</button>
+    <button class="btn-secondary" onclick="exportInventoryPDF()">📄 Export PDF</button>
       </div>
     </section>
   </div>
@@ -1437,7 +1443,220 @@ function adjustInventory() {
   
   renderInventory();
 }
+// Export Functions
+function exportInventoryExcel() {
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
+  const currentInventory = window.appState.getState('currentInventory') || {};
+  
+  if (inventoryLog.length === 0) {
+    alert('No inventory data to export');
+    return;
+  }
 
+  // Create workbook
+  const wb = XLSX.utils.book_new();
+  
+  // Current Stock Sheet
+  const stockData = [
+    ['Item', 'Current Quantity'],
+    ['Vacuum Bags (10kg)', currentInventory.vacuumBags || 0],
+    ['Golden Hill Boxes', currentInventory.goldenHillBoxes || 0],
+    ['Extra Boxes', currentInventory.extraBoxes || 0]
+  ];
+  const stockWs = XLSX.utils.aoa_to_sheet(stockData);
+  XLSX.utils.book_append_sheet(wb, stockWs, 'Current Stock');
+  
+  // Inventory Log Sheet
+  const logData = [
+    ['Timestamp', 'Item', 'Action', 'Quantity', 'Result', 'Notes'],
+    ...inventoryLog.map(log => [
+      new Date(log.timestamp).toLocaleString(),
+      log.item,
+      log.action,
+      log.quantity,
+      log.result,
+      log.notes || ''
+    ])
+  ];
+  const logWs = XLSX.utils.aoa_to_sheet(logData);
+  XLSX.utils.book_append_sheet(wb, logWs, 'Inventory Log');
+  
+  // Save file
+  XLSX.writeFile(wb, `inventory_report_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+function exportInventoryPDF() {
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
+  const currentInventory = window.appState.getState('currentInventory') || {};
+  
+  if (inventoryLog.length === 0) {
+    alert('No inventory data to export');
+    return;
+  }
+
+  let pdfContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Inventory Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #a32034; padding-bottom: 10px; }
+        .stock-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .stock-card { padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center; }
+        .stock-value { font-size: 24px; font-weight: bold; color: #a32034; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #a32034; color: white; }
+        @media print { body { margin: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Al Jameel MES - Inventory Report</h1>
+        <p>Generated: ${new Date().toLocaleString()}</p>
+      </div>
+      
+      <h2>Current Stock Levels</h2>
+      <div class="stock-summary">
+        <div class="stock-card">
+          <div class="stock-value">${currentInventory.vacuumBags || 0}</div>
+          <div>Vacuum Bags (10kg)</div>
+        </div>
+        <div class="stock-card">
+          <div class="stock-value">${currentInventory.goldenHillBoxes || 0}</div>
+          <div>Golden Hill Boxes</div>
+        </div>
+        <div class="stock-card">
+          <div class="stock-value">${currentInventory.extraBoxes || 0}</div>
+          <div>Extra Boxes</div>
+        </div>
+      </div>
+      
+      <h2>Recent Inventory Movements</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Action</th>
+            <th>Quantity</th>
+            <th>Result</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${inventoryLog.slice(-20).reverse().map(log => `
+            <tr>
+              <td>${new Date(log.timestamp).toLocaleDateString()}</td>
+              <td>${log.item}</td>
+              <td>${log.action}</td>
+              <td>${log.quantity}</td>
+              <td>${log.result}</td>
+              <td>${log.notes || '-'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(pdfContent);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 250);
+}
+
+function exportLotReportPDF() {
+  const reportContent = document.getElementById('lotReportContent');
+  if (!reportContent || !reportContent.innerHTML.trim()) {
+    alert('Please generate a lot report first');
+    return;
+  }
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Lot Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; }
+        .lot-status.open { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; }
+        .lot-status.completed { background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 4px; }
+        .shift-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .shift-badge.day { background: #fef3c7; color: #92400e; }
+        .shift-badge.night { background: #e0e7ff; color: #3730a3; }
+        @media print { body { margin: 0; } @page { margin: 1in; } }
+      </style>
+    </head>
+    <body>
+      ${reportContent.innerHTML}
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 250);
+}
+
+function exportLotReportExcel() {
+  const lotId = document.getElementById('reportLotSelect').value;
+  if (!lotId) {
+    alert('Please generate a lot report first');
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  const selectedLot = lots.find(lot => lot.id === lotId);
+  const lotRecords = productionRecords.filter(record => record.lotId === lotId);
+  
+  const wb = XLSX.utils.book_new();
+  
+  // Lot Summary Sheet
+  const summaryData = [
+    ['Lot Information', ''],
+    ['Lot Number', selectedLot.lotNumber],
+    ['Brand', selectedLot.brand],
+    ['Total Containers', selectedLot.totalContainers],
+    ['Bags per Container', selectedLot.bagsPerContainer],
+    ['Kg per Bag', selectedLot.kgPerBag],
+    ['Total Raw Quantity (kg)', selectedLot.totalRawQuantity],
+    ['Status', selectedLot.status],
+    ['', ''],
+    ['Production Summary', ''],
+    ['Total Shifts', lotRecords.length],
+    ['Raw Used (kg)', lotRecords.reduce((sum, r) => sum + r.rawInputShift, 0)],
+    ['Finished (kg)', lotRecords.reduce((sum, r) => sum + r.finishedKg, 0)],
+    ['Rejects (kg)', lotRecords.reduce((sum, r) => sum + r.rejectsKg, 0)]
+  ];
+  const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+  XLSX.utils.book_append_sheet(wb, summaryWs, 'Lot Summary');
+  
+  // Production Details Sheet
+  const detailsData = [
+    ['Date', 'Shift', 'Raw Input (kg)', '18-21 Size (kg)', '21-25 Size (kg)', 'Finished (kg)', 'Rejects (kg)', 'Efficiency (%)', 'Yield (%)'],
+    ...lotRecords.map(record => [
+      new Date(record.productionDate).toLocaleDateString(),
+      record.shift,
+      record.rawInputShift,
+      record.kg1821,
+      record.kg2125,
+      record.finishedKg,
+      record.rejectsKg,
+      record.efficiency,
+      record.yield
+    ])
+  ];
+  const detailsWs = XLSX.utils.aoa_to_sheet(detailsData);
+  XLSX.utils.book_append_sheet(wb, detailsWs, 'Production Details');
+  
+  XLSX.writeFile(wb, `lot_report_${selectedLot.lotNumber}_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
 // Initialize on load
 window.addEventListener('load', () => {
   calculateLotTotals();
