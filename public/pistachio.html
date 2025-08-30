@@ -204,6 +204,26 @@
       border-radius: 0.5rem;
       margin: 1rem 0;
     }
+    .progress-bar {
+  background: #e5e7eb;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
 
     /* Section header with pistachio image */
     .section-header-with-image {
@@ -535,6 +555,7 @@
               <th>Total Raw (kg)</th>
               <th>Used (kg)</th>
               <th>Available (kg)</th>
+              <th>Progress</th>
               <th>Status</th>
               <th>Created</th>
             </tr>
@@ -1847,6 +1868,13 @@ function renderLots() {
       <td>${lot.totalRawQuantity.toLocaleString()}</td>
       <td>${lot.usedRawQuantity.toLocaleString()}</td>
       <td>${lot.availableRawQuantity.toLocaleString()}</td>
+      <td>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${progressPercent}%;">
+            ${progressPercent}%
+          </div>
+        </div>
+      </td>
       <td style="color: ${statusColor}; font-weight: bold;">${lot.status}</td>
       <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
     `;
