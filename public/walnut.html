@@ -249,6 +249,93 @@
       font-weight: 500;
     }
 
+    /* Professional Chart Styling */
+    .chart-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      page-break-inside: avoid;
+    }
+
+    .chart-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .pie-chart-container {
+      text-align: center;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+
+    .bar-chart-container {
+      padding: 1rem;
+    }
+
+    .bar-item {
+      margin-bottom: 1rem;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .bar-track {
+      background: #e9ecef;
+      height: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 0.5rem;
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
     /* Print-specific styles */
     @media print {
       .chart-container {
@@ -257,6 +344,11 @@
       }
       
       .chart-grid {
+        page-break-inside: avoid;
+      }
+      
+      .pie-chart-container,
+      .bar-chart-container {
         page-break-inside: avoid;
       }
     }
@@ -806,6 +898,25 @@
               <option value="Al Jameel">Al Jameel</option>
               <option value="Abu Taj">Abu Taj</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="loadAvailableLots()" style="width: 100%;">Load Available Lots</button>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Select Lots (multi-select with search)</label>
+          <div id="lotSelector" class="lot-selector">
+            <div class="search-box">
+              <input id="lotSearch" type="text" placeholder="Search lots..." onkeyup="filterLots()">
+            </div>
+            <div class="lot-options" id="lotOptions" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
+              <p style="color: #666; text-align: center; padding: 1rem;">Click "Load Available Lots" to see options</p>
+            </div>
+            <div class="selected-lots" id="selectedLots" style="margin-top: 0.5rem;">
+              <strong>Selected:</strong> <span id="selectedLotsDisplay">None</span>
+            </div>
           </div>
         </div>
         
@@ -1894,184 +2005,418 @@ function exportMaintenanceReport() {
   alert('Maintenance report would be exported here in a real application');
 }
 
-// Report generation
-function generateReport() {
+// ===== REPORTS FUNCTIONALITY =====
+let availableLots = [];
+let selectedLotsList = [];
+
+function loadAvailableLots() {
   const fromDate = document.getElementById('reportFromDate').value;
   const toDate = document.getElementById('reportToDate').value;
   const brand = document.getElementById('reportBrand').value;
   
-  if (!fromDate || !toDate) {
-    alert('Please select both From and To dates');
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  // Filter records based on date and brand
+  let filteredRecords = productionRecords.filter(record => {
+    let dateMatch = true;
+    let brandMatch = true;
+    
+    if (fromDate || toDate) {
+      const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+      if (fromDate && recordDate < fromDate) dateMatch = false;
+      if (toDate && recordDate > toDate) dateMatch = false;
+    }
+    
+    if (brand !== 'all' && record.brand !== brand) {
+      brandMatch = false;
+    }
+    
+    return dateMatch && brandMatch;
+  });
+  
+  // Extract unique lots
+  availableLots = [...new Set(filteredRecords.map(record => ({
+    lot: record.lot,
+    brand: record.brand,
+    date: new Date(record.timestamp).toLocaleDateString(),
+    finished: record.finishedKg,
+    rejects: record.rejectsKg
+  })))];
+  
+  renderLotOptions();
+  alert(`Found ${availableLots.length} lots`);
+}
+
+function renderLotOptions() {
+  const container = document.getElementById('lotOptions');
+  
+  if (availableLots.length === 0) {
+    container.innerHTML = '<p style="color: #666; text-align: center; padding: 1rem;">No lots found for the selected criteria</p>';
+    return;
+  }
+  
+  container.innerHTML = availableLots.map(lotData => `
+    <div class="lot-option" onclick="toggleLot('${lotData.lot}')" style="padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; cursor: pointer; border-radius: 0.25rem;">
+      <input type="checkbox" ${selectedLotsList.includes(lotData.lot) ? 'checked' : ''}>
+      <div>
+        <strong>${lotData.lot}</strong> - ${lotData.brand}<br>
+        <small>${lotData.date} • ${lotData.finished}kg finished • ${lotData.rejects}kg rejects</small>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterLots() {
+  const searchTerm = document.getElementById('lotSearch').value.toLowerCase();
+  const lotOptions = document.querySelectorAll('.lot-option');
+  
+  lotOptions.forEach(option => {
+    const lotText = option.textContent.toLowerCase();
+    option.style.display = lotText.includes(searchTerm) ? 'block' : 'none';
+  });
+}
+
+function toggleLot(lotNumber) {
+  if (selectedLotsList.includes(lotNumber)) {
+    selectedLotsList = selectedLotsList.filter(lot => lot !== lotNumber);
+  } else {
+    selectedLotsList.push(lotNumber);
+  }
+  
+  updateSelectedDisplay();
+  renderLotOptions(); // Re-render to update checkboxes
+}
+
+function updateSelectedDisplay() {
+  const display = document.getElementById('selectedLotsDisplay');
+  display.textContent = selectedLotsList.length > 0 ? selectedLotsList.join(', ') : 'None';
+}
+
+function generateReport() {
+  if (selectedLotsList.length === 0) {
+    alert('Please select at least one lot');
     return;
   }
   
   const productionRecords = window.appState.getState('productionRecords') || [];
-  let filteredRecords = productionRecords.filter(record => {
-    const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
-    let matchesBrand = true;
-    
-    if (brand !== 'all' && record.brand !== brand) {
-      matchesBrand = false;
-    }
-    
-    return recordDate >= fromDate && recordDate <= toDate && matchesBrand;
-  });
   
-  if (filteredRecords.length === 0) {
-    alert('No production records found matching the criteria');
-    return;
-  }
+  // Filter records for selected lots
+  const selectedRecords = productionRecords.filter(record => 
+    selectedLotsList.includes(record.lot)
+  );
   
-  // Generate report content
-  const reportContent = document.getElementById('reportContent');
+  generateReportHTML(selectedRecords);
   
-  // Calculate metrics
-  const totalRawInput = filteredRecords.reduce((sum, r) => sum + r.rawInput, 0);
-  const totalFinished = filteredRecords.reduce((sum, r) => sum + r.finishedKg, 0);
-  const totalRejects = filteredRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
-  const avgEfficiency = totalRawInput > 0 ? Math.round((totalFinished / totalRawInput) * 100) : 0;
-  
-  const brandStats = {};
-  filteredRecords.forEach(record => {
-    if (!brandStats[record.brand]) {
-      brandStats[record.brand] = { finished: 0, count: 0 };
-    }
-    brandStats[record.brand].finished += record.finishedKg;
-    brandStats[record.brand].count += 1;
-  });
-  
-  // Calculate product type statistics
-  const productTypeStats = {
-    'Half Kernel': 0,
-    'Quarter': 0,
-    'Large Pieces': 0,
-    'Amber': 0
-  };
-  
-  filteredRecords.forEach(record => {
-    if (record.halfKernel) productTypeStats['Half Kernel'] += record.halfKernel;
-    if (record.quarter) productTypeStats['Quarter'] += record.quarter;
-    if (record.largePieces) productTypeStats['Large Pieces'] += record.largePieces;
-    if (record.amber) productTypeStats['Amber'] += record.amber;
-  });
-  
-  // Create report HTML
-  reportContent.innerHTML = `
-    <div style="padding: 2rem;">
-      <div style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="color: var(--primary);">Walnut Production Report</h1>
-        <h3>Period: ${new Date(fromDate).toLocaleDateString()} - ${new Date(toDate).toLocaleDateString()}</h3>
-      </div>
-      
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-value">${totalFinished.toLocaleString()}</div>
-          <div class="metric-label">Total Finished (kg)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value">${totalRawInput.toLocaleString()}</div>
-          <div class="metric-label">Raw Input (kg)</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value">${avgEfficiency}%</div>
-          <div class="metric-label">Average Efficiency</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value">${filteredRecords.length}</div>
-          <div class="metric-label">Production Runs</div>
-        </div>
-      </div>
-      
-      <h2 style="margin-top: 2rem;">Production by Brand</h2>
-      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-        <thead>
-          <tr style="background: var(--primary); color: white;">
-            <th style="padding: 0.75rem; text-align: left;">Brand</th>
-            <th style="padding: 0.75rem; text-align: right;">Production (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Number of Runs</th>
-            <th style="padding: 0.75rem; text-align: right;">Percentage</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${Object.entries(brandStats).map(([brand, data]) => `
-            <tr>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${brand}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.finished.toLocaleString()}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${data.count}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${Math.round((data.finished / totalFinished) * 100)}%</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      
-      <h2 style="margin-top: 2rem;">Production by Product Type</h2>
-      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-        <thead>
-          <tr style="background: var(--primary); color: white;">
-            <th style="padding: 0.75rem; text-align: left;">Product Type</th>
-            <th style="padding: 0.75rem; text-align: right;">Production (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Percentage of Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${Object.entries(productTypeStats).map(([type, quantity]) => `
-            <tr>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${type}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${quantity.toFixed(1)}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${quantity > 0 ? Math.round((quantity / totalFinished) * 100) : 0}%</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      
-      <h2 style="margin-top: 2rem;">Detailed Production Records</h2>
-      <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-        <thead>
-          <tr style="background: var(--primary); color: white;">
-            <th style="padding: 0.75rem; text-align: left;">Date</th>
-            <th style="padding: 0.75rem; text-align: left;">Lot</th>
-            <th style="padding: 0.75rem; text-align: left;">Brand</th>
-            <th style="padding: 0.75rem; text-align: right;">Raw Input (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Half Kernel (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Quarter (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Large Pieces (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Amber (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Total Finished (kg)</th>
-            <th style="padding: 0.75rem; text-align: right;">Efficiency (%)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filteredRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map(record => `
-            <tr>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${new Date(record.timestamp).toLocaleDateString()}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${record.lot}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">${record.brand}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.rawInput}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.halfKernel || 0}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.quarter || 0}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.largePieces || 0}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.amber || 0}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.finishedKg}</td>
-              <td style="padding: 0.75rem; border-bottom: 1px solid #eee; text-align: right;">${record.efficiency}%</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      
-      <div style="margin-top: 3rem; text-align: center; font-size: 0.9rem; color: #6c757d;">
-        <p>Report generated on ${new Date().toLocaleString()}</p>
-        <p>Al Jameel Manufacturing Execution System</p>
-      </div>
-    </div>
-  `;
-  
-  // Show report and enable print button
   document.getElementById('reportPreview').style.display = 'block';
   document.getElementById('printButton').disabled = false;
 }
 
+function generateReportHTML(records) {
+  const reportContent = document.getElementById('reportContent');
+  
+  // Calculate comprehensive metrics
+  const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
+  const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
+  const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
+  const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
+  
+  // Brand analysis
+  const brandStats = {};
+  records.forEach(record => {
+    if (!brandStats[record.brand]) {
+      brandStats[record.brand] = { finished: 0, rejects: 0, count: 0 };
+    }
+    brandStats[record.brand].finished += record.finishedKg;
+    brandStats[record.brand].rejects += record.rejectsKg;
+    brandStats[record.brand].count += 1;
+  });
+
+  // Product type analysis
+  const productStats = {
+    'Half Kernel': records.reduce((sum, r) => sum + (r.halfKernel || 0), 0),
+    'Quarter': records.reduce((sum, r) => sum + (r.quarter || 0), 0),
+    'Large Pieces': records.reduce((sum, r) => sum + (r.largePieces || 0), 0),
+    'Amber': records.reduce((sum, r) => sum + (r.amber || 0), 0)
+  };
+
+  const reportHTML = `
+    <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #8B4513 0%, #D2B48C 100%); color: white; border-radius: 0.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="margin: 0; font-size: 2rem;">Al Jameel MES</h1>
+          <h2 style="margin: 0.5rem 0 0 0; font-size: 1.5rem; opacity: 0.9;">Walnut Production Report</h2>
+        </div>
+        <div style="text-align: right;">
+          <p style="margin: 0.25rem 0;"><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+          <p style="margin: 0.25rem 0;"><strong>Lots Analyzed:</strong> ${selectedLotsList.length}</p>
+          <p style="margin: 0.25rem 0;"><strong>Total Records:</strong> ${records.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive Summary Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">${totalFinished.toLocaleString()}</div>
+        <div class="metric-label">Total Finished (kg)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${totalRejects.toLocaleString()}</div>
+        <div class="metric-label">Total Rejects (kg)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${avgEfficiency}%</div>
+        <div class="metric-label">Average Efficiency</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${totalInput.toLocaleString()}</div>
+        <div class="metric-label">Total Raw Input (kg)</div>
+      </div>
+    </div>
+
+    <!-- Professional Charts Grid -->
+    <div class="chart-grid">
+      <!-- Production Distribution Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Production Distribution</div>
+        <div class="pie-chart-container">
+          ${generatePieChart([
+            { label: 'Finished Product', value: totalFinished, color: '#22c55e' },
+            { label: 'Rejects', value: totalRejects, color: '#ef4444' }
+          ], 200)}
+        </div>
+      </div>
+
+      <!-- Brand Performance Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Brand Distribution</div>
+        <div class="pie-chart-container">
+          ${generatePieChart(
+            Object.entries(brandStats).map(([brand, stats], index) => ({
+              label: brand,
+              value: stats.finished,
+              color: index === 0 ? '#8B4513' : '#D2B48C'
+            })), 200
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Type Distribution Bar Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Product Type Distribution Analysis</div>
+      <div class="bar-chart-container">
+        ${generateBarChart([
+          { label: 'Half Kernel', value: productStats['Half Kernel'], color: '#8B4513' },
+          { label: 'Quarter', value: productStats['Quarter'], color: '#D2B48C' },
+          { label: 'Large Pieces', value: productStats['Large Pieces'], color: '#CD853F' },
+          { label: 'Amber', value: productStats['Amber'], color: '#DEB887' }
+        ])}
+      </div>
+    </div>
+
+    <!-- Production Volume by Lot -->
+    <div class="chart-container">
+      <div class="chart-title">Production Volume by Lot</div>
+      <div class="bar-chart-container">
+        ${generateProductionBarChart(records)}
+      </div>
+    </div>
+
+    <!-- Detailed Data Tables -->
+    <div class="chart-container">
+      <div class="chart-title">Detailed Production Records</div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+          <thead>
+            <tr style="background: var(--primary); color: white;">
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Half Kernel</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Quarter</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Large Pieces</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Amber</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Efficiency</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${records.map(record => `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.halfKernel || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.quarter || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.largePieces || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.amber || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;"><strong>${record.finishedKg.toLocaleString()}</strong></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600;">${record.efficiency}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; text-align: center; border-top: 3px solid var(--primary);">
+      <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Walnut Production Management System</p>
+      <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()} | Confidential Report</p>
+    </div>
+  `;
+  
+  reportContent.innerHTML = reportHTML;
+}
+
+// Professional Chart Generation Functions
+function generatePieChart(data, size = 200) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  const radius = size / 2 - 10;
+  const centerX = size / 2;
+  const centerY = size / 2;
+  
+  let currentAngle = -90; // Start at top
+  let paths = '';
+  let legends = '';
+  
+  data.forEach((item, index) => {
+    if (item.value > 0) {
+      const percentage = (item.value / total) * 100;
+      const angle = (item.value / total) * 360;
+      const endAngle = currentAngle + angle;
+      
+      // Calculate path for pie slice
+      const startAngleRad = (currentAngle * Math.PI) / 180;
+      const endAngleRad = (endAngle * Math.PI) / 180;
+      
+      const x1 = centerX + radius * Math.cos(startAngleRad);
+      const y1 = centerY + radius * Math.sin(startAngleRad);
+      const x2 = centerX + radius * Math.cos(endAngleRad);
+      const y2 = centerY + radius * Math.sin(endAngleRad);
+      
+      const largeArcFlag = angle > 180 ? 1 : 0;
+      
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+      
+      paths += `<path d="${pathData}" fill="${item.color}" stroke="#fff" stroke-width="2" opacity="0.9"/>`;
+      
+      legends += `
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${item.color};"></div>
+          <span>${item.label}: ${item.value.toLocaleString()} (${percentage.toFixed(1)}%)</span>
+        </div>
+      `;
+      
+      currentAngle = endAngle;
+    }
+  });
+  
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="margin: 0 auto; display: block;">
+      ${paths}
+    </svg>
+    <div class="chart-legend">${legends}</div>
+  `;
+}
+
+function generateBarChart(data) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const maxValue = Math.max(...data.map(item => item.value));
+  if (maxValue === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  return data.map(item => {
+    const percentage = (item.value / maxValue) * 100;
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${item.label}</span>
+          <span style="font-weight: 700; color: ${item.color};">${item.value.toLocaleString()}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: ${item.color}; width: ${percentage}%;">
+            ${percentage > 20 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function generateProductionBarChart(records) {
+  if (!records || records.length === 0) return '<div class="chart-placeholder">No production data available</div>';
+  
+  const maxValue = Math.max(...records.map(r => r.finishedKg));
+  if (maxValue === 0) return '<div class="chart-placeholder">No production data to display</div>';
+  
+  // Sort records by production volume for better visualization
+  const sortedRecords = [...records].sort((a, b) => b.finishedKg - a.finishedKg);
+  
+  return sortedRecords.map((record, index) => {
+    const percentage = (record.finishedKg / maxValue) * 100;
+    const color = getGradientColor(index, sortedRecords.length);
+    
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${record.lot}</span>
+          <span style="font-weight: 700; color: ${color};">${record.finishedKg.toLocaleString()} kg</span>
+        </div>
+        <div class="bar-label" style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">
+          <span>${record.brand} • ${new Date(record.timestamp).toLocaleDateString()}</span>
+          <span>Efficiency: ${record.efficiency}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: linear-gradient(90deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%); width: ${percentage}%;">
+            ${percentage > 15 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Helper function to generate gradient colors for bars
+function getGradientColor(index, total) {
+  const colors = ['#8B4513', '#D2B48C', '#CD853F', '#DEB887', '#F4A460', '#DAA520'];
+  return colors[index % colors.length];
+}
+
+// Helper function to adjust color brightness
+function adjustBrightness(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+    (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+}
+
 function printReport() {
   window.print();
+}
+
+// Initialize report dates
+function initializeReportDates() {
+  const today = new Date();
+  const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+  
+  document.getElementById('reportToDate').value = today.toISOString().split('T')[0];
+  document.getElementById('reportFromDate').value = monthAgo.toISOString().split('T')[0];
 }
 
 // Item prices management
@@ -2249,6 +2594,7 @@ window.addEventListener('load', () => {
   updateInventoryDisplay();
   renderEquipmentGrid();
   renderMaintenanceTable();
+  initializeReportDates();
 });
 </script>
 </body>
