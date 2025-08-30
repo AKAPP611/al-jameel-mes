@@ -1,11 +1,11 @@
+// Pistacho.html working 30/08/2025
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Pistachio Production – Al Jameel MES</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary: #a32034;
@@ -44,6 +44,7 @@
       margin-right: 1rem;
     }
 
+    /* Pistachio icon styling */
     .pistachio-brand-icon {
       width: 40px;
       height: 40px;
@@ -206,6 +207,7 @@
       margin: 1rem 0;
     }
 
+    /* Section header with pistachio image */
     .section-header-with-image {
       display: flex;
       align-items: center;
@@ -220,59 +222,181 @@
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
 
-    .lot-status {
-      padding: 0.25rem 0.75rem;
-      border-radius: 1rem;
-      font-size: 0.85rem;
+    /* Item Prices Management Styling */
+    #itemPricesTable th,
+    #priceAuditTable th {
+      background: var(--primary);
+      color: white;
       font-weight: 600;
+      text-align: left;
     }
 
-    .lot-status.open {
-      background: #d1fae5;
-      color: #065f46;
+    #itemPricesTable td,
+    #priceAuditTable td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
     }
 
-    .lot-status.completed {
-      background: #f3f4f6;
-      color: #374151;
+    #itemPricesTable button,
+    #priceAuditTable button {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.85rem;
+      border-radius: 0.25rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
 
-    .progress-bar {
-      background: #e5e7eb;
-      height: 20px;
-      border-radius: 10px;
+    #itemPricesTable button:hover,
+    #priceAuditTable button:hover {
+      opacity: 0.8;
+    }
+
+    .price-change-positive {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .price-change-negative {
+      color: #ef4444;
+      font-weight: bold;
+    }
+
+    .price-change-neutral {
+      color: #6b7280;
+    }
+
+    /* Professional Chart Styling */
+    .chart-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      page-break-inside: avoid;
+    }
+
+    .chart-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .pie-chart-container {
+      text-align: center;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+
+    .bar-chart-container {
+      padding: 1rem;
+    }
+
+    .bar-item {
+      margin-bottom: 1rem;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .bar-track {
+      background: #e9ecef;
+      height: 24px;
+      border-radius: 12px;
       overflow: hidden;
-      margin: 0.5rem 0;
+      position: relative;
     }
 
-    .progress-fill {
-      background: linear-gradient(90deg, var(--primary), var(--accent));
+    .bar-fill {
       height: 100%;
-      border-radius: 10px;
+      border-radius: 12px;
       transition: width 0.3s ease;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
+      padding-right: 0.5rem;
       color: white;
       font-weight: 600;
-      font-size: 0.85rem;
-    }
-
-    .shift-badge {
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
       font-size: 0.8rem;
-      font-weight: 600;
     }
 
-    .shift-badge.day {
-      background: #fef3c7;
-      color: #92400e;
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
     }
 
-    .shift-badge.night {
-      background: #e0e7ff;
-      color: #3730a3;
+    .metric-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      border: 1px solid #dee2e6;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      .chart-container {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+      
+      .chart-grid {
+        page-break-inside: avoid;
+      }
+      
+      .pie-chart-container,
+      .bar-chart-container {
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
@@ -324,12 +448,12 @@
   <div class="container">
    <div class="nav-buttons">
   <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
-  <button class="nav-btn" onclick="showSection('lotmanagement')">Lot Management</button>
   <button class="nav-btn" onclick="showSection('production')">New Production</button>
   <button class="nav-btn" onclick="showSection('records')">View Records</button>
   <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
   <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
   <button class="nav-btn" onclick="showSection('reports')">Reports</button>
+  <button class="nav-btn" id="itemPricesBtn" onclick="showSection('itemprices')" style="display: none;">Item Prices</button>
 </div>
 
     <!-- Dashboard Section -->
@@ -339,10 +463,6 @@
         <h2>Production Dashboard</h2>
       </div>
       <div class="stats-grid">
-        <div class="stat-card">
-          <div>Active Lots</div>
-          <div class="stat-value" id="kpiActiveLots">0</div>
-        </div>
         <div class="stat-card">
           <div>Total Finished (kg)</div>
           <div class="stat-value" id="kpiFinished">0</div>
@@ -359,71 +479,7 @@
       <p>KPIs update automatically when you submit production records.</p>
     </section>
 
-    <!-- Lot Management Section -->
-    <section id="lotmanagement" class="section">
-      <div class="section-header-with-image">
-        <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
-        <h2>Lot Management</h2>
-      </div>
-      
-      <!-- Create New Lot -->
-      <div class="materials-section">
-        <h3>Create New Lot</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Lot Number</label>
-            <input id="lotNumber" type="text" placeholder="e.g., Lot-01-02-03-2024" required>
-          </div>
-          <div class="form-group">
-            <label>Brand</label>
-            <select id="lotBrand">
-              <option>Golden Hill</option>
-              <option>Extra</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Total Containers</label>
-            <input id="totalContainers" type="number" min="1" value="1" onchange="calculateLotTotals()">
-          </div>
-          <div class="form-group">
-            <label>Bags per Container</label>
-            <input id="bagsPerContainer" type="number" min="1" value="50" onchange="calculateLotTotals()">
-          </div>
-          <div class="form-group">
-            <label>Kg per Bag</label>
-            <input id="kgPerBag" type="number" min="0.1" step="0.1" value="25" onchange="calculateLotTotals()">
-          </div>
-          <div class="form-group">
-            <label>Total Raw Quantity (kg)</label>
-            <input id="totalRawQuantity" type="number" readonly style="background: #f8f9fa;">
-          </div>
-        </div>
-        <button onclick="createLot()">Create Lot</button>
-      </div>
-
-      <!-- Active Lots Table -->
-      <h3>Current Lots Status</h3>
-      <div style="overflow-x: auto;">
-        <table id="lotsTable">
-          <thead>
-            <tr>
-              <th>Lot Number</th>
-              <th>Brand</th>
-              <th>Total Containers</th>
-              <th>Total Raw (kg)</th>
-              <th>Used (kg)</th>
-              <th>Available (kg)</th>
-              <th>Progress</th>
-              <th>Status</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Production Entry Section (Modified) -->
+    <!-- Production Entry Section -->
     <section id="production" class="section">
       <div class="section-header-with-image">
         <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
@@ -431,60 +487,63 @@
       </div>
       
       <div class="warning-box">
-        <strong>Note:</strong> Select an active lot to record production for a specific shift.
+        <strong>Note:</strong> Huller Run shows rejects section, Repacking Only hides it.
       </div>
 
       <div class="form-grid">
         <div class="form-group">
-          <label>Select Lot</label>
-          <select id="productionLot" onchange="updateLotInfo()" required>
-            <option value="">Select a lot...</option>
+          <label>Run Type</label>
+          <select id="runType" onchange="updateFormVisibility()">
+            <option value="huller">Huller Run</option>
+            <option value="repack">Repacking Only</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Shift</label>
-          <select id="shift">
-            <option value="Day">Day Shift</option>
-            <option value="Night">Night Shift</option>
+          <label>Brand</label>
+          <select id="brand" onchange="updateInventoryDisplay()">
+            <option>Golden Hill</option>
+            <option>Extra</option>
+          </select>
+        </div>
+        <div class="form-group" id="sizeGroup">
+          <label>Size</label>
+          <select id="size">
+            <option>18-21</option>
+            <option>21-25</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Production Date</label>
-          <input id="productionDate" type="date" value="" required>
+          <label>Lot Number</label>
+          <input id="lotNo" type="text" placeholder="e.g., GH-240315-01">
         </div>
         <div class="form-group">
-          <label>Raw Input This Shift (kg)</label>
-          <input id="rawInputShift" type="number" min="0" step="1" value="0" onchange="updateProductionSummary()">
+          <label>Raw Input (kg)</label>
+          <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
         </div>
       </div>
 
-      <!-- Lot Info Display -->
-      <div id="lotInfoDisplay" class="materials-section" style="display: none;">
-        <h4>Selected Lot Information</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-          <div><strong>Brand:</strong> <span id="selectedLotBrand">-</span></div>
-          <div><strong>Available Raw:</strong> <span id="selectedLotAvailable">-</span> kg</div>
-          <div><strong>Total Containers:</strong> <span id="selectedLotContainers">-</span></div>
-          <div><strong>Bags/Container:</strong> <span id="selectedLotBags">-</span></div>
-        </div>
-      </div>
-
-      <!-- Final Goods Output -->
+      <!-- Final Goods -->
       <h3>Final Goods Output</h3>
       <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
         <div class="form-group">
           <label>18-21 Size (kg)</label>
-          <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateProductionSummary()">
+          <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary()">
         </div>
         <div class="form-group">
           <label>21-25 Size (kg)</label>
-          <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateProductionSummary()">
+          <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary()">
         </div>
       </div>
 
-      <!-- Materials Usage -->
+      <!-- Materials -->
       <div class="materials-section">
         <h3>Materials Usage</h3>
+        <div id="inventoryStatus" style="background: #e3f2fd; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem;">
+          <strong>Current Stock:</strong> 
+          <span id="currentBags">0</span> vacuum bags, 
+          <span id="currentGoldenBoxes">0</span> Golden Hill boxes, 
+          <span id="currentExtraBoxes">0</span> Extra boxes
+        </div>
         <div class="form-grid">
           <div class="form-group">
             <label>Vacuum Bags Used</label>
@@ -505,113 +564,84 @@
         </div>
       </div>
 
-      <!-- Rejects -->
-      <div class="materials-section">
-        <h3>Rejects (kg)</h3>
+      <!-- Rejects (shown only for Huller Run) -->
+      <div id="rejectsSection" class="materials-section">
+        <h3>Rejects (kg) - Huller Run Only</h3>
         <div class="form-grid">
           <div class="form-group">
             <label>Non-Split (Closed)</label>
-            <input id="rejNonSplit" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejNonSplit" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Light Stain</label>
-            <input id="rejLightStain" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejLightStain" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Adhering Hull</label>
-            <input id="rejAdheringHull" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejAdheringHull" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Dark Stain</label>
-            <input id="rejDarkStain" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejDarkStain" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Shell & Split</label>
-            <input id="rejShellSplit" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejShellSplit" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Undersize & Kernel</label>
-            <input id="rejUndersize" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejUndersize" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Loose Shell</label>
-            <input id="rejLooseShell" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejLooseShell" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Loose Kernel</label>
-            <input id="rejLooseKernel" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejLooseKernel" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
           <div class="form-group">
             <label>Dust</label>
-            <input id="rejDust" type="number" min="0" step="5" value="0" onchange="updateProductionSummary()">
+            <input id="rejDust" type="number" min="0" step="5" value="0" onchange="updateSummary()">
           </div>
         </div>
       </div>
 
       <div style="display: flex; gap: 1rem; margin-top: 1rem;">
         <button onclick="submitProduction()">Submit Production</button>
-        <button class="btn-secondary" onclick="clearProductionForm()">Clear Form</button>
+        <button class="btn-secondary" onclick="clearForm()">Clear Form</button>
       </div>
 
       <div class="summary-box" id="productionSummary">
-        Finished: 0 kg • Rejects: 0 kg • Efficiency: 0% • Yield: 0%
+        Finished: 0 kg • Rejects: 0 kg • Efficiency: 0% • Reject Rate: 0%
       </div>
     </section>
 
-    <!-- Enhanced Records Section -->
+    <!-- Records Section -->
     <section id="records" class="section">
       <h2 style="margin-bottom: 1rem;">📋 Production Records</h2>
-      
-      <!-- Filter Controls -->
-      <div class="materials-section">
-        <h3>Filter Records</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Filter by Lot</label>
-            <select id="recordsLotFilter" onchange="filterRecords()">
-              <option value="">All Lots</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Filter by Shift</label>
-            <select id="recordsShiftFilter" onchange="filterRecords()">
-              <option value="">All Shifts</option>
-              <option value="Day">Day Shift</option>
-              <option value="Night">Night Shift</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>From Date</label>
-            <input id="recordsFromDate" type="date" onchange="filterRecords()">
-          </div>
-          <div class="form-group">
-            <label>To Date</label>
-            <input id="recordsToDate" type="date" onchange="filterRecords()">
-          </div>
-        </div>
-      </div>
-
       <div style="overflow-x: auto;">
         <table id="recordsTable">
-          <thead>
-            <tr>
-              <th>Date/Time</th>
-              <th>Lot Number</th>
-              <th>Brand</th>
-              <th>Shift</th>
-              <th>Raw Input (kg)</th>
-              <th>18-21 Size (kg)</th>
-              <th>21-25 Size (kg)</th>
-              <th>Finished (kg)</th>
-              <th>Rejects (kg)</th>
-              <th>Efficiency (%)</th>
-              <th>Yield (%)</th>
-            </tr>
-          </thead>
+         <thead>
+  <tr>
+    <th>Timestamp</th>
+    <th>Run Type</th>
+    <th>Brand</th>
+    <th>Lot</th>
+    <th>Raw Input (kg)</th>
+    <th>18-21 Size (kg)</th>
+    <th>21-25 Size (kg)</th>
+    <th>Finished (kg)</th>
+    <th>Rejects (kg)</th>
+    <th>Total Output (kg)</th>
+    <th>Material Gain/Loss</th>
+    <th>Efficiency (%)</th>
+  </tr>
+</thead>
           <tbody></tbody>
         </table>
       </div>
-   </section>
+    </section>
 
     <!-- Maintenance Section -->
     <section id="maintenance" class="section">
@@ -823,61 +853,200 @@
         </table>
       </div>
     </section>
-
-    <!-- Enhanced Reports Section -->
-    <section id="reports" class="section">
-    <!-- Enhanced Reports Section -->
-    <section id="reports" class="section">
-      <h2 style="margin-bottom: 1rem;">📊 Lot & Production Reports</h2>
+    <!-- Reports Section -->
+<section id="reports" class="section">
+  <h2 style="margin-bottom: 1rem;">📊 Production Reports</h2>
+  
+  <div class="materials-section">
+    <h3>Report Generator</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>From Date</label>
+        <input id="reportFromDate" type="date">
+      </div>
+      <div class="form-group">
+        <label>To Date</label>
+        <input id="reportToDate" type="date">
+      </div>
+      <div class="form-group">
+        <label>Product Line</label>
+        <select id="reportBrand">
+          <option value="all">All Brands</option>
+          <option value="Golden Hill">Golden Hill</option>
+          <option value="Extra">Extra</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button onclick="loadAvailableLots()" style="width: 100%;">Load Available Lots</button>
+      </div>
+    </div>
+    
+    <div class="form-group" style="margin-top: 1rem;">
+      <label>Select Lots (multi-select with search)</label>
+      <div id="lotSelector" class="lot-selector">
+        <div class="search-box">
+          <input id="lotSearch" type="text" placeholder="Search lots..." onkeyup="filterLots()">
+        </div>
+        <div class="lot-options" id="lotOptions" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
+          <p style="color: #666; text-align: center; padding: 1rem;">Click "Load Available Lots" to see options</p>
+        </div>
+        <div class="selected-lots" id="selectedLots" style="margin-top: 0.5rem;">
+          <strong>Selected:</strong> <span id="selectedLotsDisplay">None</span>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 1.5rem;">
+      <button onclick="generateReport()" style="margin-right: 1rem;">Generate Report</button>
+      <button onclick="printReport()" class="btn-secondary" id="printButton" disabled>Print Report</button>
+    </div>
+  </div>
+  
+  <!-- Report Preview Area -->
+  <div id="reportPreview" style="display: none; margin-top: 2rem;">
+    <div style="text-align: right; margin-bottom: 1rem;">
+      <button onclick="printReport()">Print Report</button>
+    </div>
+    <div id="reportContent" class="report-content">
+      <!-- Report content will be generated here -->
+    </div>
+  </div>
+</section>
+<!-- Item Prices Section (Admin Only) -->
+    <section id="itemprices" class="section">
+      <h2 style="margin-bottom: 1rem;">💰 Item Prices Management</h2>
       
-      <div class="materials-section">
-  <h3>Multi-Lot Summary Report</h3>
-  <div class="form-grid">
-    <div class="form-group">
-      <label>Report Type</label>
-      <select id="reportType" onchange="toggleLotSelection()">
-        <option value="single">Single Lot Report</option>
-        <option value="multiple">Multiple Lots Report</option>
-      </select>
-    </div>
-    <div class="form-group" id="singleLotGroup">
-      <label>Select Lot</label>
-      <select id="reportLotSelect">
-        <option value="">Choose a lot...</option>
-      </select>
-    </div>
-    <div class="form-group" id="multipleLotGroup" style="display: none;">
-      <label>Select Multiple Lots</label>
-      <div id="lotCheckboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
-        <!-- Checkboxes will be populated here -->
+      <div class="warning-box" style="background: #fff3cd; border: 1px solid #ffeeba;">
+        <strong>Admin Only:</strong> Changes to pricing affect all future calculations and reports.
       </div>
-      <div style="margin-top: 0.5rem;">
-        <button type="button" onclick="selectAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Select All</button>
-        <button type="button" onclick="clearAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Clear All</button>
-        <span id="selectedLotsCount" style="margin-left: 1rem; font-size: 0.9rem; color: var(--muted);">0 lots selected</span>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>&nbsp;</label>
-      <button onclick="generateLotReport()" style="width: 100%;">Generate Report</button>
-    </div>
-  </div>
-</div>
 
-      <!-- Report Preview Area -->
-      <div id="lotReportPreview" style="display: none; margin-top: 2rem;">
-  <div style="text-align: right; margin-bottom: 1rem;">
-    <button onclick="printLotReport()">🖨️ Print Report</button>
-    <button onclick="exportLotReportPDF()" class="btn-secondary">📄 Export PDF</button>
-    <button onclick="exportLotReportExcel()" class="btn-secondary">📊 Export Excel</button>
-  </div>
-  <div id="lotReportContent" class="report-content">
-          <!-- Lot report content will be generated here -->
+      <!-- Current Item Prices -->
+      <div class="materials-section">
+        <h3>Current Item Prices</h3>
+        <div style="overflow-x: auto;">
+          <table id="itemPricesTable">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Unit</th>
+                <th>Unit Price ($)</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Updated By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add/Edit Item Form -->
+      <div class="materials-section">
+        <h3 id="itemFormTitle">Add New Item</h3>
+        <form id="itemPriceForm" onsubmit="saveItemPrice(event)">
+          <input type="hidden" id="editItemId" value="">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Item Name</label>
+              <input id="itemName" type="text" required placeholder="e.g., Vacuum Bags (10kg)">
+            </div>
+            <div class="form-group">
+              <label>Unit</label>
+              <input id="itemUnit" type="text" required placeholder="e.g., piece, kg, box">
+            </div>
+            <div class="form-group">
+              <label>Unit Price ($)</label>
+              <input id="itemPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="itemStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <button type="submit" id="saveItemBtn">Add Item</button>
+            <button type="button" class="btn-secondary" onclick="cancelItemEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="materials-section">
+        <h3>Quick Actions</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Bulk Price Update</label>
+            <select id="bulkUpdateType">
+              <option value="percentage">Percentage Change</option>
+              <option value="fixed">Fixed Amount Change</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Change Amount</label>
+            <input id="bulkUpdateAmount" type="number" step="0.01" placeholder="e.g., 10 for +10% or +$10">
+          </div>
+          <div class="form-group">
+            <label>Apply to</label>
+            <select id="bulkUpdateFilter">
+              <option value="all">All Active Items</option>
+              <option value="category">Specific Category</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="applyBulkUpdate()">Apply Bulk Update</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Change History -->
+      <div class="materials-section">
+        <h3>Price Change Audit Trail</h3>
+        <div class="form-grid" style="margin-bottom: 1rem;">
+          <div class="form-group">
+            <label>Filter by Item</label>
+            <select id="auditFilterItem">
+              <option value="all">All Items</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date Range</label>
+            <input id="auditFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="auditToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="filterAuditHistory()">Filter History</button>
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="priceAuditTable">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Item</th>
+                <th>Action</th>
+                <th>Old Price</th>
+                <th>New Price</th>
+                <th>Change</th>
+                <th>Updated By</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
     </section>
-
-    <!-- Inventory Section (Simplified) -->
+    <!-- Inventory Section -->
     <section id="inventory" class="section">
       <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
       
@@ -925,30 +1094,115 @@
           </div>
         </div>
         <button onclick="adjustInventory()">Update Inventory</button>
-        <button class="btn-secondary" onclick="exportInventoryExcel()">📊 Export Excel</button>
-    <button class="btn-secondary" onclick="exportInventoryPDF()">📄 Export PDF</button>
+      </div>
+
+      <h3>Stock Movement Log</h3>
+      <div style="overflow-x: auto;">
+        <table id="inventoryTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Item</th>
+              <th>Action</th>
+              <th>Quantity</th>
+              <th>Result</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <h3>Wastage Analysis</h3>
+      <div class="materials-section">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Filter by Date Range</label>
+            <input id="wastageFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="wastageToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="filterWastageByDate()" style="width: 100%;">Filter Wastage</button>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="showAllWastage()" style="width: 100%;" class="btn-secondary">Show All</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table id="wastageTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Lot Number</th>
+              <th>Brand</th>
+              <th>Bags Wasted</th>
+              <th>Boxes Wasted</th>
+              <th>Total Waste Cost</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </section>
   </div>
 </div>
-
+ 
 <script>
-// Enhanced State Management with Lot Support
-class EnhancedAppState {
+// ===== STATE MANAGEMENT =====
+class AppState {
   constructor() {
-   this.data = {
-  lots: [],
-  productionRecords: [],
-  inventoryLog: [],
-  maintenanceLog: [],
-  currentInventory: {
-    vacuumBags: 0,
-    goldenHillBoxes: 0,
-    extraBoxes: 0
-  },
-  equipment: [], // Will be populated with equipment data
-  currentUser: null
-};
+    this.data = {
+      productionRecords: [],
+      inventoryLog: [],
+      maintenanceLog: [],
+      wastageLog: [],
+      itemPrices: [
+        {
+          id: 'vacuum_bags_10kg',
+          name: 'Vacuum Bags (10kg)',
+          unit: 'piece',
+          price: 2.50,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'golden_hill_boxes',
+          name: 'Golden Hill Boxes',
+          unit: 'piece', 
+          price: 1.25,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'extra_boxes',
+          name: 'Extra Boxes',
+          unit: 'piece',
+          price: 1.00,
+          status: 'active', 
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        }
+      ],
+      priceAuditLog: [],
+      currentInventory: {
+        vacuumBags: 0,
+        goldenHillBoxes: 0,
+        extraBoxes: 0
+      },
+      equipment: [], // Will be populated below
+      currentUser: null
+    };
     this.listeners = {};
     this.loadFromStorage();
   }
@@ -984,17 +1238,6 @@ class EnhancedAppState {
     }
   }
 
-  updateArrayItem(key, id, updater) {
-    if (Array.isArray(this.data[key])) {
-      const index = this.data[key].findIndex(item => item.id === id);
-      if (index !== -1) {
-        this.data[key][index] = updater(this.data[key][index]);
-        this.saveToStorage();
-        this.notify(key, this.data[key]);
-      }
-    }
-  }
-
   updateInventory(item, action, quantity) {
     const current = this.data.currentInventory[item] || 0;
     let newValue;
@@ -1021,7 +1264,7 @@ class EnhancedAppState {
 
   saveToStorage() {
     try {
-      localStorage.setItem('pistachio_enhanced_mes_data', JSON.stringify(this.data));
+      localStorage.setItem('pistachio_mes_data', JSON.stringify(this.data));
     } catch (e) {
       console.warn('Could not save to localStorage:', e);
     }
@@ -1029,7 +1272,7 @@ class EnhancedAppState {
 
   loadFromStorage() {
     try {
-      const saved = localStorage.getItem('pistachio_enhanced_mes_data');
+      const saved = localStorage.getItem('pistachio_mes_data');
       if (saved) {
         const parsed = JSON.parse(saved);
         this.data = { ...this.data, ...parsed };
@@ -1038,12 +1281,238 @@ class EnhancedAppState {
       console.warn('Could not load from localStorage:', e);
     }
   }
+
+  getItemPrice(itemId) {
+    const item = this.data.itemPrices.find(item => item.id === itemId && item.status === 'active');
+    return item ? item.price : 0;
+  }
+
+  updateItemPrice(itemId, newPrice, updatedBy, notes = '') {
+    const item = this.data.itemPrices.find(item => item.id === itemId);
+    if (item) {
+      const oldPrice = item.price;
+      item.price = newPrice;
+      item.lastUpdated = new Date().toISOString();
+      item.updatedBy = updatedBy;
+      
+      this.addToArray('priceAuditLog', {
+        timestamp: new Date().toISOString(),
+        itemId: itemId,
+        itemName: item.name,
+        action: 'price_update',
+        oldPrice: oldPrice,
+        newPrice: newPrice,
+        change: newPrice - oldPrice,
+        changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
+        updatedBy: updatedBy,
+        notes: notes
+      });
+      
+      this.saveToStorage();
+      this.notify('itemPrices', this.data.itemPrices);
+      return true;
+    }
+    return false;
+  }
+
+  addNewItem(itemData, createdBy) {
+    const newItem = {
+      id: itemData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+      name: itemData.name,
+      unit: itemData.unit,
+      price: itemData.price,
+      status: itemData.status || 'active',
+      category: itemData.category || 'general',
+      lastUpdated: new Date().toISOString(),
+      updatedBy: createdBy
+    };
+    
+    this.addToArray('itemPrices', newItem);
+    
+    this.addToArray('priceAuditLog', {
+      timestamp: new Date().toISOString(),
+      itemId: newItem.id,
+      itemName: newItem.name,
+      action: 'item_created',
+      oldPrice: 0,
+      newPrice: newItem.price,
+      change: newItem.price,
+      changePercent: 0,
+      updatedBy: createdBy,
+      notes: 'New item created'
+    });
+    
+    return newItem.id;
+  }
+
+  calculateWastageCost(bagsWasted, boxesWasted, brand) {
+    const bagPrice = this.getItemPrice('vacuum_bags_10kg');
+    const boxItemId = brand === 'Golden Hill' ? 'golden_hill_boxes' : 'extra_boxes';
+    const boxPrice = this.getItemPrice(boxItemId);
+    
+    return (bagsWasted * bagPrice) + (boxesWasted * boxPrice);
+  }
 }
 
-// Initialize Enhanced State
-// Initialize Enhanced State
-window.appState = new EnhancedAppState();
+// ===== VALIDATION SYSTEM =====
+class FormValidator {
+  constructor() {
+    this.rules = {};
+    this.setupStyles();
+  }
 
+  setupStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .form-field-error {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+      }
+      .form-field-success {
+        border-color: #22c55e !important;
+      }
+      .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+      }
+      .form-group.has-error label {
+        color: #ef4444;
+      }
+      .success-toast, .error-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        z-index: 1001;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+      .success-toast {
+        background: #22c55e;
+      }
+      .error-toast {
+        background: #ef4444;
+      }
+      .success-toast.show, .error-toast.show {
+        transform: translateX(0);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  addRule(fieldId, validator, message) {
+    if (!this.rules[fieldId]) {
+      this.rules[fieldId] = [];
+    }
+    this.rules[fieldId].push({ validator, message });
+  }
+
+  validateField(fieldId) {
+    const field = document.getElementById(fieldId);
+    const rules = this.rules[fieldId];
+    
+    if (!field || !rules) return true;
+
+    this.clearFieldError(fieldId);
+    
+    for (const rule of rules) {
+      if (!rule.validator(field.value, field)) {
+        this.showFieldError(fieldId, rule.message);
+        return false;
+      }
+    }
+    
+    this.showFieldSuccess(fieldId);
+    return true;
+  }
+
+  validateForm() {
+    let isValid = true;
+    const fieldIds = Object.keys(this.rules);
+    
+    fieldIds.forEach(fieldId => {
+      if (!this.validateField(fieldId)) {
+        isValid = false;
+      }
+    });
+    
+    return isValid;
+  }
+
+  showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.add('form-field-error');
+    field.classList.remove('form-field-success');
+    formGroup.classList.add('has-error');
+    
+    const errorMsg = document.createElement('span');
+    errorMsg.className = 'error-message';
+    errorMsg.textContent = message;
+    formGroup.appendChild(errorMsg);
+  }
+
+  showFieldSuccess(fieldId) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.remove('form-field-error');
+    field.classList.add('form-field-success');
+    formGroup.classList.remove('has-error');
+  }
+
+  clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.remove('form-field-error', 'form-field-success');
+    formGroup.classList.remove('has-error');
+    
+    const errorMsg = formGroup.querySelector('.error-message');
+    if (errorMsg) {
+      errorMsg.remove();
+    }
+  }
+
+  showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `${type}-toast`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+}
+
+// ===== VALIDATION RULES =====
+const ValidationRules = {
+  required: (value) => value.trim() !== '',
+  positiveNumber: (value) => !isNaN(value) && parseFloat(value) >= 0,
+  range: (min, max) => (value) => {
+    const num = parseFloat(value);
+    return !isNaN(num) && num >= min && num <= max;
+  },
+  lotNumberFormat: (value) => {
+  return /^Lot-\d{2}-\d{2}-\d{2}-\d{4}$/.test(value);
+}
+};
+
+// ===== INITIALIZE GLOBAL OBJECTS =====
+window.appState = new AppState();
+window.formValidator = new FormValidator();
+
+// ===== ORIGINAL DATA WITH STATE INTEGRATION =====
 // Equipment data
 const equipmentData = [
   {code: "Ton", name: "Ton bag opener", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
@@ -1119,11 +1588,30 @@ window.appState.setState('equipment', equipmentData);
 // User management
 const users = { admin: 'admin123', operator: 'op123' };
 
+// ===== UPDATED FUNCTIONS WITH VALIDATION =====
+function setupProductionValidation() {
+  const validator = window.formValidator;
+  
+  validator.addRule('rawInput', ValidationRules.positiveNumber, 'Raw input must be a positive number');
+  validator.addRule('rawInput', ValidationRules.range(0, 999999), 'Raw input must be between 0-999,999 kg');
+  validator.addRule('bags1821', ValidationRules.positiveNumber, '18-21 size must be a positive number');
+  validator.addRule('bags2125', ValidationRules.positiveNumber, '21-25 size must be a positive number');
+  validator.addRule('lotNo', ValidationRules.required, 'Lot number is required');
+  validator.addRule('lotNo', ValidationRules.lotNumberFormat, 'Lot format should be Lot-##-##-##-#### (e.g., Lot-01-02-03-2024)');
+  validator.addRule('bagsUsed', ValidationRules.positiveNumber, 'Bags used must be a positive number');
+}
+
+// ===== MODIFIED ORIGINAL FUNCTIONS =====
+
+// Login handling
 // Login handling
 function handleLogin(event) {
   event.preventDefault();
   const username = document.getElementById('loginUsername').value;
   const password = document.getElementById('loginPassword').value;
+  
+  console.log('Login attempt:', username, password); // Debug line
+  console.log('Available users:', users); // Debug line
   
   if (users[username] && users[username] === password) {
     window.appState.setState('currentUser', username);
@@ -1131,17 +1619,19 @@ function handleLogin(event) {
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('userDisplay').textContent = username;
     
-    // Set today's date
-    document.getElementById('productionDate').value = new Date().toISOString().split('T')[0];
+    showAdminControls();
     
     updateDashboard();
-    renderLots();
     renderRecords();
     renderInventory();
-    updateProductionLotDropdown();
-    updateReportsLotDropdown();
+    renderEquipmentGrid();
+    
+    if (username === 'admin') {
+      renderItemPricesTable();
+      renderPriceAuditTable();
+    }
   } else {
-    alert('Invalid credentials');
+    window.formValidator.showToast('Invalid credentials', 'error');
   }
 }
 
@@ -1153,6 +1643,15 @@ function logout() {
 
 // Navigation
 function showSection(sectionId) {
+  // Check admin access for restricted sections
+  if (sectionId === 'itemprices') {
+    const currentUser = window.appState.getState('currentUser');
+    if (currentUser !== 'admin') {
+      window.formValidator.showToast('Access denied: Admin only section', 'error');
+      return;
+    }
+  }
+  
   document.querySelectorAll('.section').forEach(section => {
     section.classList.remove('active');
   });
@@ -1162,731 +1661,236 @@ function showSection(sectionId) {
   
   document.getElementById(sectionId).classList.add('active');
   event.target.classList.add('active');
-}
-
-// Lot Management Functions
-function calculateLotTotals() {
-  const containers = parseInt(document.getElementById('totalContainers').value) || 0;
-  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
-  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
   
-  const totalRawQuantity = containers * bagsPerContainer * kgPerBag;
-  document.getElementById('totalRawQuantity').value = totalRawQuantity;
-}
-
-function createLot() {
-  const lotNumber = document.getElementById('lotNumber').value.trim();
-  const brand = document.getElementById('lotBrand').value;
-  const totalContainers = parseInt(document.getElementById('totalContainers').value) || 0;
-  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
-  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
-  const totalRawQuantity = parseFloat(document.getElementById('totalRawQuantity').value) || 0;
-  
-  if (!lotNumber) {
-    alert('Please enter a lot number');
-    return;
-  }
-  
-  if (totalContainers <= 0 || bagsPerContainer <= 0 || kgPerBag <= 0) {
-    alert('Please enter valid quantities');
-    return;
-  }
-  
-  // Check for duplicate lot number
-  const lots = window.appState.getState('lots') || [];
-  if (lots.some(lot => lot.lotNumber === lotNumber)) {
-    alert('Lot number already exists');
-    return;
-  }
-  
-  const newLot = {
-    id: Date.now().toString(),
-    lotNumber,
-    brand,
-    totalContainers,
-    bagsPerContainer,
-    kgPerBag,
-    totalRawQuantity,
-    availableRawQuantity: totalRawQuantity,
-    usedRawQuantity: 0,
-    status: 'Open',
-    createdDate: new Date().toISOString()
-  };
-  
-  window.appState.addToArray('lots', newLot);
-  
-  // Clear form
-  document.getElementById('lotNumber').value = '';
-  document.getElementById('totalContainers').value = '1';
-  document.getElementById('bagsPerContainer').value = '50';
-  document.getElementById('kgPerBag').value = '25';
-  document.getElementById('totalRawQuantity').value = '';
-  
-  alert('Lot created successfully!');
-  renderLots();
-  updateProductionLotDropdown();
-  updateReportsLotDropdown();
-  updateDashboard();
-}
-
-function renderLots() {
-  const tbody = document.querySelector('#lotsTable tbody');
-  tbody.innerHTML = '';
-  
-  const lots = window.appState.getState('lots') || [];
-  lots.forEach(lot => {
-    const progressPercent = lot.totalRawQuantity > 0 
-      ? Math.round((lot.usedRawQuantity / lot.totalRawQuantity) * 100) 
-      : 0;
-    
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td><strong>${lot.lotNumber}</strong></td>
-      <td>${lot.brand}</td>
-      <td>${lot.totalContainers}</td>
-      <td>${lot.totalRawQuantity.toLocaleString()}</td>
-      <td>${lot.usedRawQuantity.toLocaleString()}</td>
-      <td>${lot.availableRawQuantity.toLocaleString()}</td>
-      <td>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${progressPercent}%;">
-            ${progressPercent}%
-          </div>
-        </div>
-      </td>
-      <td><span class="lot-status ${lot.status.toLowerCase()}">${lot.status}</span></td>
-      <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-// Production Functions
-function updateProductionLotDropdown() {
-  const dropdown = document.getElementById('productionLot');
-  dropdown.innerHTML = '<option value="">Select a lot...</option>';
-  
-  const lots = window.appState.getState('lots') || [];
-  const openLots = lots.filter(lot => lot.status === 'Open' && lot.availableRawQuantity > 0);
-  
-  openLots.forEach(lot => {
-    const option = document.createElement('option');
-    option.value = lot.id;
-    option.textContent = `${lot.lotNumber} (${lot.brand}) - ${lot.availableRawQuantity} kg available`;
-    dropdown.appendChild(option);
-  });
-}
-
-function updateLotInfo() {
-  const lotId = document.getElementById('productionLot').value;
-  const lotDisplay = document.getElementById('lotInfoDisplay');
-  
-  if (!lotId) {
-    lotDisplay.style.display = 'none';
-    return;
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  const selectedLot = lots.find(lot => lot.id === lotId);
-  
-  if (selectedLot) {
-    document.getElementById('selectedLotBrand').textContent = selectedLot.brand;
-    document.getElementById('selectedLotAvailable').textContent = selectedLot.availableRawQuantity.toLocaleString();
-    document.getElementById('selectedLotContainers').textContent = selectedLot.totalContainers;
-    document.getElementById('selectedLotBags').textContent = selectedLot.bagsPerContainer;
-    lotDisplay.style.display = 'block';
+  // Load section-specific data when switching
+  if (sectionId === 'itemprices') {
+    renderItemPricesTable();
+    renderPriceAuditTable();
   }
 }
 
-function updateProductionSummary() {
+// Form handling
+function updateFormVisibility() {
+  const runType = document.getElementById('runType').value;
+  const sizeGroup = document.getElementById('sizeGroup');
+  const rejectsSection = document.getElementById('rejectsSection');
+  
+  if (runType === 'huller') {
+    sizeGroup.style.display = 'none';
+    rejectsSection.style.display = 'block';
+  } else {
+    sizeGroup.style.display = 'block';
+    rejectsSection.style.display = 'none';
+  }
+  updateSummary();
+}
+
+function updateInventoryDisplay() {
+  renderInventory();
+}
+
+function updateSummary() {
   const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
   const finishedKg = kg1821 + kg2125;
   
-  const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
-                    'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
-  const rejectsKg = rejectIds.reduce((sum, id) => {
-    return sum + (parseInt(document.getElementById(id).value) || 0);
-  }, 0);
+  const runType = document.getElementById('runType').value;
+  let rejectsKg = 0;
   
-  const rawInput = parseInt(document.getElementById('rawInputShift').value) || 0;
-  const totalOutput = finishedKg + rejectsKg;
+  if (runType === 'huller') {
+    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
+                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
+    rejectsKg = rejectIds.reduce((sum, id) => {
+      return sum + (parseInt(document.getElementById(id).value) || 0);
+    }, 0);
+  }
   
-  const efficiency = rawInput > 0 ? Math.round((finishedKg / rawInput) * 100) : 0;
-  const yield = rawInput > 0 ? Math.round((totalOutput / rawInput) * 100) : 0;
+  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
+  const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
+  
+  const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
+  const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
   
   document.getElementById('productionSummary').textContent = 
-    `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Yield: ${yield}%`;
+    `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
+}
+
+function clearForm() {
+  document.querySelectorAll('#production input[type="number"]').forEach(input => {
+    input.value = 0;
+  });
+  document.getElementById('lotNo').value = '';
+  updateSummary();
 }
 
 function submitProduction() {
-  const lotId = document.getElementById('productionLot').value;
-  const shift = document.getElementById('shift').value;
-  const productionDate = document.getElementById('productionDate').value;
-  const rawInputShift = parseInt(document.getElementById('rawInputShift').value) || 0;
-  
-  if (!lotId) {
-    alert('Please select a lot');
+  // Validate form first
+  if (!window.formValidator.validateForm()) {
+    window.formValidator.showToast('Please fix the errors before submitting', 'error');
     return;
   }
-  
-  if (!productionDate) {
-    alert('Please select a production date');
-    return;
-  }
-  
-  if (rawInputShift <= 0) {
-    alert('Please enter raw input quantity');
-    return;
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  const selectedLot = lots.find(lot => lot.id === lotId);
-  
-  if (!selectedLot) {
-    alert('Selected lot not found');
-    return;
-  }
-  
-  if (rawInputShift > selectedLot.availableRawQuantity) {
-    alert(`Insufficient raw material. Available: ${selectedLot.availableRawQuantity} kg`);
-    return;
-  }
-  
+
   const bags1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const bags2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const finishedKg = bags1821 + bags2125;
+  const totalBags = bags1821 + bags2125;
   
-  if (finishedKg <= 0) {
-    alert('Please enter finished goods quantities');
+  if (totalBags === 0) {
+    window.formValidator.showToast('Please enter finished goods quantities', 'error');
     return;
   }
   
-  const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
-                    'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
-  const rejectsKg = rejectIds.reduce((sum, id) => {
-    return sum + (parseInt(document.getElementById(id).value) || 0);
-  }, 0);
+  const brand = document.getElementById('brand').value;
+  const boxType = brand === 'Golden Hill' ? 'goldenHillBoxes' : 'extraBoxes';
   
-  const totalOutput = finishedKg + rejectsKg;
-  const efficiency = Math.round((finishedKg / rawInputShift) * 100);
-  const yield = Math.round((totalOutput / rawInputShift) * 100);
+  const bagsUsed = parseInt(document.getElementById('bagsUsed').value) || 0;
+  const boxesUsed = parseInt(document.getElementById('boxesUsed').value) || 0;
+  const bagsWasted = parseInt(document.getElementById('bagsWasted').value) || 0;
+  const boxesWasted = parseInt(document.getElementById('boxesWasted').value) || 0;
   
-  const productionRecord = {
-    id: Date.now().toString(),
-    lotId: lotId,
-    lotNumber: selectedLot.lotNumber,
-    brand: selectedLot.brand,
-    shift: shift,
-    productionDate: productionDate,
+  const totalBagsNeeded = bagsUsed + bagsWasted;
+  const totalBoxesNeeded = boxesUsed + boxesWasted;
+  
+  const currentInventory = window.appState.getState('currentInventory');
+  
+  if (totalBagsNeeded > currentInventory.vacuumBags) {
+    window.formValidator.showToast(`Insufficient vacuum bags! Required: ${totalBagsNeeded}, Available: ${currentInventory.vacuumBags}`, 'error');
+    return;
+  }
+  
+  if (totalBoxesNeeded > currentInventory[boxType]) {
+    const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill boxes' : 'Extra boxes';
+    window.formValidator.showToast(`Insufficient ${boxTypeName}! Required: ${totalBoxesNeeded}, Available: ${currentInventory[boxType]}`, 'error');
+    return;
+  }
+  
+  const runType = document.getElementById('runType').value;
+  const finishedKg = totalBags;
+  
+  let rejectsKg = 0;
+  if (runType === 'huller') {
+    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
+                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
+    rejectsKg = rejectIds.reduce((sum, id) => {
+      return sum + (parseInt(document.getElementById(id).value) || 0);
+    }, 0);
+  }
+  
+  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
+  const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
+  const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
+  
+  const record = {
     timestamp: new Date().toISOString(),
-    rawInputShift: rawInputShift,
+    runType,
+    brand: brand,
+    size: document.getElementById('size').value,
+    lot: document.getElementById('lotNo').value,
+    rawInput,
     kg1821: bags1821,
     kg2125: bags2125,
-    finishedKg: finishedKg,
-    rejectsKg: rejectsKg,
-    totalOutput: totalOutput,
-    efficiency: efficiency,
-    yield: yield,
+    totalKg: totalBags,
+    finishedKg,
+    rejectsKg,
+    efficiency,
     materials: {
-      bagsUsed: parseInt(document.getElementById('bagsUsed').value) || 0,
-      boxesUsed: parseInt(document.getElementById('boxesUsed').value) || 0,
-      bagsWasted: parseInt(document.getElementById('bagsWasted').value) || 0,
-      boxesWasted: parseInt(document.getElementById('boxesWasted').value) || 0
-    },
-    rejects: {
-      nonSplit: parseInt(document.getElementById('rejNonSplit').value) || 0,
-      lightStain: parseInt(document.getElementById('rejLightStain').value) || 0,
-      adheringHull: parseInt(document.getElementById('rejAdheringHull').value) || 0,
-      darkStain: parseInt(document.getElementById('rejDarkStain').value) || 0,
-      shellSplit: parseInt(document.getElementById('rejShellSplit').value) || 0,
-      undersize: parseInt(document.getElementById('rejUndersize').value) || 0,
-      looseShell: parseInt(document.getElementById('rejLooseShell').value) || 0,
-      looseKernel: parseInt(document.getElementById('rejLooseKernel').value) || 0,
-      dust: parseInt(document.getElementById('rejDust').value) || 0
+      bagsUsed: bagsUsed,
+      boxesUsed: boxesUsed,
+      bagsWasted: bagsWasted,
+      boxesWasted: boxesWasted
     }
   };
   
-  // Add production record
-  window.appState.addToArray('productionRecords', productionRecord);
+  // Add to state instead of local array
+  window.appState.addToArray('productionRecords', record);
+  trackWastage(record);
+  // Update inventory using state methods
+  window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
+  window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
   
-  // Update lot quantities
-  window.appState.updateArrayItem('lots', lotId, (lot) => {
-    lot.usedRawQuantity += rawInputShift;
-    lot.availableRawQuantity -= rawInputShift;
-    if (lot.availableRawQuantity <= 0) {
-      lot.status = 'Completed';
-    }
-    return lot;
-  });
-  
-  // Handle inventory updates (materials usage)
-  const totalBagsNeeded = productionRecord.materials.bagsUsed + productionRecord.materials.bagsWasted;
-  const totalBoxesNeeded = productionRecord.materials.boxesUsed + productionRecord.materials.boxesWasted;
-  const boxType = selectedLot.brand === 'Golden Hill' ? 'goldenHillBoxes' : 'extraBoxes';
-  
+  // Add inventory log entries
   if (totalBagsNeeded > 0) {
-    window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: 'Vacuum Bags (10kg)',
+      action: 'remove',
+      quantity: totalBagsNeeded,
+      result: window.appState.getState('currentInventory').vacuumBags,
+      notes: 'Auto: Production submission'
+    });
   }
+  
   if (totalBoxesNeeded > 0) {
-    window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
+    const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: boxTypeName,
+      action: 'remove',
+      quantity: totalBoxesNeeded,
+      result: window.appState.getState('currentInventory')[boxType],
+      notes: 'Auto: Production submission'
+    });
   }
   
-  alert('Production record submitted successfully!');
-  clearProductionForm();
+  window.formValidator.showToast('Production record submitted successfully!', 'success');
+  clearForm();
   updateDashboard();
-  renderLots();
   renderRecords();
-  updateProductionLotDropdown();
+  renderInventory();
 }
 
-function clearProductionForm() {
-  document.getElementById('productionLot').value = '';
-  document.getElementById('rawInputShift').value = '0';
-  document.querySelectorAll('#production input[type="number"]').forEach(input => {
-    input.value = '0';
-  });
-  document.getElementById('lotInfoDisplay').style.display = 'none';
-  updateProductionSummary();
-}
-
-// Dashboard Functions
+// Dashboard updates
 function updateDashboard() {
-  const lots = window.appState.getState('lots') || [];
   const productionRecords = window.appState.getState('productionRecords') || [];
-  
-  const activeLots = lots.filter(lot => lot.status === 'Open').length;
-  
   let totalFinished = 0;
-  let totalInput = 0;
   let totalRejects = 0;
+  let totalInput = 0;
   
   productionRecords.forEach(record => {
     totalFinished += record.finishedKg;
-    totalInput += record.rawInputShift;
     totalRejects += record.rejectsKg;
+    totalInput += record.rawInput || (record.finishedKg + record.rejectsKg);
   });
   
-  const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
+  const efficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const rejectRate = totalInput > 0 ? Math.round((totalRejects / totalInput) * 1000) / 10 : 0;
   
-  document.getElementById('kpiActiveLots').textContent = activeLots;
-  document.getElementById('kpiFinished').textContent = totalFinished.toLocaleString();
-  document.getElementById('kpiEff').textContent = avgEfficiency;
+  document.getElementById('kpiFinished').textContent = totalFinished;
+  document.getElementById('kpiEff').textContent = efficiency;
   document.getElementById('kpiReject').textContent = rejectRate.toFixed(1);
 }
 
-// Records Functions
+// Records rendering
 function renderRecords() {
   const tbody = document.querySelector('#recordsTable tbody');
   tbody.innerHTML = '';
   
   const productionRecords = window.appState.getState('productionRecords') || [];
-  
   productionRecords.slice().reverse().forEach(record => {
     const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${new Date(record.timestamp).toLocaleString()}</td>
-      <td>${record.lotNumber}</td>
-      <td>${record.brand}</td>
-      <td><span class="shift-badge ${record.shift.toLowerCase()}">${record.shift}</span></td>
-      <td>${record.rawInputShift.toLocaleString()}</td>
-      <td>${record.kg1821.toLocaleString()}</td>
-      <td>${record.kg2125.toLocaleString()}</td>
-      <td><strong>${record.finishedKg.toLocaleString()}</strong></td>
-      <td>${record.rejectsKg.toLocaleString()}</td>
-      <td><strong>${record.efficiency}%</strong></td>
-      <td>${record.yield}%</td>
-    `;
-    tbody.appendChild(row);
-  });
-  
-  updateRecordsFilters();
-}
+    const totalOutput = record.finishedKg + record.rejectsKg;
+const materialGain = totalOutput - record.rawInput;
+const gainPercent = record.rawInput > 0 ? ((materialGain / record.rawInput) * 100).toFixed(1) : 0;
+const gainColor = materialGain > 0 ? '#22c55e' : '#ef4444';
 
-function updateRecordsFilters() {
-  const lots = window.appState.getState('lots') || [];
-  const lotFilter = document.getElementById('recordsLotFilter');
-  
-  // Update lot filter options
-  const currentValue = lotFilter.value;
-  lotFilter.innerHTML = '<option value="">All Lots</option>';
-  lots.forEach(lot => {
-    const option = document.createElement('option');
-    option.value = lot.lotNumber;
-    option.textContent = `${lot.lotNumber} (${lot.brand})`;
-    if (option.value === currentValue) option.selected = true;
-    lotFilter.appendChild(option);
-  });
-}
-
-function filterRecords() {
-  const lotFilter = document.getElementById('recordsLotFilter').value;
-  const shiftFilter = document.getElementById('recordsShiftFilter').value;
-  const fromDate = document.getElementById('recordsFromDate').value;
-  const toDate = document.getElementById('recordsToDate').value;
-  
-  const tbody = document.querySelector('#recordsTable tbody');
-  tbody.innerHTML = '';
-  
-  let productionRecords = window.appState.getState('productionRecords') || [];
-  
-  // Apply filters
-  if (lotFilter) {
-    productionRecords = productionRecords.filter(record => record.lotNumber === lotFilter);
-  }
-  
-  if (shiftFilter) {
-    productionRecords = productionRecords.filter(record => record.shift === shiftFilter);
-  }
-  
-  if (fromDate) {
-    productionRecords = productionRecords.filter(record => record.productionDate >= fromDate);
-  }
-  
-  if (toDate) {
-    productionRecords = productionRecords.filter(record => record.productionDate <= toDate);
-  }
-  
-  // Render filtered records
-  productionRecords.slice().reverse().forEach(record => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${new Date(record.timestamp).toLocaleString()}</td>
-      <td>${record.lotNumber}</td>
-      <td>${record.brand}</td>
-      <td><span class="shift-badge ${record.shift.toLowerCase()}">${record.shift}</span></td>
-      <td>${record.rawInputShift.toLocaleString()}</td>
-      <td>${record.kg1821.toLocaleString()}</td>
-      <td>${record.kg2125.toLocaleString()}</td>
-      <td><strong>${record.finishedKg.toLocaleString()}</strong></td>
-      <td>${record.rejectsKg.toLocaleString()}</td>
-      <td><strong>${record.efficiency}%</strong></td>
-      <td>${record.yield}%</td>
-    `;
+row.innerHTML = `
+  <td>${new Date(record.timestamp).toLocaleString()}</td>
+  <td>${record.runType}</td>
+  <td>${record.brand}</td>
+  <td>${record.lot}</td>
+  <td>${record.rawInput}</td>
+  <td>${record.kg1821 || 0}</td>
+  <td>${record.kg2125 || 0}</td>
+  <td>${record.finishedKg}</td>
+  <td>${record.rejectsKg}</td>
+  <td>${totalOutput}</td>
+  <td style="color: ${gainColor}; font-weight: bold;">${materialGain > 0 ? '+' : ''}${materialGain} (${gainPercent > 0 ? '+' : ''}${gainPercent}%)</td>
+  <td>${record.efficiency}%</td>
+`;
     tbody.appendChild(row);
   });
 }
 
-// Reports Functions
-function updateReportsLotDropdown() {
-  const dropdown = document.getElementById('reportLotSelect');
-  const checkboxContainer = document.getElementById('lotCheckboxes');
-  
-  dropdown.innerHTML = '<option value="">Choose a lot...</option>';
-  if (checkboxContainer) checkboxContainer.innerHTML = '';
-  
-  const lots = window.appState.getState('lots') || [];
-  lots.forEach(lot => {
-    // Single lot dropdown
-    const option = document.createElement('option');
-    option.value = lot.id;
-    option.textContent = `${lot.lotNumber} (${lot.brand}) - ${lot.status}`;
-    dropdown.appendChild(option);
-    
-    // Multiple lots checkboxes
-    if (checkboxContainer) {
-      const checkboxDiv = document.createElement('div');
-      checkboxDiv.style.cssText = 'padding: 0.5rem; border-bottom: 1px solid #eee;';
-      checkboxDiv.innerHTML = `
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-          <input type="checkbox" value="${lot.id}" onchange="updateSelectedCount()">
-          <div>
-            <strong>${lot.lotNumber}</strong> (${lot.brand})
-            <div style="font-size: 0.8rem; color: var(--muted);">
-              ${lot.status} • ${lot.totalRawQuantity.toLocaleString()} kg total
-            </div>
-          </div>
-        </label>
-      `;
-      checkboxContainer.appendChild(checkboxDiv);
-    }
-  });
-}
-
-function generateLotReport() {
-  const reportType = document.getElementById('reportType') ? document.getElementById('reportType').value : 'single';
-  let selectedLotIds = [];
-  
-  if (reportType === 'single') {
-    const singleLotId = document.getElementById('reportLotSelect').value;
-    if (!singleLotId) {
-      alert('Please select a lot');
-      return;
-    }
-    selectedLotIds = [singleLotId];
-  } else {
-    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
-    selectedLotIds = Array.from(checkboxes).map(cb => cb.value);
-    
-    if (selectedLotIds.length === 0) {
-      alert('Please select at least one lot');
-      return;
-    }
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  
-  const selectedLots = lots.filter(lot => selectedLotIds.includes(lot.id));
-  const allLotRecords = productionRecords.filter(record => selectedLotIds.includes(record.lotId));
-  
-  if (selectedLots.length === 1) {
-    generateLotReportHTML(selectedLots[0], allLotRecords);
-  } else {
-    generateMultiLotReportHTML(selectedLots, allLotRecords);
-  }
-  
-  document.getElementById('lotReportPreview').style.display = 'block';
-}
-
-function generateLotReportHTML(lot, records) {
-  const reportContent = document.getElementById('lotReportContent');
-  
-  // Calculate totals
-  const totalRawUsed = records.reduce((sum, r) => sum + r.rawInputShift, 0);
-  const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
-  const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
-  const avgEfficiency = totalRawUsed > 0 ? Math.round((totalFinished / totalRawUsed) * 100) : 0;
-  const avgYield = totalRawUsed > 0 ? Math.round(((totalFinished + totalRejects) / totalRawUsed) * 100) : 0;
-  
-  const reportHTML = `
-    <div style="padding: 2rem; background: white; border-radius: 0.5rem;">
-      <div style="text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 3px solid var(--primary);">
-        <h1 style="color: var(--primary); margin: 0;">Al Jameel MES</h1>
-        <h2 style="margin: 0.5rem 0;">Lot Production Report</h2>
-        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-        <div>
-          <h3 style="color: var(--primary); margin-bottom: 1rem;">Lot Information</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr><td style="font-weight: bold; padding: 0.5rem; border-bottom: 1px solid #eee;">Lot Number:</td><td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${lot.lotNumber}</td></tr>
-            <tr><td style="font-weight: bold; padding: 0.5rem; border-bottom: 1px solid #eee;">Brand:</td><td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${lot.brand}</td></tr>
-            <tr><td style="font-weight: bold; padding: 0.5rem; border-bottom: 1px solid #eee;">Total Containers:</td><td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${lot.totalContainers}</td></tr>
-            <tr><td style="font-weight: bold; padding: 0.5rem; border-bottom: 1px solid #eee;">Bags per Container:</td><td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${lot.bagsPerContainer}</td></tr>
-            <tr><td style="font-weight: bold; padding: 0.5rem; border-bottom: 1px solid #eee;">Kg per Bag:</td><td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${lot.kgPerBag}</td></tr>
-            <tr><td style="font-weight: bold; padding: 0.5rem; border-bottom: 1px solid #eee;">Total Raw Quantity:</td><td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${lot.totalRawQuantity.toLocaleString()} kg</td></tr>
-            <tr><td style="font-weight: bold; padding: 0.5rem;">Status:</td><td style="padding: 0.5rem;"><span class="lot-status ${lot.status.toLowerCase()}">${lot.status}</span></td></tr>
-          </table>
-        </div>
-
-        <div>
-          <h3 style="color: var(--primary); margin-bottom: 1rem;">Production Summary</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem;">
-              <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${records.length}</div>
-              <div style="font-size: 0.9rem;">Total Shifts</div>
-            </div>
-            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem;">
-              <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${totalRawUsed.toLocaleString()}</div>
-              <div style="font-size: 0.9rem;">Raw Used (kg)</div>
-            </div>
-            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem;">
-              <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${totalFinished.toLocaleString()}</div>
-              <div style="font-size: 0.9rem;">Finished (kg)</div>
-            </div>
-            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem;">
-              <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${avgEfficiency}%</div>
-              <div style="font-size: 0.9rem;">Avg Efficiency</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <h3 style="color: var(--primary); margin-bottom: 1rem;">Shift-wise Production Details</h3>
-      <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
-          <thead>
-            <tr style="background: var(--primary); color: white;">
-              <th style="padding: 0.75rem; text-align: left;">Date</th>
-              <th style="padding: 0.75rem; text-align: left;">Shift</th>
-              <th style="padding: 0.75rem; text-align: right;">Raw Input (kg)</th>
-              <th style="padding: 0.75rem; text-align: right;">18-21 Size (kg)</th>
-              <th style="padding: 0.75rem; text-align: right;">21-25 Size (kg)</th>
-              <th style="padding: 0.75rem; text-align: right;">Finished (kg)</th>
-              <th style="padding: 0.75rem; text-align: right;">Rejects (kg)</th>
-              <th style="padding: 0.75rem; text-align: right;">Efficiency (%)</th>
-              <th style="padding: 0.75rem; text-align: right;">Yield (%)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${records.map(record => `
-              <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 0.5rem;">${new Date(record.productionDate).toLocaleDateString()}</td>
-                <td style="padding: 0.5rem;"><span class="shift-badge ${record.shift.toLowerCase()}">${record.shift}</span></td>
-                <td style="padding: 0.5rem; text-align: right;">${record.rawInputShift.toLocaleString()}</td>
-                <td style="padding: 0.5rem; text-align: right;">${record.kg1821.toLocaleString()}</td>
-                <td style="padding: 0.5rem; text-align: right;">${record.kg2125.toLocaleString()}</td>
-                <td style="padding: 0.5rem; text-align: right; font-weight: bold;">${record.finishedKg.toLocaleString()}</td>
-                <td style="padding: 0.5rem; text-align: right;">${record.rejectsKg.toLocaleString()}</td>
-                <td style="padding: 0.5rem; text-align: right; font-weight: bold;">${record.efficiency}%</td>
-                <td style="padding: 0.5rem; text-align: right;">${record.yield}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-          <tfoot>
-            <tr style="background: #f8f9fa; font-weight: bold;">
-              <td style="padding: 0.75rem;" colspan="2">TOTALS</td>
-              <td style="padding: 0.75rem; text-align: right;">${totalRawUsed.toLocaleString()}</td>
-              <td style="padding: 0.75rem; text-align: right;">${records.reduce((sum, r) => sum + r.kg1821, 0).toLocaleString()}</td>
-              <td style="padding: 0.75rem; text-align: right;">${records.reduce((sum, r) => sum + r.kg2125, 0).toLocaleString()}</td>
-              <td style="padding: 0.75rem; text-align: right;">${totalFinished.toLocaleString()}</td>
-              <td style="padding: 0.75rem; text-align: right;">${totalRejects.toLocaleString()}</td>
-              <td style="padding: 0.75rem; text-align: right;">${avgEfficiency}%</td>
-              <td style="padding: 0.75rem; text-align: right;">${avgYield}%</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; text-align: center; border-top: 3px solid var(--primary);">
-        <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Pistachio Production Management System</p>
-        <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()} | Confidential Report</p>
-      </div>
-    </div>
-  `;
-  
-  reportContent.innerHTML = reportHTML;
-}
-// ADD these new functions after the existing generateLotReportHTML function
-
-function toggleLotSelection() {
-  const reportType = document.getElementById('reportType').value;
-  const singleGroup = document.getElementById('singleLotGroup');
-  const multipleGroup = document.getElementById('multipleLotGroup');
-  
-  if (reportType === 'single') {
-    singleGroup.style.display = 'block';
-    multipleGroup.style.display = 'none';
-  } else {
-    singleGroup.style.display = 'none';
-    multipleGroup.style.display = 'block';
-  }
-}
-
-function selectAllLots() {
-  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
-  checkboxes.forEach(cb => cb.checked = true);
-  updateSelectedCount();
-}
-
-function clearAllLots() {
-  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
-  checkboxes.forEach(cb => cb.checked = false);
-  updateSelectedCount();
-}
-
-function updateSelectedCount() {
-  const countElement = document.getElementById('selectedLotsCount');
-  if (countElement) {
-    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
-    countElement.textContent = `${checkboxes.length} lots selected`;
-  }
-}
-
-function generateMultiLotReportHTML(lots, allRecords) {
-  const reportContent = document.getElementById('lotReportContent');
-  
-  // Calculate combined totals
-  const totalRawUsed = allRecords.reduce((sum, r) => sum + r.rawInputShift, 0);
-  const totalFinished = allRecords.reduce((sum, r) => sum + r.finishedKg, 0);
-  const totalRejects = allRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
-  const totalShifts = allRecords.length;
-  const avgEfficiency = totalRawUsed > 0 ? Math.round((totalFinished / totalRawUsed) * 100) : 0;
-  
-  // Calculate lot-wise summaries
-  const lotSummaries = lots.map(lot => {
-    const lotRecords = allRecords.filter(r => r.lotId === lot.id);
-    const lotRawUsed = lotRecords.reduce((sum, r) => sum + r.rawInputShift, 0);
-    const lotFinished = lotRecords.reduce((sum, r) => sum + r.finishedKg, 0);
-    const lotRejects = lotRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
-    const lotEfficiency = lotRawUsed > 0 ? Math.round((lotFinished / lotRawUsed) * 100) : 0;
-    
-    return {
-      lot,
-      records: lotRecords,
-      totalRawUsed: lotRawUsed,
-      totalFinished: lotFinished,
-      totalRejects: lotRejects,
-      efficiency: lotEfficiency,
-      shiftsCount: lotRecords.length
-    };
-  });
-  
-  const reportHTML = `
-    <div style="padding: 2rem; background: white; border-radius: 0.5rem;">
-      <div style="text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 3px solid var(--primary);">
-        <h1 style="color: var(--primary); margin: 0;">Al Jameel MES</h1>
-        <h2 style="margin: 0.5rem 0;">Multi-Lot Production Report</h2>
-        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-        <p><strong>Lots Included:</strong> ${lots.length} lots • <strong>Total Shifts:</strong> ${totalShifts}</p>
-      </div>
-
-      <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem; border-left: 4px solid var(--primary);">
-        <h3 style="color: var(--primary); margin-bottom: 1rem;">📊 Combined Summary</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
-            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${lots.length}</div>
-            <div style="font-size: 0.9rem;">Total Lots</div>
-          </div>
-          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
-            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${totalFinished.toLocaleString()}</div>
-            <div style="font-size: 0.9rem;">Finished (kg)</div>
-          </div>
-          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
-            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${avgEfficiency}%</div>
-            <div style="font-size: 0.9rem;">Avg Efficiency</div>
-          </div>
-        </div>
-      </div>
-
-      <h3 style="color: var(--primary); margin-bottom: 1rem;">📈 Lot Performance Comparison</h3>
-      <div style="overflow-x: auto; margin-bottom: 2rem;">
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
-          <thead>
-            <tr style="background: var(--primary); color: white;">
-              <th style="padding: 0.75rem; text-align: left;">Lot Number</th>
-              <th style="padding: 0.75rem; text-align: left;">Brand</th>
-              <th style="padding: 0.75rem; text-align: right;">Finished (kg)</th>
-              <th style="padding: 0.75rem; text-align: right;">Efficiency (%)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${lotSummaries.map(summary => `
-              <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 0.5rem; font-weight: bold;">${summary.lot.lotNumber}</td>
-                <td style="padding: 0.5rem;">${summary.lot.brand}</td>
-                <td style="padding: 0.5rem; text-align: right;">${summary.totalFinished.toLocaleString()}</td>
-                <td style="padding: 0.5rem; text-align: right; font-weight: bold;">${summary.efficiency}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-
-      <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; text-align: center;">
-        <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Multi-Lot Production Report</p>
-        <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()}</p>
-      </div>
-    </div>
-  `;
-  
-  reportContent.innerHTML = reportHTML;
-}
-function printLotReport() {
-  window.print();
-}
-
-// Inventory Functions (Simplified)
-function renderInventory() {
-  const currentInventory = window.appState.getState('currentInventory') || {};
-  document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags || 0;
-  document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes || 0;
-  document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes || 0;
-}
-
+// Inventory management
 function adjustInventory() {
   const item = document.getElementById('invItem').value;
   const action = document.getElementById('invAction').value;
@@ -1894,251 +1898,69 @@ function adjustInventory() {
   const notes = document.getElementById('invNotes').value;
   
   if (quantity <= 0 && action !== 'set') {
-    alert('Please enter a valid quantity');
+    window.formValidator.showToast('Please enter a valid quantity', 'error');
     return;
   }
+  
+  let itemName;
+  if (item === 'vacuumBags') itemName = 'Vacuum Bags (10kg)';
+  else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
+  else if (item === 'extraBoxes') itemName = 'Extra Boxes';
   
   const success = window.appState.updateInventory(item, action, quantity);
   
   if (success) {
+    const result = window.appState.getState('currentInventory')[item];
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: itemName,
+      action,
+      quantity,
+      result,
+      notes
+    });
+    
     document.getElementById('invQuantity').value = 0;
     document.getElementById('invNotes').value = '';
-    alert('Inventory updated successfully');
+    window.formValidator.showToast('Inventory updated successfully', 'success');
   } else {
-    alert('Failed to update inventory');
+    window.formValidator.showToast('Failed to update inventory', 'error');
   }
   
   renderInventory();
 }
-// Export Functions
-function exportInventoryExcel() {
-  const inventoryLog = window.appState.getState('inventoryLog') || [];
+
+function renderInventory() {
   const currentInventory = window.appState.getState('currentInventory') || {};
+  document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags || 0;
+  document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes || 0;
+  document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes || 0;
   
-  if (inventoryLog.length === 0) {
-    alert('No inventory data to export');
-    return;
+  if (document.getElementById('currentBags')) {
+    document.getElementById('currentBags').textContent = currentInventory.vacuumBags || 0;
+    document.getElementById('currentGoldenBoxes').textContent = currentInventory.goldenHillBoxes || 0;
+    document.getElementById('currentExtraBoxes').textContent = currentInventory.extraBoxes || 0;
   }
-
-  // Create workbook
-  const wb = XLSX.utils.book_new();
   
-  // Current Stock Sheet
-  const stockData = [
-    ['Item', 'Current Quantity'],
-    ['Vacuum Bags (10kg)', currentInventory.vacuumBags || 0],
-    ['Golden Hill Boxes', currentInventory.goldenHillBoxes || 0],
-    ['Extra Boxes', currentInventory.extraBoxes || 0]
-  ];
-  const stockWs = XLSX.utils.aoa_to_sheet(stockData);
-  XLSX.utils.book_append_sheet(wb, stockWs, 'Current Stock');
+  const tbody = document.querySelector('#inventoryTable tbody');
+  tbody.innerHTML = '';
   
-  // Inventory Log Sheet
-  const logData = [
-    ['Timestamp', 'Item', 'Action', 'Quantity', 'Result', 'Notes'],
-    ...inventoryLog.map(log => [
-      new Date(log.timestamp).toLocaleString(),
-      log.item,
-      log.action,
-      log.quantity,
-      log.result,
-      log.notes || ''
-    ])
-  ];
-  const logWs = XLSX.utils.aoa_to_sheet(logData);
-  XLSX.utils.book_append_sheet(wb, logWs, 'Inventory Log');
-  
-  // Save file
-  XLSX.writeFile(wb, `inventory_report_${new Date().toISOString().split('T')[0]}.xlsx`);
-}
-
-function exportInventoryPDF() {
   const inventoryLog = window.appState.getState('inventoryLog') || [];
-  const currentInventory = window.appState.getState('currentInventory') || {};
-  
-  if (inventoryLog.length === 0) {
-    alert('No inventory data to export');
-    return;
-  }
-
-  let pdfContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Inventory Report</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #a32034; padding-bottom: 10px; }
-        .stock-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .stock-card { padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center; }
-        .stock-value { font-size: 24px; font-weight: bold; color: #a32034; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
-        th { background-color: #a32034; color: white; }
-        @media print { body { margin: 0; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>Al Jameel MES - Inventory Report</h1>
-        <p>Generated: ${new Date().toLocaleString()}</p>
-      </div>
-      
-      <h2>Current Stock Levels</h2>
-      <div class="stock-summary">
-        <div class="stock-card">
-          <div class="stock-value">${currentInventory.vacuumBags || 0}</div>
-          <div>Vacuum Bags (10kg)</div>
-        </div>
-        <div class="stock-card">
-          <div class="stock-value">${currentInventory.goldenHillBoxes || 0}</div>
-          <div>Golden Hill Boxes</div>
-        </div>
-        <div class="stock-card">
-          <div class="stock-value">${currentInventory.extraBoxes || 0}</div>
-          <div>Extra Boxes</div>
-        </div>
-      </div>
-      
-      <h2>Recent Inventory Movements</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Item</th>
-            <th>Action</th>
-            <th>Quantity</th>
-            <th>Result</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${inventoryLog.slice(-20).reverse().map(log => `
-            <tr>
-              <td>${new Date(log.timestamp).toLocaleDateString()}</td>
-              <td>${log.item}</td>
-              <td>${log.action}</td>
-              <td>${log.quantity}</td>
-              <td>${log.result}</td>
-              <td>${log.notes || '-'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </body>
-    </html>
-  `;
-  
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(pdfContent);
-  printWindow.document.close();
-  printWindow.focus();
-  setTimeout(() => printWindow.print(), 250);
+  inventoryLog.slice().reverse().forEach(log => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.item}</td>
+      <td>${log.action}</td>
+      <td>${log.quantity}</td>
+      <td>${log.result}</td>
+      <td>${log.notes}</td>
+    `;
+    tbody.appendChild(row);
+  });
 }
 
-function exportLotReportPDF() {
-  const reportContent = document.getElementById('lotReportContent');
-  if (!reportContent || !reportContent.innerHTML.trim()) {
-    alert('Please generate a lot report first');
-    return;
-  }
-  
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Lot Report</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 0; }
-        .lot-status.open { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; }
-        .lot-status.completed { background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 4px; }
-        .shift-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .shift-badge.day { background: #fef3c7; color: #92400e; }
-        .shift-badge.night { background: #e0e7ff; color: #3730a3; }
-        @media print { body { margin: 0; } @page { margin: 1in; } }
-      </style>
-    </head>
-    <body>
-      ${reportContent.innerHTML}
-    </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.focus();
-  setTimeout(() => printWindow.print(), 250);
-}
-
-function exportLotReportExcel() {
-  const reportType = document.getElementById('reportType') ? document.getElementById('reportType').value : 'single';
-  let selectedLotIds = [];
-  
-  if (reportType === 'single') {
-    const singleLotId = document.getElementById('reportLotSelect').value;
-    if (!singleLotId) {
-      alert('Please generate a lot report first');
-      return;
-    }
-    selectedLotIds = [singleLotId];
-  } else {
-    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
-    selectedLotIds = Array.from(checkboxes).map(cb => cb.value);
-    
-    if (selectedLotIds.length === 0) {
-      alert('Please generate a lot report first');
-      return;
-    }
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  
-  const selectedLot = lots.find(lot => lot.id === lotId);
-  const lotRecords = productionRecords.filter(record => record.lotId === lotId);
-  
-  const wb = XLSX.utils.book_new();
-  
-  // Lot Summary Sheet
-  const summaryData = [
-    ['Lot Information', ''],
-    ['Lot Number', selectedLot.lotNumber],
-    ['Brand', selectedLot.brand],
-    ['Total Containers', selectedLot.totalContainers],
-    ['Bags per Container', selectedLot.bagsPerContainer],
-    ['Kg per Bag', selectedLot.kgPerBag],
-    ['Total Raw Quantity (kg)', selectedLot.totalRawQuantity],
-    ['Status', selectedLot.status],
-    ['', ''],
-    ['Production Summary', ''],
-    ['Total Shifts', lotRecords.length],
-    ['Raw Used (kg)', lotRecords.reduce((sum, r) => sum + r.rawInputShift, 0)],
-    ['Finished (kg)', lotRecords.reduce((sum, r) => sum + r.finishedKg, 0)],
-    ['Rejects (kg)', lotRecords.reduce((sum, r) => sum + r.rejectsKg, 0)]
-  ];
-  const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(wb, summaryWs, 'Lot Summary');
-  
-  // Production Details Sheet
-  const detailsData = [
-    ['Date', 'Shift', 'Raw Input (kg)', '18-21 Size (kg)', '21-25 Size (kg)', 'Finished (kg)', 'Rejects (kg)', 'Efficiency (%)', 'Yield (%)'],
-    ...lotRecords.map(record => [
-      new Date(record.productionDate).toLocaleDateString(),
-      record.shift,
-      record.rawInputShift,
-      record.kg1821,
-      record.kg2125,
-      record.finishedKg,
-      record.rejectsKg,
-      record.efficiency,
-      record.yield
-    ])
-  ];
-  const detailsWs = XLSX.utils.aoa_to_sheet(detailsData);
-  XLSX.utils.book_append_sheet(wb, detailsWs, 'Production Details');
-  
-  XLSX.writeFile(wb, `lot_report_${selectedLot.lotNumber}_${new Date().toISOString().split('T')[0]}.xlsx`);
-}
-// Equipment & Maintenance Management Functions
+// Equipment & Maintenance management (keeping your original functions but using state)
 function updateEquipmentStatus() {
   const equipmentCode = document.getElementById('equipmentSelect').value;
   const newStatus = document.getElementById('equipmentStatus').value;
@@ -2180,7 +2002,7 @@ function updateEquipmentStatus() {
   document.getElementById('problemDescription').value = '';
   document.getElementById('maintenanceCost').value = 0;
   
-  alert('Equipment status updated successfully!');
+  window.formValidator.showToast('Equipment status updated successfully!', 'success');
   renderEquipmentGrid();
   renderMaintenanceLog();
 }
@@ -2346,7 +2168,7 @@ function exportMaintenanceReport() {
   const toDate = document.getElementById('exportToDate').value;
   
   if (!fromDate || !toDate) {
-    alert('Please select both From and To dates');
+    window.formValidator.showToast('Please select both From and To dates', 'error');
     return;
   }
   
@@ -2357,7 +2179,7 @@ function exportMaintenanceReport() {
   });
   
   if (filtered.length === 0) {
-    alert('No maintenance records found in the selected date range');
+    window.formValidator.showToast('No maintenance records found in the selected date range', 'error');
     return;
   }
   
@@ -2472,45 +2294,994 @@ function exportMaintenanceReport() {
     printWindow.print();
   }, 250);
 }
+// Add this after the submitProduction function
+function trackWastage(record) {
+  if (record.materials.bagsWasted > 0 || record.materials.boxesWasted > 0) {
+    const estimatedCost = window.appState.calculateWastageCost(
+      record.materials.bagsWasted, 
+      record.materials.boxesWasted, 
+      record.brand
+    );
+    
+    const wastageRecord = {
+      timestamp: record.timestamp,
+      lot: record.lot,
+      brand: record.brand,
+      bagsWasted: record.materials.bagsWasted,
+      boxesWasted: record.materials.boxesWasted,
+      estimatedCost: estimatedCost
+    };
+    
+    window.appState.addToArray('wastageLog', wastageRecord);
+  }
+}
 
-// Initialize on load
+// Add wastage rendering function
+function renderWastageTable(filteredData = null) {
+  const tbody = document.querySelector('#wastageTable tbody');
+  if (!tbody) return;
+  
+  const wastageData = filteredData || window.appState.getState('wastageLog') || [];
+  tbody.innerHTML = '';
+  
+  let totalBagsWasted = 0;
+  let totalBoxesWasted = 0;
+  let totalCost = 0;
+  
+  wastageData.slice().reverse().forEach(waste => {
+    totalBagsWasted += waste.bagsWasted;
+    totalBoxesWasted += waste.boxesWasted;
+    totalCost += waste.estimatedCost;
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${new Date(waste.timestamp).toLocaleDateString()}</td>
+      <td>${waste.lot}</td>
+      <td>${waste.brand}</td>
+      <td>${waste.bagsWasted}</td>
+      <td>${waste.boxesWasted}</td>
+      <td>$${waste.estimatedCost.toFixed(2)}</td>
+    `;
+    tbody.appendChild(row);
+  });
+  
+  // Add summary row
+  if (wastageData.length > 0) {
+    const summaryRow = document.createElement('tr');
+    summaryRow.style.backgroundColor = '#f8f9fa';
+    summaryRow.style.fontWeight = 'bold';
+    summaryRow.innerHTML = `
+      <td colspan="3">TOTAL</td>
+      <td>${totalBagsWasted}</td>
+      <td>${totalBoxesWasted}</td>
+      <td>$${totalCost.toFixed(2)}</td>
+    `;
+    tbody.appendChild(summaryRow);
+  }
+}
+
+function filterWastageByDate() {
+  const fromDate = document.getElementById('wastageFromDate').value;
+  const toDate = document.getElementById('wastageToDate').value;
+  
+  if (!fromDate || !toDate) {
+    window.formValidator.showToast('Please select both dates', 'error');
+    return;
+  }
+  
+  const wastageLog = window.appState.getState('wastageLog') || [];
+  const filtered = wastageLog.filter(waste => {
+    const wasteDate = new Date(waste.timestamp).toISOString().split('T')[0];
+    return wasteDate >= fromDate && wasteDate <= toDate;
+  });
+  
+  renderWastageTable(filtered);
+  
+  if (filtered.length === 0) {
+    window.formValidator.showToast('No wastage found in selected date range', 'error');
+  }
+}
+
+function showAllWastage() {
+  document.getElementById('wastageFromDate').value = '';
+  document.getElementById('wastageToDate').value = '';
+  renderWastageTable();
+}
+// ===== REPORTS FUNCTIONALITY =====
+let availableLots = [];
+let selectedLotsList = [];
+
+function loadAvailableLots() {
+  const fromDate = document.getElementById('reportFromDate').value;
+  const toDate = document.getElementById('reportToDate').value;
+  const brand = document.getElementById('reportBrand').value;
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  // Filter records based on date and brand
+  let filteredRecords = productionRecords.filter(record => {
+    let dateMatch = true;
+    let brandMatch = true;
+    
+    if (fromDate || toDate) {
+      const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+      if (fromDate && recordDate < fromDate) dateMatch = false;
+      if (toDate && recordDate > toDate) dateMatch = false;
+    }
+    
+    if (brand !== 'all' && record.brand !== brand) {
+      brandMatch = false;
+    }
+    
+    return dateMatch && brandMatch;
+  });
+  
+  // Extract unique lots
+  availableLots = [...new Set(filteredRecords.map(record => ({
+    lot: record.lot,
+    brand: record.brand,
+    date: new Date(record.timestamp).toLocaleDateString(),
+    finished: record.finishedKg,
+    rejects: record.rejectsKg
+  })))];
+  
+  renderLotOptions();
+  window.formValidator.showToast(`Found ${availableLots.length} lots`, 'success');
+}
+
+function renderLotOptions() {
+  const container = document.getElementById('lotOptions');
+  
+  if (availableLots.length === 0) {
+    container.innerHTML = '<p style="color: #666; text-align: center; padding: 1rem;">No lots found for the selected criteria</p>';
+    return;
+  }
+  
+  container.innerHTML = availableLots.map(lotData => `
+    <div class="lot-option" onclick="toggleLot('${lotData.lot}')">
+      <input type="checkbox" ${selectedLotsList.includes(lotData.lot) ? 'checked' : ''}>
+      <div>
+        <strong>${lotData.lot}</strong> - ${lotData.brand}<br>
+        <small>${lotData.date} • ${lotData.finished}kg finished • ${lotData.rejects}kg rejects</small>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterLots() {
+  const searchTerm = document.getElementById('lotSearch').value.toLowerCase();
+  const lotOptions = document.querySelectorAll('.lot-option');
+  
+  lotOptions.forEach(option => {
+    const lotText = option.textContent.toLowerCase();
+    option.style.display = lotText.includes(searchTerm) ? 'block' : 'none';
+  });
+}
+
+function toggleLot(lotNumber) {
+  if (selectedLotsList.includes(lotNumber)) {
+    selectedLotsList = selectedLotsList.filter(lot => lot !== lotNumber);
+  } else {
+    selectedLotsList.push(lotNumber);
+  }
+  
+  updateSelectedDisplay();
+  renderLotOptions(); // Re-render to update checkboxes
+}
+
+function updateSelectedDisplay() {
+  const display = document.getElementById('selectedLotsDisplay');
+  display.textContent = selectedLotsList.length > 0 ? selectedLotsList.join(', ') : 'None';
+}
+
+function generateReport() {
+  if (selectedLotsList.length === 0) {
+    window.formValidator.showToast('Please select at least one lot', 'error');
+    return;
+  }
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  const wastageLog = window.appState.getState('wastageLog') || [];
+  
+  // Filter records for selected lots
+  const selectedRecords = productionRecords.filter(record => 
+    selectedLotsList.includes(record.lot)
+  );
+  
+  const selectedWastage = wastageLog.filter(waste => 
+    selectedLotsList.includes(waste.lot)
+  );
+  
+  generateReportHTML(selectedRecords, selectedWastage);
+  
+  document.getElementById('reportPreview').style.display = 'block';
+  document.getElementById('printButton').disabled = false;
+}
+
+function generateReportHTML(records, wastageData) {
+  const reportContent = document.getElementById('reportContent');
+  
+  // Calculate comprehensive metrics
+  const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
+  const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
+  const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
+  const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
+  const totalWasteCost = wastageData.reduce((sum, w) => sum + w.estimatedCost, 0);
+  
+  // Brand analysis
+  const brandStats = {};
+  records.forEach(record => {
+    if (!brandStats[record.brand]) {
+      brandStats[record.brand] = { finished: 0, rejects: 0, count: 0 };
+    }
+    brandStats[record.brand].finished += record.finishedKg;
+    brandStats[record.brand].rejects += record.rejectsKg;
+    brandStats[record.brand].count += 1;
+  });
+
+  // Size analysis
+  const sizeStats = {
+    '18-21': records.reduce((sum, r) => sum + (r.kg1821 || 0), 0),
+    '21-25': records.reduce((sum, r) => sum + (r.kg2125 || 0), 0)
+  };
+
+  const reportHTML = `
+    <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #a32034 0%, #d5a333 100%); color: white; border-radius: 0.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="margin: 0; font-size: 2rem;">Al Jameel MES</h1>
+          <h2 style="margin: 0.5rem 0 0 0; font-size: 1.5rem; opacity: 0.9;">Pistachio Production Report</h2>
+        </div>
+        <div style="text-align: right;">
+          <p style="margin: 0.25rem 0;"><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+          <p style="margin: 0.25rem 0;"><strong>Lots Analyzed:</strong> ${selectedLotsList.length}</p>
+          <p style="margin: 0.25rem 0;"><strong>Total Records:</strong> ${records.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive Summary Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">${totalFinished.toLocaleString()}</div>
+        <div class="metric-label">Total Finished (kg)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${totalRejects.toLocaleString()}</div>
+        <div class="metric-label">Total Rejects (kg)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${avgEfficiency}%</div>
+        <div class="metric-label">Average Efficiency</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">$${totalWasteCost.toFixed(0)}</div>
+        <div class="metric-label">Total Waste Cost</div>
+      </div>
+    </div>
+
+    <!-- Professional Charts Grid -->
+    <div class="chart-grid">
+      <!-- Production Distribution Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Production Distribution</div>
+        <div class="pie-chart-container">
+          ${generatePieChart([
+            { label: 'Finished Product', value: totalFinished, color: '#22c55e' },
+            { label: 'Rejects', value: totalRejects, color: '#ef4444' }
+          ], 200)}
+        </div>
+      </div>
+
+      <!-- Brand Performance Pie Chart -->
+      <div class="chart-container">
+        <div class="chart-title">Brand Distribution</div>
+        <div class="pie-chart-container">
+          ${generatePieChart(
+            Object.entries(brandStats).map(([brand, stats], index) => ({
+              label: brand,
+              value: stats.finished,
+              color: index === 0 ? '#a32034' : '#d5a333'
+            })), 200
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Size Distribution Bar Chart -->
+    <div class="chart-container">
+      <div class="chart-title">Size Distribution Analysis</div>
+      <div class="bar-chart-container">
+        ${generateBarChart([
+          { label: '18-21 Size', value: sizeStats['18-21'], color: '#a32034' },
+          { label: '21-25 Size', value: sizeStats['21-25'], color: '#d5a333' }
+        ])}
+      </div>
+    </div>
+
+    <!-- Production Volume by Lot -->
+    <div class="chart-container">
+      <div class="chart-title">Production Volume by Lot</div>
+      <div class="bar-chart-container">
+        ${generateProductionBarChart(records)}
+      </div>
+    </div>
+
+    ${wastageData.length > 0 ? `
+      <!-- Wastage Cost Analysis -->
+      <div class="chart-container">
+        <div class="chart-title">Wastage Cost Analysis by Lot</div>
+        <div class="bar-chart-container">
+          ${generateWastageBarChart(wastageData)}
+        </div>
+      </div>
+    ` : ''}
+
+    <!-- Detailed Data Tables -->
+    <div class="chart-container">
+      <div class="chart-title">Detailed Production Records</div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+          <thead>
+            <tr style="background: var(--primary); color: white;">
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">18-21 kg</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">21-25 kg</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Rejects</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Efficiency</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${records.map(record => `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg1821 || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg2125 || 0).toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;"><strong>${record.finishedKg.toLocaleString()}</strong></td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${record.rejectsKg.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600;">${record.efficiency}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    ${wastageData.length > 0 ? `
+      <div class="chart-container">
+        <div class="chart-title">Wastage Details</div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+              <tr style="background: #dc3545; color: white;">
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Bags Wasted</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Boxes Wasted</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Est. Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${wastageData.map(waste => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(waste.timestamp).toLocaleDateString()}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.lot}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.brand}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${waste.bagsWasted}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${waste.boxesWasted}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600; color: #dc3545;">$${waste.estimatedCost.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ` : ''}
+
+    <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; text-align: center; border-top: 3px solid var(--primary);">
+      <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Pistachio Production Management System</p>
+      <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()} | Confidential Report</p>
+    </div>
+  `;
+  
+  reportContent.innerHTML = reportHTML;
+}
+  // Professional Chart Generation Functions
+
+function generatePieChart(data, size = 200) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  const radius = size / 2 - 10;
+  const centerX = size / 2;
+  const centerY = size / 2;
+  
+  let currentAngle = -90; // Start at top
+  let paths = '';
+  let legends = '';
+  
+  data.forEach((item, index) => {
+    if (item.value > 0) {
+      const percentage = (item.value / total) * 100;
+      const angle = (item.value / total) * 360;
+      const endAngle = currentAngle + angle;
+      
+      // Calculate path for pie slice
+      const startAngleRad = (currentAngle * Math.PI) / 180;
+      const endAngleRad = (endAngle * Math.PI) / 180;
+      
+      const x1 = centerX + radius * Math.cos(startAngleRad);
+      const y1 = centerY + radius * Math.sin(startAngleRad);
+      const x2 = centerX + radius * Math.cos(endAngleRad);
+      const y2 = centerY + radius * Math.sin(endAngleRad);
+      
+      const largeArcFlag = angle > 180 ? 1 : 0;
+      
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        'Z'
+      ].join(' ');
+      
+      paths += `<path d="${pathData}" fill="${item.color}" stroke="#fff" stroke-width="2" opacity="0.9"/>`;
+      
+      legends += `
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${item.color};"></div>
+          <span>${item.label}: ${item.value.toLocaleString()} (${percentage.toFixed(1)}%)</span>
+        </div>
+      `;
+      
+      currentAngle = endAngle;
+    }
+  });
+  
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="margin: 0 auto; display: block;">
+      ${paths}
+    </svg>
+    <div class="chart-legend">${legends}</div>
+  `;
+}
+
+function generateBarChart(data) {
+  if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
+  
+  const maxValue = Math.max(...data.map(item => item.value));
+  if (maxValue === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  return data.map(item => {
+    const percentage = (item.value / maxValue) * 100;
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${item.label}</span>
+          <span style="font-weight: 700; color: ${item.color};">${item.value.toLocaleString()}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: ${item.color}; width: ${percentage}%;">
+            ${percentage > 20 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function generateProductionBarChart(records) {
+  if (!records || records.length === 0) return '<div class="chart-placeholder">No production data available</div>';
+  
+  const maxValue = Math.max(...records.map(r => r.finishedKg));
+  if (maxValue === 0) return '<div class="chart-placeholder">No production data to display</div>';
+  
+  // Sort records by production volume for better visualization
+  const sortedRecords = [...records].sort((a, b) => b.finishedKg - a.finishedKg);
+  
+  return sortedRecords.map((record, index) => {
+    const percentage = (record.finishedKg / maxValue) * 100;
+    const color = getGradientColor(index, sortedRecords.length);
+    
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${record.lot}</span>
+          <span style="font-weight: 700; color: ${color};">${record.finishedKg.toLocaleString()} kg</span>
+        </div>
+        <div class="bar-label" style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">
+          <span>${record.brand} • ${new Date(record.timestamp).toLocaleDateString()}</span>
+          <span>Efficiency: ${record.efficiency}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: linear-gradient(90deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%); width: ${percentage}%;">
+            ${percentage > 15 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function generateWastageBarChart(wastageData) {
+  if (!wastageData || wastageData.length === 0) return '<div class="chart-placeholder">No wastage data available</div>';
+  
+  const maxValue = Math.max(...wastageData.map(w => w.estimatedCost));
+  if (maxValue === 0) return '<div class="chart-placeholder">No wastage data to display</div>';
+  
+  // Sort by cost for better visualization
+  const sortedWastage = [...wastageData].sort((a, b) => b.estimatedCost - a.estimatedCost);
+  
+  return sortedWastage.map((waste, index) => {
+    const percentage = (waste.estimatedCost / maxValue) * 100;
+    const color = getRedGradientColor(index, sortedWastage.length);
+    
+    return `
+      <div class="bar-item">
+        <div class="bar-label">
+          <span style="font-weight: 600;">${waste.lot}</span>
+          <span style="font-weight: 700; color: ${color};">$${waste.estimatedCost.toFixed(2)}</span>
+        </div>
+        <div class="bar-label" style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">
+          <span>${waste.brand} • ${new Date(waste.timestamp).toLocaleDateString()}</span>
+          <span>Bags: ${waste.bagsWasted} • Boxes: ${waste.boxesWasted}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background: linear-gradient(90deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%); width: ${percentage}%;">
+            ${percentage > 15 ? `${percentage.toFixed(1)}%` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Helper function to generate gradient colors for bars
+function getGradientColor(index, total) {
+  const colors = ['#a32034', '#d5a333', '#22c55e', '#3b82f6', '#8b5cf6', '#f59e0b'];
+  return colors[index % colors.length];
+}
+
+// Helper function to generate red gradient colors for wastage
+function getRedGradientColor(index, total) {
+  const colors = ['#dc3545', '#fd7e14', '#ffc107', '#e74c3c', '#c0392b'];
+  return colors[index % colors.length];
+}
+
+// Helper function to adjust color brightness
+function adjustBrightness(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+    (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+    (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+}
+function generateProductionChart(records) {
+  if (records.length === 0) return '<div class="chart-placeholder">No production data available</div>';
+  
+  // Simple horizontal bar chart using CSS
+  const maxValue = Math.max(...records.map(r => r.finishedKg));
+  
+  return `
+    <div style="padding: 1rem;">
+      ${records.map(record => {
+        const percentage = (record.finishedKg / maxValue) * 100;
+        return `
+          <div style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <span><strong>${record.lot}</strong></span>
+              <span>${record.finishedKg} kg</span>
+            </div>
+            <div style="background: #e9ecef; height: 20px; border-radius: 10px; overflow: hidden;">
+              <div style="background: var(--primary); height: 100%; width: ${percentage}%; border-radius: 10px;"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function generateWastageChart(wastageData) {
+  if (wastageData.length === 0) return '<div class="chart-placeholder">No wastage data available</div>';
+  
+  const maxValue = Math.max(...wastageData.map(w => w.estimatedCost));
+  
+  return `
+    <div style="padding: 1rem;">
+      ${wastageData.map(waste => {
+        const percentage = (waste.estimatedCost / maxValue) * 100;
+        return `
+          <div style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <span><strong>${waste.lot}</strong></span>
+              <span>$${waste.estimatedCost.toFixed(2)}</span>
+            </div>
+            <div style="background: #e9ecef; height: 20px; border-radius: 10px; overflow: hidden;">
+              <div style="background: #dc3545; height: 100%; width: ${percentage}%; border-radius: 10px;"></div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function printReport() {
+  window.print();
+}
+
+// Initialize report dates
+function initializeReportDates() {
+  const today = new Date();
+  const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+  
+  document.getElementById('reportToDate').value = today.toISOString().split('T')[0];
+  document.getElementById('reportFromDate').value = monthAgo.toISOString().split('T')[0];
+}
+
+// ===== ITEM PRICES MANAGEMENT =====
+
+function showAdminControls() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser === 'admin') {
+    document.getElementById('itemPricesBtn').style.display = 'block';
+  } else {
+    document.getElementById('itemPricesBtn').style.display = 'none';
+  }
+}
+
+function renderItemPricesTable() {
+  const tbody = document.querySelector('#itemPricesTable tbody');
+  if (!tbody) return;
+  
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  tbody.innerHTML = '';
+  
+  itemPrices.forEach(item => {
+    const row = document.createElement('tr');
+    const statusColor = item.status === 'active' ? '#22c55e' : '#6b7280';
+    
+    row.innerHTML = `
+      <td><strong>${item.name}</strong></td>
+      <td>${item.unit}</td>
+      <td>$${item.price.toFixed(2)}</td>
+      <td style="color: ${statusColor}; font-weight: bold;">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</td>
+      <td>${new Date(item.lastUpdated).toLocaleDateString()}</td>
+      <td>${item.updatedBy}</td>
+      <td>
+        <button onclick="editItemPrice('${item.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</button>
+        <button onclick="toggleItemStatus('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" class="btn-secondary">
+          ${item.status === 'active' ? 'Deactivate' : 'Activate'}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+  
+  updateAuditFilterOptions();
+}
+
+function editItemPrice(itemId) {
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    document.getElementById('editItemId').value = itemId;
+    document.getElementById('itemName').value = item.name;
+    document.getElementById('itemUnit').value = item.unit;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemStatus').value = item.status;
+    
+    document.getElementById('itemFormTitle').textContent = 'Edit Item Price';
+    document.getElementById('saveItemBtn').textContent = 'Update Item';
+    
+    document.getElementById('itemPriceForm').scrollIntoView({behavior: 'smooth'});
+  }
+}
+
+function cancelItemEdit() {
+  document.getElementById('itemPriceForm').reset();
+  document.getElementById('editItemId').value = '';
+  document.getElementById('itemFormTitle').textContent = 'Add New Item';
+  document.getElementById('saveItemBtn').textContent = 'Add Item';
+}
+
+function saveItemPrice(event) {
+  event.preventDefault();
+  
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const itemId = document.getElementById('editItemId').value;
+  const itemData = {
+    name: document.getElementById('itemName').value,
+    unit: document.getElementById('itemUnit').value,
+    price: parseFloat(document.getElementById('itemPrice').value),
+    status: document.getElementById('itemStatus').value
+  };
+  
+  if (itemId) {
+    const success = window.appState.updateItemPrice(itemId, itemData.price, currentUser, 'Manual price update');
+    
+    if (success) {
+      const itemPrices = window.appState.getState('itemPrices');
+      const item = itemPrices.find(item => item.id === itemId);
+      if (item) {
+        item.name = itemData.name;
+        item.unit = itemData.unit;
+        item.status = itemData.status;
+        item.lastUpdated = new Date().toISOString();
+        item.updatedBy = currentUser;
+        window.appState.setState('itemPrices', itemPrices);
+      }
+      
+      window.formValidator.showToast('Item updated successfully!', 'success');
+    } else {
+      window.formValidator.showToast('Failed to update item', 'error');
+    }
+  } else {
+    const newItemId = window.appState.addNewItem(itemData, currentUser);
+    if (newItemId) {
+      window.formValidator.showToast('New item added successfully!', 'success');
+    } else {
+      window.formValidator.showToast('Failed to add item', 'error');
+    }
+  }
+  
+  cancelItemEdit();
+  renderItemPricesTable();
+  renderPriceAuditTable();
+}
+
+function toggleItemStatus(itemId) {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const itemPrices = window.appState.getState('itemPrices');
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    const oldStatus = item.status;
+    item.status = item.status === 'active' ? 'inactive' : 'active';
+    item.lastUpdated = new Date().toISOString();
+    item.updatedBy = currentUser;
+    
+    window.appState.addToArray('priceAuditLog', {
+      timestamp: new Date().toISOString(),
+      itemId: itemId,
+      itemName: item.name,
+      action: 'status_change',
+      oldPrice: item.price,
+      newPrice: item.price,
+      change: 0,
+      changePercent: 0,
+      updatedBy: currentUser,
+      notes: `Status changed from ${oldStatus} to ${item.status}`
+    });
+    
+    window.appState.setState('itemPrices', itemPrices);
+    window.formValidator.showToast(`Item ${item.status === 'active' ? 'activated' : 'deactivated'}!`, 'success');
+    renderItemPricesTable();
+    renderPriceAuditTable();
+  }
+}
+
+function applyBulkUpdate() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const updateType = document.getElementById('bulkUpdateType').value;
+  const amount = parseFloat(document.getElementById('bulkUpdateAmount').value);
+  const filter = document.getElementById('bulkUpdateFilter').value;
+  
+  if (!amount || amount === 0) {
+    window.formValidator.showToast('Please enter a valid update amount', 'error');
+    return;
+  }
+  
+  const itemPrices = window.appState.getState('itemPrices');
+  let itemsToUpdate = itemPrices.filter(item => item.status === 'active');
+  
+  let updatedCount = 0;
+  
+  itemsToUpdate.forEach(item => {
+    const oldPrice = item.price;
+    let newPrice;
+    
+    if (updateType === 'percentage') {
+      newPrice = oldPrice * (1 + (amount / 100));
+    } else {
+      newPrice = oldPrice + amount;
+    }
+    
+    newPrice = Math.max(0, Math.round(newPrice * 100) / 100);
+    
+    if (newPrice !== oldPrice) {
+      item.price = newPrice;
+      item.lastUpdated = new Date().toISOString();
+      item.updatedBy = currentUser;
+      
+      window.appState.addToArray('priceAuditLog', {
+        timestamp: new Date().toISOString(),
+        itemId: item.id,
+        itemName: item.name,
+        action: 'bulk_update',
+        oldPrice: oldPrice,
+        newPrice: newPrice,
+        change: newPrice - oldPrice,
+        changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
+        updatedBy: currentUser,
+        notes: `Bulk ${updateType} update: ${amount > 0 ? '+' : ''}${amount}${updateType === 'percentage' ? '%' : '$'}`
+      });
+      
+      updatedCount++;
+    }
+  });
+  
+  window.appState.setState('itemPrices', itemPrices);
+  window.formValidator.showToast(`Bulk update applied to ${updatedCount} items!`, 'success');
+  
+  document.getElementById('bulkUpdateAmount').value = '';
+  
+  renderItemPricesTable();
+  renderPriceAuditTable();
+}
+
+function updateAuditFilterOptions() {
+  const select = document.getElementById('auditFilterItem');
+  if (!select) return;
+  
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  
+  select.innerHTML = '<option value="all">All Items</option>';
+  itemPrices.forEach(item => {
+    select.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+  });
+}
+
+function filterAuditHistory() {
+  const itemFilter = document.getElementById('auditFilterItem').value;
+  const fromDate = document.getElementById('auditFromDate').value;
+  const toDate = document.getElementById('auditToDate').value;
+  
+  const auditLog = window.appState.getState('priceAuditLog') || [];
+  let filteredLog = [...auditLog];
+  
+  if (itemFilter !== 'all') {
+    filteredLog = filteredLog.filter(log => log.itemId === itemFilter);
+  }
+  
+  if (fromDate) {
+    filteredLog = filteredLog.filter(log => {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      return logDate >= fromDate;
+    });
+  }
+  
+  if (toDate) {
+    filteredLog = filteredLog.filter(log => {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      return logDate <= toDate;
+    });
+  }
+  
+  renderPriceAuditTable(filteredLog);
+}
+
+function renderPriceAuditTable(filteredData = null) {
+  const tbody = document.querySelector('#priceAuditTable tbody');
+  if (!tbody) return;
+  
+  const auditData = filteredData || window.appState.getState('priceAuditLog') || [];
+  tbody.innerHTML = '';
+  
+  auditData.slice().reverse().forEach(log => {
+    const row = document.createElement('tr');
+    const changeColor = log.change > 0 ? '#22c55e' : log.change < 0 ? '#ef4444' : '#6b7280';
+    
+    row.innerHTML = `
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.itemName}</td>
+      <td style="text-transform: capitalize;">${log.action.replace('_', ' ')}</td>
+      <td>$${log.oldPrice.toFixed(2)}</td>
+      <td>$${log.newPrice.toFixed(2)}</td>
+      <td style="color: ${changeColor}; font-weight: bold;">
+        ${log.change > 0 ? '+' : ''}${log.change.toFixed(2)} 
+        ${log.changePercent != 0 ? `(${log.changePercent > 0 ? '+' : ''}${log.changePercent}%)` : ''}
+      </td>
+      <td>${log.updatedBy}</td>
+      <td>${log.notes}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+// Initialize
+// Initialize
 window.addEventListener('load', () => {
-  calculateLotTotals();
-  updateProductionSummary();
-  
-  // Set today's date
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('productionDate').value = today;
-  
-  updateDashboard();
-  renderLots();
-  renderRecords();
+  setupProductionValidation();
+  updateFormVisibility();
+  updateSummary();
   renderInventory();
   renderEquipmentGrid();
   renderMaintenanceLog();
-  updateProductionLotDropdown();
-  updateReportsLotDropdown();
+  renderWastageTable();
+  initializeReportDates();
+  
+  renderItemPricesTable();
+  renderPriceAuditTable();
+  
+  const today = new Date();
+  const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+  
+  document.getElementById('exportToDate').value = today.toISOString().split('T')[0];
+  document.getElementById('exportFromDate').value = monthAgo.toISOString().split('T')[0];
+  
+  if (document.getElementById('auditToDate')) {
+    document.getElementById('auditToDate').value = today.toISOString().split('T')[0];
+    document.getElementById('auditFromDate').value = monthAgo.toISOString().split('T')[0];
+  }
+  
+  window.appState.subscribe('itemPrices', () => {
+    renderItemPricesTable();
+    updateAuditFilterOptions();
+  });
+  
+  window.appState.subscribe('priceAuditLog', () => {
+    renderPriceAuditTable();
+  });
+  
+  showAdminControls();
 });
 </script>
-
-<style>
-@media print {
-  body * { visibility: hidden; }
-  .report-content, .report-content * { visibility: visible; }
-  .report-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    background: white !important;
+<script>
+// Hide any accidentally visible JavaScript text
+document.addEventListener('DOMContentLoaded', function() {
+  // Remove any text nodes that contain JavaScript code
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  
+  let node;
+  const nodesToRemove = [];
+  
+  while (node = walker.nextNode()) {
+    if (node.textContent.includes('document.addEventListener') || 
+        node.textContent.includes('Enhanced back link handling')) {
+      nodesToRemove.push(node.parentElement);
+    }
   }
-  .header, .nav-buttons, .container > *:not(.section), 
-  .section:not(#reports), #lotReportPreview button {
-    display: none !important;
-  }
-  @page { margin: 1in; size: A4; }
-}
-</style>
-
+  
+  nodesToRemove.forEach(element => {
+    if (element && element.remove) {
+      element.remove();
+    }
+  });
+});
+</script>
 </body>
 </html>
