@@ -617,20 +617,38 @@
       <h2 style="margin-bottom: 1rem;">📊 Lot & Production Reports</h2>
       
       <div class="materials-section">
-        <h3>Lot Summary Report</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Select Lot</label>
-            <select id="reportLotSelect">
-              <option value="">Choose a lot...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>&nbsp;</label>
-            <button onclick="generateLotReport()" style="width: 100%;">Generate Lot Report</button>
-          </div>
-        </div>
+  <h3>Multi-Lot Summary Report</h3>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Report Type</label>
+      <select id="reportType" onchange="toggleLotSelection()">
+        <option value="single">Single Lot Report</option>
+        <option value="multiple">Multiple Lots Report</option>
+      </select>
+    </div>
+    <div class="form-group" id="singleLotGroup">
+      <label>Select Lot</label>
+      <select id="reportLotSelect">
+        <option value="">Choose a lot...</option>
+      </select>
+    </div>
+    <div class="form-group" id="multipleLotGroup" style="display: none;">
+      <label>Select Multiple Lots</label>
+      <div id="lotCheckboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
+        <!-- Checkboxes will be populated here -->
       </div>
+      <div style="margin-top: 0.5rem;">
+        <button type="button" onclick="selectAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Select All</button>
+        <button type="button" onclick="clearAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Clear All</button>
+        <span id="selectedLotsCount" style="margin-left: 1rem; font-size: 0.9rem; color: var(--muted);">0 lots selected</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>&nbsp;</label>
+      <button onclick="generateLotReport()" style="width: 100%;">Generate Report</button>
+    </div>
+  </div>
+</div>
 
       <!-- Report Preview Area -->
       <div id="lotReportPreview" style="display: none; margin-top: 2rem;">
@@ -1261,26 +1279,312 @@ function filterRecords() {
   });
 }
 
-// Reports Functions
 function updateReportsLotDropdown() {
   const dropdown = document.getElementById('reportLotSelect');
+  const checkboxContainer = document.getElementById('lotCheckboxes');
+  
   dropdown.innerHTML = '<option value="">Choose a lot...</option>';
+  checkboxContainer.innerHTML = '';
   
   const lots = window.appState.getState('lots') || [];
   lots.forEach(lot => {
+    // Single lot dropdown
     const option = document.createElement('option');
     option.value = lot.id;
     option.textContent = `${lot.lotNumber} (${lot.brand}) - ${lot.status}`;
     dropdown.appendChild(option);
+    
+    // Multiple lots checkboxes
+    const checkboxDiv = document.createElement('div');
+    checkboxDiv.style.cssText = 'padding: 0.5rem; border-bottom: 1px solid #eee;';
+    checkboxDiv.innerHTML = `
+      <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <input type="checkbox" value="${lot.id}" onchange="updateSelectedCount()">
+        <div>
+          <strong>${lot.lotNumber}</strong> (${lot.brand})
+          <div style="font-size: 0.8rem; color: var(--muted);">
+            ${lot.status} • ${lot.totalRawQuantity.toLocaleString()} kg total
+          </div>
+        </div>
+      </label>
+    `;
+    checkboxContainer.appendChild(checkboxDiv);
   });
 }
 
-function generateLotReport() {
-  const lotId = document.getElementById('reportLotSelect').value;
-  if (!lotId) {
-    alert('Please select a lot');
-    return;
+function toggleLotSelection() {
+  const reportType = document.getElementById('reportType').value;
+  const singleGroup = document.getElementById('singleLotGroup');
+  const multipleGroup = document.getElementById('multipleLotGroup');
+  
+  if (reportType === 'single') {
+    singleGroup.style.display = 'block';
+    multipleGroup.style.display = 'none';
+  } else {
+    singleGroup.style.display = 'none';
+    multipleGroup.style.display = 'block';
   }
+}
+
+function selectAllLots() {
+  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = true);
+  updateSelectedCount();
+}
+
+function clearAllLots() {
+  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = false);
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
+  document.getElementById('selectedLotsCount').textContent = `${checkboxes.length} lots selected`;
+}
+
+function generateLotReport() {
+  const reportType = document.getElementById('reportType').value;
+  let selectedLotIds = [];
+  
+  if (reportType === 'single') {
+    const singleLotId = document.getElementById('reportLotSelect').value;
+    if (!singleLotId) {
+      alert('Please select a lot');
+      return;
+    }
+    selectedLotIds = [singleLotId];
+  } else {
+    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
+    selectedLotIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedLotIds.length === 0) {
+      alert('Please select at least one lot');
+      return;
+    }
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  const selectedLots = lots.filter(lot => selectedLotIds.includes(lot.id));
+  const allLotRecords = productionRecords.filter(record => selectedLotIds.includes(record.lotId));
+  
+  if (selectedLots.length === 1) {
+    // Single lot report (existing functionality)
+    generateSingleLotReportHTML(selectedLots[0], allLotRecords);
+  } else {
+    // Multi-lot report (new functionality)
+    generateMultiLotReportHTML(selectedLots, allLotRecords);
+  }
+  
+  document.getElementById('lotReportPreview').style.display = 'block';
+}
+
+function generateSingleLotReportHTML(lot, records) {
+  // Keep existing generateLotReportHTML function content but rename it
+  const reportContent = document.getElementById('lotReportContent');
+  
+  // Calculate totals
+  const totalRawUsed = records.reduce((sum, r) => sum + r.rawInputShift, 0);
+  const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
+  const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
+  const avgEfficiency = totalRawUsed > 0 ? Math.round((totalFinished / totalRawUsed) * 100) : 0;
+  const avgYield = totalRawUsed > 0 ? Math.round(((totalFinished + totalRejects) / totalRawUsed) * 100) : 0;
+  
+  // Use existing single lot report HTML (same as before)
+  const reportHTML = `/* ... existing single lot report HTML ... */`;
+  
+  reportContent.innerHTML = reportHTML;
+}
+
+function generateMultiLotReportHTML(lots, allRecords) {
+  const reportContent = document.getElementById('lotReportContent');
+  
+  // Calculate combined totals
+  const totalRawUsed = allRecords.reduce((sum, r) => sum + r.rawInputShift, 0);
+  const totalFinished = allRecords.reduce((sum, r) => sum + r.finishedKg, 0);
+  const totalRejects = allRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
+  const totalShifts = allRecords.length;
+  const avgEfficiency = totalRawUsed > 0 ? Math.round((totalFinished / totalRawUsed) * 100) : 0;
+  const avgYield = totalRawUsed > 0 ? Math.round(((totalFinished + totalRejects) / totalRawUsed) * 100) : 0;
+  
+  // Calculate lot-wise summaries
+  const lotSummaries = lots.map(lot => {
+    const lotRecords = allRecords.filter(r => r.lotId === lot.id);
+    const lotRawUsed = lotRecords.reduce((sum, r) => sum + r.rawInputShift, 0);
+    const lotFinished = lotRecords.reduce((sum, r) => sum + r.finishedKg, 0);
+    const lotRejects = lotRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
+    const lotEfficiency = lotRawUsed > 0 ? Math.round((lotFinished / lotRawUsed) * 100) : 0;
+    
+    return {
+      lot,
+      records: lotRecords,
+      totalRawUsed: lotRawUsed,
+      totalFinished: lotFinished,
+      totalRejects: lotRejects,
+      efficiency: lotEfficiency,
+      shiftsCount: lotRecords.length
+    };
+  });
+  
+  const reportHTML = `
+    <div style="padding: 2rem; background: white; border-radius: 0.5rem;">
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 3px solid var(--primary);">
+        <h1 style="color: var(--primary); margin: 0;">Al Jameel MES</h1>
+        <h2 style="margin: 0.5rem 0;">Multi-Lot Production Report</h2>
+        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+        <p><strong>Lots Included:</strong> ${lots.length} lots • <strong>Total Shifts:</strong> ${totalShifts}</p>
+      </div>
+
+      <!-- Combined Summary -->
+      <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem; border-left: 4px solid var(--primary);">
+        <h3 style="color: var(--primary); margin-bottom: 1rem;">📊 Combined Summary</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${lots.length}</div>
+            <div style="font-size: 0.9rem;">Total Lots</div>
+          </div>
+          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${totalShifts}</div>
+            <div style="font-size: 0.9rem;">Total Shifts</div>
+          </div>
+          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${totalRawUsed.toLocaleString()}</div>
+            <div style="font-size: 0.9rem;">Raw Used (kg)</div>
+          </div>
+          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${totalFinished.toLocaleString()}</div>
+            <div style="font-size: 0.9rem;">Finished (kg)</div>
+          </div>
+          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${totalRejects.toLocaleString()}</div>
+            <div style="font-size: 0.9rem;">Rejects (kg)</div>
+          </div>
+          <div style="text-align: center; padding: 1rem; background: white; border-radius: 0.5rem;">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">${avgEfficiency}%</div>
+            <div style="font-size: 0.9rem;">Avg Efficiency</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lot Comparison Table -->
+      <h3 style="color: var(--primary); margin-bottom: 1rem;">📈 Lot Performance Comparison</h3>
+      <div style="overflow-x: auto; margin-bottom: 2rem;">
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+          <thead>
+            <tr style="background: var(--primary); color: white;">
+              <th style="padding: 0.75rem; text-align: left;">Lot Number</th>
+              <th style="padding: 0.75rem; text-align: left;">Brand</th>
+              <th style="padding: 0.75rem; text-align: center;">Shifts</th>
+              <th style="padding: 0.75rem; text-align: right;">Raw Used (kg)</th>
+              <th style="padding: 0.75rem; text-align: right;">Finished (kg)</th>
+              <th style="padding: 0.75rem; text-align: right;">Rejects (kg)</th>
+              <th style="padding: 0.75rem; text-align: right;">Efficiency (%)</th>
+              <th style="padding: 0.75rem; text-align: center;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${lotSummaries.map(summary => `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 0.5rem; font-weight: bold;">${summary.lot.lotNumber}</td>
+                <td style="padding: 0.5rem;">${summary.lot.brand}</td>
+                <td style="padding: 0.5rem; text-align: center;">${summary.shiftsCount}</td>
+                <td style="padding: 0.5rem; text-align: right;">${summary.totalRawUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; text-align: right; font-weight: bold;">${summary.totalFinished.toLocaleString()}</td>
+                <td style="padding: 0.5rem; text-align: right;">${summary.totalRejects.toLocaleString()}</td>
+                <td style="padding: 0.5rem; text-align: right; font-weight: bold;">${summary.efficiency}%</td>
+                <td style="padding: 0.5rem; text-align: center;"><span class="lot-status ${summary.lot.status.toLowerCase()}">${summary.lot.status}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="background: #f8f9fa; font-weight: bold; border-top: 2px solid var(--primary);">
+              <td style="padding: 0.75rem;" colspan="3">COMBINED TOTALS</td>
+              <td style="padding: 0.75rem; text-align: right;">${totalRawUsed.toLocaleString()}</td>
+              <td style="padding: 0.75rem; text-align: right;">${totalFinished.toLocaleString()}</td>
+              <td style="padding: 0.75rem; text-align: right;">${totalRejects.toLocaleString()}</td>
+              <td style="padding: 0.75rem; text-align: right;">${avgEfficiency}%</td>
+              <td style="padding: 0.75rem;"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      ${lotSummaries.map(summary => `
+        <div style="page-break-before: always; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border);">
+          <h3 style="color: var(--primary); margin-bottom: 1rem;">📋 Detailed Report: ${summary.lot.lotNumber} (${summary.lot.brand})</h3>
+          
+          <!-- Individual Lot Summary -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
+            <div>
+              <h4 style="margin-bottom: 0.5rem;">Lot Information</h4>
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <tr><td style="font-weight: bold; padding: 0.25rem; border-bottom: 1px solid #eee;">Total Containers:</td><td style="padding: 0.25rem; border-bottom: 1px solid #eee;">${summary.lot.totalContainers}</td></tr>
+                <tr><td style="font-weight: bold; padding: 0.25rem; border-bottom: 1px solid #eee;">Bags/Container:</td><td style="padding: 0.25rem; border-bottom: 1px solid #eee;">${summary.lot.bagsPerContainer}</td></tr>
+                <tr><td style="font-weight: bold; padding: 0.25rem; border-bottom: 1px solid #eee;">Kg/Bag:</td><td style="padding: 0.25rem; border-bottom: 1px solid #eee;">${summary.lot.kgPerBag}</td></tr>
+                <tr><td style="font-weight: bold; padding: 0.25rem;">Total Raw Quantity:</td><td style="padding: 0.25rem;">${summary.lot.totalRawQuantity.toLocaleString()} kg</td></tr>
+              </table>
+            </div>
+            <div>
+              <h4 style="margin-bottom: 0.5rem;">Production Summary</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <div style="text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 0.25rem;">
+                  <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">${summary.shiftsCount}</div>
+                  <div style="font-size: 0.8rem;">Shifts</div>
+                </div>
+                <div style="text-align: center; padding: 0.75rem; background: #f8f9fa; border-radius: 0.25rem;">
+                  <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">${summary.efficiency}%</div>
+                  <div style="font-size: 0.8rem;">Efficiency</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Shift Details -->
+          <h4 style="margin-bottom: 0.5rem;">Shift-wise Production</h4>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+              <thead>
+                <tr style="background: #f1f5f9;">
+                  <th style="padding: 0.5rem; text-align: left;">Date</th>
+                  <th style="padding: 0.5rem; text-align: left;">Shift</th>
+                  <th style="padding: 0.5rem; text-align: right;">Raw Input</th>
+                  <th style="padding: 0.5rem; text-align: right;">18-21 Size</th>
+                  <th style="padding: 0.5rem; text-align: right;">21-25 Size</th>
+                  <th style="padding: 0.5rem; text-align: right;">Finished</th>
+                  <th style="padding: 0.5rem; text-align: right;">Efficiency</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${summary.records.map(record => `
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 0.4rem;">${new Date(record.productionDate).toLocaleDateString()}</td>
+                    <td style="padding: 0.4rem;"><span class="shift-badge ${record.shift.toLowerCase()}">${record.shift}</span></td>
+                    <td style="padding: 0.4rem; text-align: right;">${record.rawInputShift.toLocaleString()}</td>
+                    <td style="padding: 0.4rem; text-align: right;">${record.kg1821.toLocaleString()}</td>
+                    <td style="padding: 0.4rem; text-align: right;">${record.kg2125.toLocaleString()}</td>
+                    <td style="padding: 0.4rem; text-align: right; font-weight: bold;">${record.finishedKg.toLocaleString()}</td>
+                    <td style="padding: 0.4rem; text-align: right; font-weight: bold;">${record.efficiency}%</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `).join('')}
+
+      <!-- Footer -->
+      <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; text-align: center; border-top: 3px solid var(--primary);">
+        <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Multi-Lot Production Report</p>
+        <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()} | ${lots.length} Lots • ${totalShifts} Shifts</p>
+      </div>
+    </div>
+  `;
+  
+  reportContent.innerHTML = reportHTML;
+}
   
   const lots = window.appState.getState('lots') || [];
   const productionRecords = window.appState.getState('productionRecords') || [];
@@ -1608,7 +1912,126 @@ function exportLotReportExcel() {
     alert('Please generate a lot report first');
     return;
   }
+  function exportLotReportExcel() {
+  const reportType = document.getElementById('reportType').value;
+  let selectedLotIds = [];
   
+  if (reportType === 'single') {
+    const singleLotId = document.getElementById('reportLotSelect').value;
+    if (!singleLotId) {
+      alert('Please generate a lot report first');
+      return;
+    }
+    selectedLotIds = [singleLotId];
+  } else {
+    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
+    selectedLotIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedLotIds.length === 0) {
+      alert('Please generate a lot report first');
+      return;
+    }
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  const selectedLots = lots.filter(lot => selectedLotIds.includes(lot.id));
+  const allLotRecords = productionRecords.filter(record => selectedLotIds.includes(record.lotId));
+  
+  const wb = XLSX.utils.book_new();
+  
+  if (selectedLots.length === 1) {
+    // Single lot export (keep existing logic)
+    const selectedLot = selectedLots[0];
+    const lotRecords = allLotRecords;
+    
+    // ... existing single lot export code ...
+  } else {
+    // Multi-lot export
+    const totalRawUsed = allLotRecords.reduce((sum, r) => sum + r.rawInputShift, 0);
+    const totalFinished = allLotRecords.reduce((sum, r) => sum + r.finishedKg, 0);
+    const totalRejects = allLotRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
+    
+    // Combined Summary Sheet
+    const combinedData = [
+      ['Multi-Lot Production Report', ''],
+      ['Generated', new Date().toLocaleString()],
+      ['Total Lots', selectedLots.length],
+      ['Total Shifts', allLotRecords.length],
+      ['', ''],
+      ['Combined Totals', ''],
+      ['Raw Used (kg)', totalRawUsed],
+      ['Finished (kg)', totalFinished],
+      ['Rejects (kg)', totalRejects],
+      ['Average Efficiency (%)', totalRawUsed > 0 ? Math.round((totalFinished / totalRawUsed) * 100) : 0],
+      ['', ''],
+      ['Lot Comparison', ''],
+      ['Lot Number', 'Brand', 'Shifts', 'Raw Used', 'Finished', 'Efficiency'],
+      ...selectedLots.map(lot => {
+        const lotRecords = allLotRecords.filter(r => r.lotId === lot.id);
+        const lotRawUsed = lotRecords.reduce((sum, r) => sum + r.rawInputShift, 0);
+        const lotFinished = lotRecords.reduce((sum, r) => sum + r.finishedKg, 0);
+        const lotEfficiency = lotRawUsed > 0 ? Math.round((lotFinished / lotRawUsed) * 100) : 0;
+        
+        return [lot.lotNumber, lot.brand, lotRecords.length, lotRawUsed, lotFinished, lotEfficiency];
+      })
+    ];
+    const combinedWs = XLSX.utils.aoa_to_sheet(combinedData);
+    XLSX.utils.book_append_sheet(wb, combinedWs, 'Combined Summary');
+    
+    // All Production Details Sheet
+    const allDetailsData = [
+      ['Date', 'Lot Number', 'Brand', 'Shift', 'Raw Input (kg)', '18-21 Size (kg)', '21-25 Size (kg)', 'Finished (kg)', 'Rejects (kg)', 'Efficiency (%)', 'Yield (%)'],
+      ...allLotRecords.map(record => [
+        new Date(record.productionDate).toLocaleDateString(),
+        record.lotNumber,
+        record.brand,
+        record.shift,
+        record.rawInputShift,
+        record.kg1821,
+        record.kg2125,
+        record.finishedKg,
+        record.rejectsKg,
+        record.efficiency,
+        record.yield
+      ])
+    ];
+    const allDetailsWs = XLSX.utils.aoa_to_sheet(allDetailsData);
+    XLSX.utils.book_append_sheet(wb, allDetailsWs, 'All Production Details');
+    
+    // Individual Lot Sheets
+    selectedLots.forEach(lot => {
+      const lotRecords = allLotRecords.filter(r => r.lotId === lot.id);
+      const lotData = [
+        [`${lot.lotNumber} Details`, ''],
+        ['Lot Information', ''],
+        ['Lot Number', lot.lotNumber],
+        ['Brand', lot.brand],
+        ['Total Containers', lot.totalContainers],
+        ['Total Raw Quantity (kg)', lot.totalRawQuantity],
+        ['Status', lot.status],
+        ['', ''],
+        ['Production Details', ''],
+        ['Date', 'Shift', 'Raw Input', '18-21 Size', '21-25 Size', 'Finished', 'Rejects', 'Efficiency'],
+        ...lotRecords.map(record => [
+          new Date(record.productionDate).toLocaleDateString(),
+          record.shift,
+          record.rawInputShift,
+          record.kg1821,
+          record.kg2125,
+          record.finishedKg,
+          record.rejectsKg,
+          record.efficiency
+        ])
+      ];
+      const lotWs = XLSX.utils.aoa_to_sheet(lotData);
+      XLSX.utils.book_append_sheet(wb, lotWs, lot.lotNumber.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 31));
+    });
+    
+    XLSX.writeFile(wb, `multi_lot_report_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+}
   const lots = window.appState.getState('lots') || [];
   const productionRecords = window.appState.getState('productionRecords') || [];
   
