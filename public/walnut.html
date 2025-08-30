@@ -2603,7 +2603,61 @@ function generateReportHTML(records) {
     brandStats[record.brand].count += 1;
   });
 
- 'Half Kernel': records.reduce((sum, r) => sum + (r.halfKernel || 0), 0),
+  // Product type analysis
+  const productStats = {
+    'Half Kernel': records.reduce((sum, r) => sum + (r.halfKernel || 0), 0),
+    'Quarter': records.reduce((sum, r) => sum + (r.quarter || 0), 0),
+    'Large Pieces': records.reduce((sum, r) => sum + (r.largePieces || 0), 0),
+    'Amber': records.reduce((sum, r) => sum + (r.amber || 0), 0)
+  };
+
+  // Materials usage analysis
+  const materialsAnalysis = {
+    pouches5kgUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.pouches5kgUsed) || 0), 0),
+    pouches10kgUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.pouches10kgUsed) || 0), 0),
+    pouches5kgWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.pouches5kgWasted) || 0), 0),
+    pouches10kgWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.pouches10kgWasted) || 0), 0),
+    halfKernelBoxesUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.halfKernelBoxesUsed) || 0), 0),
+    quarterBoxesUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.quarterBoxesUsed) || 0), 0),
+    largePiecesBoxesUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.largePiecesBoxesUsed) || 0), 0),
+    amberBoxesUsed: records.reduce((sum, r) => sum + ((r.materials && r.materials.amberBoxesUsed) || 0), 0),
+    halfKernelBoxesWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.halfKernelBoxesWasted) || 0), 0),
+    quarterBoxesWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.quarterBoxesWasted) || 0), 0),
+    largePiecesBoxesWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.largePiecesBoxesWasted) || 0), 0),
+    amberBoxesWasted: records.reduce((sum, r) => sum + ((r.materials && r.materials.amberBoxesWasted) || 0), 0)
+  };
+
+  // Get pricing information
+  const getItemPrice = (itemId) => window.appState.getItemPrice(itemId) || 0;
+  
+  // Calculate costs - determine brand from majority of records
+  const majorityBrand = Object.keys(brandStats).reduce((a, b) => brandStats[a].count > brandStats[b].count ? a : b);
+  const brandPrefix = majorityBrand === 'Al Jameel' ? 'alJameel' : 'abuTaj';
+  
+  const pouchCosts = {
+    pouches5kgUsed: materialsAnalysis.pouches5kgUsed * getItemPrice(`${brandPrefix}5kg_pouch`),
+    pouches10kgUsed: materialsAnalysis.pouches10kgUsed * getItemPrice(`${brandPrefix}10kg_pouch`),
+    pouches5kgWasted: materialsAnalysis.pouches5kgWasted * getItemPrice(`${brandPrefix}5kg_pouch`),
+    pouches10kgWasted: materialsAnalysis.pouches10kgWasted * getItemPrice(`${brandPrefix}10kg_pouch`)
+  };
+
+  const boxCosts = {
+    halfKernelUsed: materialsAnalysis.halfKernelBoxesUsed * getItemPrice(`${brandPrefix}_half_kernel_box`),
+    quarterUsed: materialsAnalysis.quarterBoxesUsed * getItemPrice(`${brandPrefix}_quarter_box`),
+    largePiecesUsed: materialsAnalysis.largePiecesBoxesUsed * getItemPrice(`${brandPrefix}_large_pieces_box`),
+    amberUsed: materialsAnalysis.amberBoxesUsed * getItemPrice(`${brandPrefix}_amber_box`),
+    halfKernelWasted: materialsAnalysis.halfKernelBoxesWasted * getItemPrice(`${brandPrefix}_half_kernel_box`),
+    quarterWasted: materialsAnalysis.quarterBoxesWasted * getItemPrice(`${brandPrefix}_quarter_box`),
+    largePiecesWasted: materialsAnalysis.largePiecesBoxesWasted * getItemPrice(`${brandPrefix}_large_pieces_box`),
+    amberWasted: materialsAnalysis.amberBoxesWasted * getItemPrice(`${brandPrefix}_amber_box`)
+  };
+
+  const totalBoxesWasted = materialsAnalysis.halfKernelBoxesWasted + materialsAnalysis.quarterBoxesWasted + 
+                           materialsAnalysis.largePiecesBoxesWasted + materialsAnalysis.amberBoxesWasted;
+  const totalBoxWastageCost = boxCosts.halfKernelWasted + boxCosts.quarterWasted + 
+                              boxCosts.largePiecesWasted + boxCosts.amberWasted;
+
+  const reportHTML = `
     <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #8B4513 0%, #D2B48C 100%); color: white; border-radius: 0.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
