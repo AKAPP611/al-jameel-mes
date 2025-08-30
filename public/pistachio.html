@@ -589,13 +589,7 @@
             <option value="repack">Repacking Only</option>
           </select>
         </div>
-        <div class="form-group" id="sizeGroup">
-          <label>Size</label>
-          <select id="size">
-            <option>18-21</option>
-            <option>21-25</option>
-          </select>
-        </div>
+
         <div class="form-group">
           <label>Raw Input (kg)</label>
           <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
@@ -616,11 +610,11 @@
 <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
   <div class="form-group">
     <label>18-21 Size (kg)</label>
-    <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+    <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
   </div>
   <div class="form-group">
     <label>21-25 Size (kg)</label>
-    <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+    <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
   </div>
 </div>
       <!-- Materials -->
@@ -1773,14 +1767,11 @@ function showSection(sectionId) {
 // Form handling
 function updateFormVisibility() {
   const runType = document.getElementById('runType').value;
-  const sizeGroup = document.getElementById('sizeGroup');
   const rejectsSection = document.getElementById('rejectsSection');
   
   if (runType === 'huller') {
-    sizeGroup.style.display = 'none';
     rejectsSection.style.display = 'block';
   } else {
-    sizeGroup.style.display = 'block';
     rejectsSection.style.display = 'none';
   }
   updateSummary();
@@ -1942,9 +1933,47 @@ function updateSummary() {
       return sum + (parseInt(document.getElementById(id).value) || 0);
     }, 0);
   }
+  function updateSummary() {
+  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
+  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
+  const finishedKg = kg1821 + kg2125;
+  
+  const runType = document.getElementById('runType').value;
+  let rejectsKg = 0;
+  
+  if (runType === 'huller') {
+    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
+                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
+    rejectsKg = rejectIds.reduce((sum, id) => {
+      return sum + (parseInt(document.getElementById(id).value) || 0);
+    }, 0);
+  }
   
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
+  
+  const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
+  const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
+  
+  document.getElementById('productionSummary').textContent = 
+    `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
+}
+
+function autoCalculateMaterials() {
+  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
+  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
+  const totalKg = kg1821 + kg2125;
+  
+  // Each vacuum bag holds 10kg
+  const requiredBags = Math.ceil(totalKg / 10);
+  
+  // Each box typically holds 12 bags (adjust as needed)
+  const requiredBoxes = Math.ceil(requiredBags / 12);
+  
+  // Auto-fill the materials fields
+  document.getElementById('bagsUsed').value = requiredBags;
+  document.getElementById('boxesUsed').value = requiredBoxes;
+}
   
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
   const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
@@ -1992,11 +2021,30 @@ function submitProduction() {
   }
   
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
-  
-  if (rawInput > selectedLot.availableRawQuantity) {
-    window.formValidator.showToast(`Insufficient raw material. Available: ${selectedLot.availableRawQuantity} kg`, 'error');
-    return;
-  }
+
+if (rawInput > selectedLot.availableRawQuantity) {
+  window.formValidator.showToast(`Insufficient raw material. Available: ${selectedLot.availableRawQuantity} kg`, 'error');
+  return;
+}
+
+// New validation: Check if output matches input
+const runType = document.getElementById('runType').value;
+let rejectsKg = 0;
+if (runType === 'huller') {
+  const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
+                    'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
+  rejectsKg = rejectIds.reduce((sum, id) => {
+    return sum + (parseInt(document.getElementById(id).value) || 0);
+  }, 0);
+}
+
+const totalOutput = totalBags + rejectsKg;
+const tolerance = 5; // Allow 5kg tolerance for measurement differences
+
+if (Math.abs(rawInput - totalOutput) > tolerance) {
+  window.formValidator.showToast(`Output (${totalOutput}kg) must match input (${rawInput}kg). Difference: ${Math.abs(rawInput - totalOutput)}kg`, 'error');
+  return;
+}
   
   const brand = selectedLot.brand; // Use lot's brand
   const boxType = brand === 'Golden Hill' ? 'goldenHillBoxes' : 'extraBoxes';
@@ -2043,7 +2091,6 @@ function submitProduction() {
     lotNumber: selectedLot.lotNumber,
     runType,
     brand: brand,
-    size: document.getElementById('size').value,
     lot: selectedLot.lotNumber,
     rawInput,
     kg1821: bags1821,
@@ -2785,6 +2832,21 @@ function generateReportHTML(records, wastageData) {
   const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
   const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const totalWasteCost = wastageData.reduce((sum, w) => sum + w.estimatedCost, 0);
+
+// Calculate total materials cost (not just waste)
+let totalMaterialsCost = 0;
+const bagPrice = window.appState.getItemPrice('vacuum_bags_10kg');
+const goldenBoxPrice = window.appState.getItemPrice('golden_hill_boxes');
+const extraBoxPrice = window.appState.getItemPrice('extra_boxes');
+
+records.forEach(record => {
+  const bagsUsedCost = (record.materials?.bagsUsed || 0) * bagPrice;
+  const boxesUsedCost = (record.materials?.boxesUsed || 0) * 
+    (record.brand === 'Golden Hill' ? goldenBoxPrice : extraBoxPrice);
+  totalMaterialsCost += bagsUsedCost + boxesUsedCost;
+});
+
+const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
   
   // Brand analysis
   const brandStats = {};
@@ -2832,10 +2894,14 @@ function generateReportHTML(records, wastageData) {
         <div class="metric-value">${avgEfficiency}%</div>
         <div class="metric-label">Average Efficiency</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-value">$${totalWasteCost.toFixed(0)}</div>
-        <div class="metric-label">Total Waste Cost</div>
-      </div>
+     <div class="metric-card">
+  <div class="metric-value">$${totalWasteCost.toFixed(0)}</div>
+  <div class="metric-label">Total Waste Cost</div>
+</div>
+<div class="metric-card">
+  <div class="metric-value">$${totalMaterialsCost.toFixed(0)}</div>
+  <div class="metric-label">Total Materials Cost</div>
+</div>
     </div>
 
     <!-- Professional Charts Grid -->
