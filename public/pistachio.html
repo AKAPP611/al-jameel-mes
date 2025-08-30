@@ -2055,14 +2055,7 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   
   const finishedKg = totalBags;
   
-  let rejectsKg = 0;
-  if (runType === 'huller') {
-    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
-                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
-    rejectsKg = rejectIds.reduce((sum, id) => {
-      return sum + (parseInt(document.getElementById(id).value) || 0);
-    }, 0);
-  }
+  
   
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
