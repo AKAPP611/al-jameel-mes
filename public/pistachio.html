@@ -1766,7 +1766,7 @@ function showSection(sectionId) {
 
 // Form handling
 function updateFormVisibility() {
-  
+  const runType = document.getElementById('runType').value;
   const rejectsSection = document.getElementById('rejectsSection');
   
   if (runType === 'huller') {
@@ -1912,13 +1912,13 @@ function updateLotInfo() {
     // Auto-set brand
     // TODO: Add logic here if you want to auto-set the brand based on the selected lot
   }
-} // <- Missing closing brace for the if statement and function
+} 
 
 function updateInventoryDisplay() {
   renderInventory();
 }
 
-ffunction updateSummary() {
+function updateSummary() {
   const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
   const finishedKg = kg1821 + kg2125;
@@ -1944,21 +1944,6 @@ ffunction updateSummary() {
     `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
 }
 
-function autoCalculateMaterials() {
-  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
-  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const totalKg = kg1821 + kg2125;
-  
-  // Each vacuum bag holds 10kg
-  const requiredBags = Math.ceil(totalKg / 10);
-  
-  // Each box typically holds 12 bags (adjust as needed)
-  const requiredBoxes = Math.ceil(requiredBags / 12);
-  
-  // Auto-fill the materials fields
-  document.getElementById('bagsUsed').value = requiredBags;
-  document.getElementById('boxesUsed').value = requiredBoxes;
-}
 
 function autoCalculateMaterials() {
   const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
@@ -2071,7 +2056,6 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
     return;
   }
   
-  const runType = document.getElementById('runType').value;
   const finishedKg = totalBags;
   
   let rejectsKg = 0;
