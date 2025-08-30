@@ -1964,9 +1964,6 @@ function autoCalculateMaterials() {
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
   const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
   
-  document.getElementById('productionSummary').textContent = 
-    `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
-}
 
 function clearForm() {
   document.querySelectorAll('#production input[type="number"]').forEach(input => {
