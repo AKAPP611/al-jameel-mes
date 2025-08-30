@@ -1,5 +1,3 @@
-// Pistacho.html working 30/08/2025
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -448,6 +446,7 @@
   <div class="container">
    <div class="nav-buttons">
   <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="showSection('lotmanagement')">Lot Management</button>
   <button class="nav-btn" onclick="showSection('production')">New Production</button>
   <button class="nav-btn" onclick="showSection('records')">View Records</button>
   <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
@@ -462,7 +461,11 @@
         <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
         <h2>Production Dashboard</h2>
       </div>
-      <div class="stats-grid">
+     <div class="stats-grid">
+        <div class="stat-card">
+          <div>Active Lots</div>
+          <div class="stat-value" id="kpiActiveLots">0</div>
+        </div>
         <div class="stat-card">
           <div>Total Finished (kg)</div>
           <div class="stat-value" id="kpiFinished">0</div>
@@ -478,7 +481,68 @@
       </div>
       <p>KPIs update automatically when you submit production records.</p>
     </section>
+<!-- Lot Management Section -->
+    <section id="lotmanagement" class="section">
+      <div class="section-header-with-image">
+        <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
+        <h2>Lot Management</h2>
+      </div>
+      
+      <!-- Create New Lot -->
+      <div class="materials-section">
+        <h3>Create New Lot</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Lot Number</label>
+            <input id="lotNumber" type="text" placeholder="e.g., Lot-01-02-03-2024" required>
+          </div>
+          <div class="form-group">
+            <label>Brand</label>
+            <select id="lotBrand">
+              <option>Golden Hill</option>
+              <option>Extra</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Total Containers</label>
+            <input id="totalContainers" type="number" min="1" value="1" onchange="calculateLotTotals()">
+          </div>
+          <div class="form-group">
+            <label>Bags per Container</label>
+            <input id="bagsPerContainer" type="number" min="1" value="50" onchange="calculateLotTotals()">
+          </div>
+          <div class="form-group">
+            <label>Kg per Bag</label>
+            <input id="kgPerBag" type="number" min="0.1" step="0.1" value="25" onchange="calculateLotTotals()">
+          </div>
+          <div class="form-group">
+            <label>Total Raw Quantity (kg)</label>
+            <input id="totalRawQuantity" type="number" readonly style="background: #f8f9fa;">
+          </div>
+        </div>
+        <button onclick="createLot()">Create Lot</button>
+      </div>
 
+      <!-- Active Lots Table -->
+      <h3>Current Lots Status</h3>
+      <div style="overflow-x: auto;">
+        <table id="lotsTable">
+          <thead>
+            <tr>
+              <th>Lot Number</th>
+              <th>Brand</th>
+              <th>Total Containers</th>
+              <th>Total Raw (kg)</th>
+              <th>Used (kg)</th>
+              <th>Available (kg)</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
     <!-- Production Entry Section -->
     <section id="production" class="section">
       <div class="section-header-with-image">
@@ -486,23 +550,22 @@
         <h2>New Production Entry</h2>
       </div>
       
-      <div class="warning-box">
-        <strong>Note:</strong> Huller Run shows rejects section, Repacking Only hides it.
+       <div class="warning-box">
+        <strong>Note:</strong> Select an active lot to record production. Huller Run shows rejects, Repacking Only hides them.
       </div>
 
       <div class="form-grid">
+        <div class="form-group">
+          <label>Select Lot</label>
+          <select id="productionLot" onchange="updateLotInfo()" required>
+            <option value="">Select a lot...</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Run Type</label>
           <select id="runType" onchange="updateFormVisibility()">
             <option value="huller">Huller Run</option>
             <option value="repack">Repacking Only</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Brand</label>
-          <select id="brand" onchange="updateInventoryDisplay()">
-            <option>Golden Hill</option>
-            <option>Extra</option>
           </select>
         </div>
         <div class="form-group" id="sizeGroup">
@@ -513,25 +576,19 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Lot Number</label>
-          <input id="lotNo" type="text" placeholder="e.g., GH-240315-01">
-        </div>
-        <div class="form-group">
           <label>Raw Input (kg)</label>
           <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
         </div>
       </div>
 
-      <!-- Final Goods -->
-      <h3>Final Goods Output</h3>
-      <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-        <div class="form-group">
-          <label>18-21 Size (kg)</label>
-          <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary()">
-        </div>
-        <div class="form-group">
-          <label>21-25 Size (kg)</label>
-          <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+      <!-- Lot Info Display -->
+      <div id="lotInfoDisplay" class="materials-section" style="display: none;">
+        <h4>Selected Lot Information</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div><strong>Lot Number:</strong> <span id="selectedLotNumber">-</span></div>
+          <div><strong>Brand:</strong> <span id="selectedLotBrand">-</span></div>
+          <div><strong>Available Raw:</strong> <span id="selectedLotAvailable">-</span> kg</div>
+          <div><strong>Total Containers:</strong> <span id="selectedLotContainers">-</span></div>
         </div>
       </div>
 
@@ -1158,6 +1215,7 @@
 class AppState {
   constructor() {
     this.data = {
+      lots: [],
       productionRecords: [],
       inventoryLog: [],
       maintenanceLog: [],
@@ -1236,6 +1294,16 @@ class AppState {
       this.saveToStorage();
       this.notify(key, this.data[key]);
     }
+     updateArrayItem(key, id, updater) {
+    if (Array.isArray(this.data[key])) {
+      const index = this.data[key].findIndex(item => item.id === id);
+      if (index !== -1) {
+        this.data[key][index] = updater(this.data[key][index]);
+        this.saveToStorage();
+        this.notify(key, this.data[key]);
+      }
+    }
+  }
   }
 
   updateInventory(item, action, quantity) {
@@ -1622,9 +1690,11 @@ function handleLogin(event) {
     showAdminControls();
     
     updateDashboard();
+    renderLots();
     renderRecords();
     renderInventory();
     renderEquipmentGrid();
+    updateProductionLotDropdown();
     
     if (username === 'admin') {
       renderItemPricesTable();
@@ -1684,7 +1754,136 @@ function updateFormVisibility() {
   }
   updateSummary();
 }
+// Lot Management Functions
+function calculateLotTotals() {
+  const containers = parseInt(document.getElementById('totalContainers').value) || 0;
+  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
+  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
+  
+  const totalRawQuantity = containers * bagsPerContainer * kgPerBag;
+  document.getElementById('totalRawQuantity').value = totalRawQuantity;
+}
 
+function createLot() {
+  const lotNumber = document.getElementById('lotNumber').value.trim();
+  const brand = document.getElementById('lotBrand').value;
+  const totalContainers = parseInt(document.getElementById('totalContainers').value) || 0;
+  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
+  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
+  const totalRawQuantity = parseFloat(document.getElementById('totalRawQuantity').value) || 0;
+  
+  if (!lotNumber) {
+    alert('Please enter a lot number');
+    return;
+  }
+  
+  if (totalContainers <= 0 || bagsPerContainer <= 0 || kgPerBag <= 0) {
+    alert('Please enter valid quantities');
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  if (lots.some(lot => lot.lotNumber === lotNumber)) {
+    alert('Lot number already exists');
+    return;
+  }
+  
+  const newLot = {
+    id: Date.now().toString(),
+    lotNumber,
+    brand,
+    totalContainers,
+    bagsPerContainer,
+    kgPerBag,
+    totalRawQuantity,
+    availableRawQuantity: totalRawQuantity,
+    usedRawQuantity: 0,
+    status: 'Open',
+    createdDate: new Date().toISOString()
+  };
+  
+  window.appState.addToArray('lots', newLot);
+  
+  document.getElementById('lotNumber').value = '';
+  document.getElementById('totalContainers').value = '1';
+  document.getElementById('bagsPerContainer').value = '50';
+  document.getElementById('kgPerBag').value = '25';
+  document.getElementById('totalRawQuantity').value = '';
+  
+  alert('Lot created successfully!');
+  renderLots();
+  updateProductionLotDropdown();
+}
+
+function renderLots() {
+  const tbody = document.querySelector('#lotsTable tbody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = '';
+  
+  const lots = window.appState.getState('lots') || [];
+  lots.forEach(lot => {
+    const progressPercent = lot.totalRawQuantity > 0 
+      ? Math.round((lot.usedRawQuantity / lot.totalRawQuantity) * 100) 
+      : 0;
+    
+    const statusColor = lot.status === 'Open' ? '#22c55e' : '#6b7280';
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${lot.lotNumber}</strong></td>
+      <td>${lot.brand}</td>
+      <td>${lot.totalContainers}</td>
+      <td>${lot.totalRawQuantity.toLocaleString()}</td>
+      <td>${lot.usedRawQuantity.toLocaleString()}</td>
+      <td>${lot.availableRawQuantity.toLocaleString()}</td>
+      <td style="color: ${statusColor}; font-weight: bold;">${lot.status}</td>
+      <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function updateProductionLotDropdown() {
+  const dropdown = document.getElementById('productionLot');
+  if (!dropdown) return;
+  
+  dropdown.innerHTML = '<option value="">Select a lot...</option>';
+  
+  const lots = window.appState.getState('lots') || [];
+  const openLots = lots.filter(lot => lot.status === 'Open' && lot.availableRawQuantity > 0);
+  
+  openLots.forEach(lot => {
+    const option = document.createElement('option');
+    option.value = lot.id;
+    option.textContent = `${lot.lotNumber} (${lot.brand}) - ${lot.availableRawQuantity} kg available`;
+    dropdown.appendChild(option);
+  });
+}
+
+function updateLotInfo() {
+  const lotId = document.getElementById('productionLot').value;
+  const lotDisplay = document.getElementById('lotInfoDisplay');
+  
+  if (!lotId) {
+    lotDisplay.style.display = 'none';
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const selectedLot = lots.find(lot => lot.id === lotId);
+  
+  if (selectedLot) {
+    document.getElementById('selectedLotNumber').textContent = selectedLot.lotNumber;
+    document.getElementById('selectedLotBrand').textContent = selectedLot.brand;
+    document.getElementById('selectedLotAvailable').textContent = selectedLot.availableRawQuantity.toLocaleString();
+    document.getElementById('selectedLotContainers').textContent = selectedLot.totalContainers;
+    lotDisplay.style.display = 'block';
+    
+    // Auto-set brand
+    document.getElementById('brand').value = selectedLot.brand;
+  }
+}
 function updateInventoryDisplay() {
   renderInventory();
 }
@@ -1730,6 +1929,13 @@ function submitProduction() {
     return;
   }
 
+  const lotId = document.getElementById('productionLot').value;
+  
+  if (!lotId) {
+    window.formValidator.showToast('Please select a lot', 'error');
+    return;
+  }
+
   const bags1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const bags2125 = parseInt(document.getElementById('bags2125').value) || 0;
   const totalBags = bags1821 + bags2125;
@@ -1739,7 +1945,22 @@ function submitProduction() {
     return;
   }
   
-  const brand = document.getElementById('brand').value;
+  const lots = window.appState.getState('lots') || [];
+  const selectedLot = lots.find(lot => lot.id === lotId);
+  
+  if (!selectedLot) {
+    window.formValidator.showToast('Selected lot not found', 'error');
+    return;
+  }
+  
+  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
+  
+  if (rawInput > selectedLot.availableRawQuantity) {
+    window.formValidator.showToast(`Insufficient raw material. Available: ${selectedLot.availableRawQuantity} kg`, 'error');
+    return;
+  }
+  
+  const brand = selectedLot.brand; // Use lot's brand
   const boxType = brand === 'Golden Hill' ? 'goldenHillBoxes' : 'extraBoxes';
   
   const bagsUsed = parseInt(document.getElementById('bagsUsed').value) || 0;
@@ -1775,16 +1996,17 @@ function submitProduction() {
     }, 0);
   }
   
-  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
   
   const record = {
     timestamp: new Date().toISOString(),
+    lotId: lotId,
+    lotNumber: selectedLot.lotNumber,
     runType,
     brand: brand,
     size: document.getElementById('size').value,
-    lot: document.getElementById('lotNo').value,
+    lot: selectedLot.lotNumber,
     rawInput,
     kg1821: bags1821,
     kg2125: bags2125,
@@ -1800,10 +2022,21 @@ function submitProduction() {
     }
   };
   
-  // Add to state instead of local array
+  // Add to state
   window.appState.addToArray('productionRecords', record);
   trackWastage(record);
-  // Update inventory using state methods
+  
+  // Update lot quantities
+  window.appState.updateArrayItem('lots', lotId, (lot) => {
+    lot.usedRawQuantity += rawInput;
+    lot.availableRawQuantity -= rawInput;
+    if (lot.availableRawQuantity <= 0) {
+      lot.status = 'Completed';
+    }
+    return lot;
+  });
+  
+  // Update inventory
   window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
   window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
   
@@ -1836,11 +2069,17 @@ function submitProduction() {
   updateDashboard();
   renderRecords();
   renderInventory();
+  renderLots();
+  updateProductionLotDropdown();
 }
 
 // Dashboard updates
 function updateDashboard() {
+  const lots = window.appState.getState('lots') || [];
   const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  const activeLots = lots.filter(lot => lot.status === 'Open').length;
+  
   let totalFinished = 0;
   let totalRejects = 0;
   let totalInput = 0;
@@ -1854,6 +2093,7 @@ function updateDashboard() {
   const efficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const rejectRate = totalInput > 0 ? Math.round((totalRejects / totalInput) * 1000) / 10 : 0;
   
+  document.getElementById('kpiActiveLots').textContent = activeLots;
   document.getElementById('kpiFinished').textContent = totalFinished;
   document.getElementById('kpiEff').textContent = efficiency;
   document.getElementById('kpiReject').textContent = rejectRate.toFixed(1);
@@ -3228,6 +3468,9 @@ window.addEventListener('load', () => {
   renderMaintenanceLog();
   renderWastageTable();
   initializeReportDates();
+  calculateLotTotals();
+  renderLots();
+  updateProductionLotDropdown();
   
   renderItemPricesTable();
   renderPriceAuditTable();
