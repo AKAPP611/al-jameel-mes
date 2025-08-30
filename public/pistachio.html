@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Pistachio Production – Al Jameel MES</title>
@@ -274,6 +273,51 @@
       background: #e0e7ff;
       color: #3730a3;
     }
+    
+    /* Item Prices Management Styling */
+    #itemPricesTable th,
+    #priceAuditTable th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    #itemPricesTable td,
+    #priceAuditTable td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    #itemPricesTable button,
+    #priceAuditTable button {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.85rem;
+      border-radius: 0.25rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    #itemPricesTable button:hover,
+    #priceAuditTable button:hover {
+      opacity: 0.8;
+    }
+
+    .price-change-positive {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .price-change-negative {
+      color: #ef4444;
+      font-weight: bold;
+    }
+
+    .price-change-neutral {
+      color: #6b7280;
+    }
   </style>
 </head>
 <body>
@@ -328,7 +372,9 @@
       <button class="nav-btn" onclick="showSection('production')">New Production</button>
       <button class="nav-btn" onclick="showSection('records')">View Records</button>
       <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
+      <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
       <button class="nav-btn" onclick="showSection('reports')">Reports</button>
+      <button class="nav-btn" id="itemPricesBtn" onclick="showSection('itemprices')" style="display: none;">Item Prices</button>
     </div>
 
     <!-- Dashboard Section -->
@@ -422,7 +468,7 @@
       </div>
     </section>
 
-    <!-- Production Entry Section (Modified) -->
+    <!-- Production Entry Section -->
     <section id="production" class="section">
       <div class="section-header-with-image">
         <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
@@ -557,7 +603,7 @@
       </div>
     </section>
 
-    <!-- Enhanced Records Section -->
+    <!-- Records Section -->
     <section id="records" class="section">
       <h2 style="margin-bottom: 1rem;">📋 Production Records</h2>
       
@@ -612,58 +658,269 @@
       </div>
     </section>
 
-    <!-- Enhanced Reports Section -->
+    <!-- Maintenance Section -->
+    <section id="maintenance" class="section">
+      <h2 style="margin-bottom: 1rem;">🔧 Equipment Maintenance</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Total Equipment</div>
+          <div class="stat-value" id="totalEquipment">65</div>
+        </div>
+        <div class="stat-card">
+          <div>Operational</div>
+          <div class="stat-value" id="operationalEquipment" style="color: #22c55e;">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Critical Down (P1-3)</div>
+          <div class="stat-value" id="criticalDown" style="color: #ef4444;">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Minor Issues (P5+)</div>
+          <div class="stat-value" id="minorIssues" style="color: #f59e0b;">0</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="materials-section" style="margin-bottom: 1rem;">
+        <h3>Equipment Filters</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Priority Level</label>
+            <select id="priorityFilter" onchange="filterEquipment()">
+              <option value="all">All Priorities</option>
+              <option value="1">Priority 1 (Critical)</option>
+              <option value="3">Priority 3 (High)</option>
+              <option value="5">Priority 5 (Medium)</option>
+              <option value="7">Priority 7 (Low)</option>
+              <option value="8">Priority 8 (Automation)</option>
+              <option value="10">Priority 10 (Minimal)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Equipment Type</label>
+            <select id="typeFilter" onchange="filterEquipment()">
+              <option value="all">All Types</option>
+              <option value="conveyor">Conveyors</option>
+              <option value="elevator">Elevators</option>
+              <option value="sorter">Sorters</option>
+              <option value="bin">Bins/Storage</option>
+              <option value="processing">Processing</option>
+              <option value="automation">Automation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="statusFilter" onchange="filterEquipment()">
+              <option value="all">All Status</option>
+              <option value="operational">Operational Only</option>
+              <option value="issues">Issues Only</option>
+              <option value="down">Down/Broken Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sort By</label>
+            <select id="sortBy">
+              <option value="priority">Priority Level</option>
+              <option value="code">Equipment Code</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="filterEquipment()" style="width: 100%;">Apply Filters</button>
+          </div>
+        </div>
+      </div>
+
+      <h3>Equipment Status (<span id="shownCount">65</span> shown)</h3>
+      <div id="equipmentGrid" class="stats-grid" style="margin-bottom: 2rem;">
+        <!-- Equipment cards will be populated here -->
+      </div>
+
+      <div class="materials-section">
+        <h3>Update Equipment Status</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Equipment</label>
+            <select id="equipmentSelect">
+              <option value="Ton">Ton - Ton bag opener (P1)</option>
+              <option value="E1">E1 - Z elevator (P1)</option>
+              <option value="E2">E2 - Z elevator (P1)</option>
+              <option value="Bin1">Bin1 - Material silo (P1)</option>
+              <option value="E3">E3 - Z elevator (P1)</option>
+              <option value="C1">C1 - Conveyor (P1)</option>
+              <option value="C2">C2 - Conveyor(LR) (P1)</option>
+              <option value="C3">C3 - Conveyor(LR) (P1)</option>
+              <option value="C4">C4 - Conveyor(LR) (P3)</option>
+              <option value="C5">C5 - Conveyor(LR) (P3)</option>
+              <option value="C6">C6 - Conveyor(LR) (P3)</option>
+              <option value="C7">C7 - Conveyor(LR) (P3)</option>
+              <option value="Sor1">Sor1 - Sorter (P3)</option>
+              <option value="Sor2">Sor2 - Sorter (P3)</option>
+              <option value="Sor3">Sor3 - Sorter (P3)</option>
+              <option value="Sor4">Sor4 - Sorter (P3)</option>
+              <option value="C8">C8 - Conveyor (P1)</option>
+              <option value="C9">C9 - Conveyor (P1)</option>
+              <option value="C10">C10 - Conveyor (P5)</option>
+              <option value="C11">C11 - Conveyor (P5)</option>
+              <option value="C12">C12 - Conveyor (P5)</option>
+              <option value="C13">C13 - Conveyor (P5)</option>
+              <option value="C14">C14 - Conveyor (P5)</option>
+              <option value="C15">C15 - Conveyor (P5)</option>
+              <option value="C16">C16 - Conveyor (P5)</option>
+              <option value="C17">C17 - Conveyor (P5)</option>
+              <option value="C18">C18 - Conveyor (P5)</option>
+              <option value="C19">C19 - Conveyor (P5)</option>
+              <option value="C20">C20 - Conveyor (P5)</option>
+              <option value="C21">C21 - Conveyor (P5)</option>
+              <option value="C22">C22 - Conveyor (P5)</option>
+              <option value="C23">C23 - Conveyor (P5)</option>
+              <option value="Bin2">Bin2 - Product bin (P7)</option>
+              <option value="Bin3">Bin3 - By product bin (P7)</option>
+              <option value="Bin4">Bin4 - By product bin (P7)</option>
+              <option value="Bin5">Bin5 - By product bin (P7)</option>
+              <option value="Bin6">Bin6 - By product bin (P7)</option>
+              <option value="Bin7">Bin7 - By product bin (P7)</option>
+              <option value="Bin8">Bin8 - By product bin (P7)</option>
+              <option value="Bin9">Bin9 - By product bin (P7)</option>
+              <option value="C24">C24 - Conveyor (P5)</option>
+              <option value="C25">C25 - Conveyor (P5)</option>
+              <option value="C26">C26 - Conveyor (P5)</option>
+              <option value="C27">C27 - Conveyor (P5)</option>
+              <option value="C28">C28 - Conveyor (P5)</option>
+              <option value="C29">C29 - Conveyor (P5)</option>
+              <option value="E4">E4 - Z elevator (P1)</option>
+              <option value="E5">E5 - Z elevator (P7)</option>
+              <option value="E6">E6 - Z elevator (P3)</option>
+              <option value="E7">E7 - Z elevator (P3)</option>
+              <option value="Bin10">Bin10 - Sizing bin (P10)</option>
+              <option value="Bin11">Bin11 - Sizing bin (P5)</option>
+              <option value="Bin12">Bin12 - Sizing bin (P5)</option>
+              <option value="C30">C30 - Conveyor (P7)</option>
+              <option value="C31">C31 - Conveyor (P7)</option>
+              <option value="E8">E8 - Z elevator (P3)</option>
+              <option value="E9">E9 - Z elevator (P3)</option>
+              <option value="E10">E10 - Z elevator (P10)</option>
+              <option value="Pac-1">Pac-1 - Packing and stacking unit (P3)</option>
+              <option value="Pac-2">Pac-2 - Packing and stacking unit (P3)</option>
+              <option value="Wra">Wra - Frame wrapper (P5)</option>
+              <option value="PRE-CL">PRE-CL - Pre-Cleaner (P1)</option>
+              <option value="AGV-1">AGV-1 - AVG Robot (P8)</option>
+              <option value="AGV-2">AGV-2 - AVG Robot (P8)</option>
+              <option value="SIZE">SIZE - Sizer Machine (P3)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="equipmentStatus">
+              <option value="operational" style="color: #22c55e;">Operational</option>
+              <option value="maintenance" style="color: #f59e0b;">Maintenance Due</option>
+              <option value="attention" style="color: #f97316;">Needs Attention</option>
+              <option value="down" style="color: #ef4444;">Down/Broken</option>
+              <option value="offline" style="color: #6b7280;">Offline</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Problem Description</label>
+            <input id="problemDescription" type="text" placeholder="Describe the issue or maintenance needed">
+          </div>
+          <div class="form-group">
+            <label>Maintenance Cost ($)</label>
+            <input id="maintenanceCost" type="number" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <button onclick="updateEquipmentStatus()">Update Status</button>
+      </div>
+
+      <h3>Maintenance Log</h3>
+      <div class="materials-section" style="margin-bottom: 1rem;">
+        <h4>Export Maintenance Cost Report</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>From Date</label>
+            <input id="exportFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="exportToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="exportMaintenanceReport()" style="width: 100%;">Export Cost Report</button>
+          </div>
+        </div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table id="maintenanceTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Equipment</th>
+              <th>Priority</th>
+              <th>Status Change</th>
+              <th>Problem</th>
+              <th>Cost ($)</th>
+              <th>Downtime (hrs)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Reports Section -->
     <section id="reports" class="section">
       <h2 style="margin-bottom: 1rem;">📊 Lot & Production Reports</h2>
       
       <div class="materials-section">
-  <h3>Multi-Lot Summary Report</h3>
-  <div class="form-grid">
-    <div class="form-group">
-      <label>Report Type</label>
-      <select id="reportType" onchange="toggleLotSelection()">
-        <option value="single">Single Lot Report</option>
-        <option value="multiple">Multiple Lots Report</option>
-      </select>
-    </div>
-    <div class="form-group" id="singleLotGroup">
-      <label>Select Lot</label>
-      <select id="reportLotSelect">
-        <option value="">Choose a lot...</option>
-      </select>
-    </div>
-    <div class="form-group" id="multipleLotGroup" style="display: none;">
-      <label>Select Multiple Lots</label>
-      <div id="lotCheckboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
-        <!-- Checkboxes will be populated here -->
+        <h3>Multi-Lot Summary Report</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Report Type</label>
+            <select id="reportType" onchange="toggleLotSelection()">
+              <option value="single">Single Lot Report</option>
+              <option value="multiple">Multiple Lots Report</option>
+            </select>
+          </div>
+          <div class="form-group" id="singleLotGroup">
+            <label>Select Lot</label>
+            <select id="reportLotSelect">
+              <option value="">Choose a lot...</option>
+            </select>
+          </div>
+          <div class="form-group" id="multipleLotGroup" style="display: none;">
+            <label>Select Multiple Lots</label>
+            <div id="lotCheckboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem;">
+              <!-- Checkboxes will be populated here -->
+            </div>
+            <div style="margin-top: 0.5rem;">
+              <button type="button" onclick="selectAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Select All</button>
+              <button type="button" onclick="clearAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Clear All</button>
+              <span id="selectedLotsCount" style="margin-left: 1rem; font-size: 0.9rem; color: var(--muted);">0 lots selected</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="generateLotReport()" style="width: 100%;">Generate Report</button>
+          </div>
+        </div>
       </div>
-      <div style="margin-top: 0.5rem;">
-        <button type="button" onclick="selectAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Select All</button>
-        <button type="button" onclick="clearAllLots()" class="btn-secondary" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">Clear All</button>
-        <span id="selectedLotsCount" style="margin-left: 1rem; font-size: 0.9rem; color: var(--muted);">0 lots selected</span>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>&nbsp;</label>
-      <button onclick="generateLotReport()" style="width: 100%;">Generate Report</button>
-    </div>
-  </div>
-</div>
 
       <!-- Report Preview Area -->
       <div id="lotReportPreview" style="display: none; margin-top: 2rem;">
-  <div style="text-align: right; margin-bottom: 1rem;">
-    <button onclick="printLotReport()">🖨️ Print Report</button>
-    <button onclick="exportLotReportPDF()" class="btn-secondary">📄 Export PDF</button>
-    <button onclick="exportLotReportExcel()" class="btn-secondary">📊 Export Excel</button>
-  </div>
-  <div id="lotReportContent" class="report-content">
+        <div style="text-align: right; margin-bottom: 1rem;">
+          <button onclick="printLotReport()">🖨️ Print Report</button>
+          <button onclick="exportLotReportPDF()" class="btn-secondary">📄 Export PDF</button>
+          <button onclick="exportLotReportExcel()" class="btn-secondary">📊 Export Excel</button>
+        </div>
+        <div id="lotReportContent" class="report-content">
           <!-- Lot report content will be generated here -->
         </div>
       </div>
     </section>
 
-    <!-- Inventory Section (Simplified) -->
+    <!-- Inventory Section -->
     <section id="inventory" class="section">
       <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
       
@@ -712,7 +969,121 @@
         </div>
         <button onclick="adjustInventory()">Update Inventory</button>
         <button class="btn-secondary" onclick="exportInventoryExcel()">📊 Export Excel</button>
-    <button class="btn-secondary" onclick="exportInventoryPDF()">📄 Export PDF</button>
+        <button class="btn-secondary" onclick="exportInventoryPDF()">📄 Export PDF</button>
+      </div>
+    </section>
+
+    <!-- Item Prices Section (Admin Only) -->
+    <section id="itemprices" class="section">
+      <h2 style="margin-bottom: 1rem;">Item Prices Management</h2>
+      
+      <div class="warning-box" style="background: #fff3cd; border: 1px solid #ffeeba;">
+        <strong>Admin Only:</strong> Changes to pricing affect all future calculations and reports.
+      </div>
+
+      <!-- Current Item Prices -->
+      <div class="materials-section">
+        <h3>Current Item Prices</h3>
+        <div style="overflow-x: auto;">
+          <table id="itemPricesTable">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Unit</th>
+                <th>Unit Price ($)</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Updated By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add/Edit Item Form -->
+      <div class="materials-section">
+        <h3 id="itemFormTitle">Add New Item</h3>
+        <form id="itemPriceForm" onsubmit="saveItemPrice(event)">
+          <input type="hidden" id="editItemId" value="">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Item Name</label>
+              <input id="itemName" type="text" required placeholder="e.g., Vacuum Bags (10kg)">
+            </div>
+            <div class="form-group">
+              <label>Unit</label>
+              <input id="itemUnit" type="text" required placeholder="e.g., piece, kg, box">
+            </div>
+            <div class="form-group">
+              <label>Unit Price ($)</label>
+              <input id="itemPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="itemStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 1rem;">
+            <button type="submit" id="saveItemBtn">Add Item</button>
+            <button type="button" class="btn-secondary" onclick="cancelItemEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="materials-section">
+        <h3>Quick Actions</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Bulk Price Update</label>
+            <select id="bulkUpdateType">
+              <option value="percentage">Percentage Change</option>
+              <option value="fixed">Fixed Amount Change</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Change Amount</label>
+            <input id="bulkUpdateAmount" type="number" step="0.01" placeholder="e.g., 10 for +10% or +$10">
+          </div>
+          <div class="form-group">
+            <label>Apply to</label>
+            <select id="bulkUpdateFilter">
+              <option value="all">All Active Items</option>
+              <option value="category">Specific Category</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="applyBulkUpdate()">Apply Bulk Update</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Change History -->
+      <div class="materials-section">
+        <h3>Price Change Audit Trail</h3>
+        <div style="overflow-x: auto;">
+          <table id="priceAuditTable">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Item</th>
+                <th>Action</th>
+                <th>Old Price</th>
+                <th>New Price</th>
+                <th>Change</th>
+                <th>Updated By</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </div>
@@ -726,11 +1097,47 @@ class EnhancedAppState {
       lots: [],
       productionRecords: [],
       inventoryLog: [],
+      maintenanceLog: [],
+      wastageLog: [],
+      itemPrices: [
+        {
+          id: 'vacuum_bags_10kg',
+          name: 'Vacuum Bags (10kg)',
+          unit: 'piece',
+          price: 2.50,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'golden_hill_boxes',
+          name: 'Golden Hill Boxes',
+          unit: 'piece', 
+          price: 1.25,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'extra_boxes',
+          name: 'Extra Boxes',
+          unit: 'piece',
+          price: 1.00,
+          status: 'active', 
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        }
+      ],
+      priceAuditLog: [],
       currentInventory: {
         vacuumBags: 0,
         goldenHillBoxes: 0,
         extraBoxes: 0
       },
+      equipment: [], // Will be populated below
       currentUser: null
     };
     this.listeners = {};
@@ -803,9 +1210,80 @@ class EnhancedAppState {
     return true;
   }
 
+  getItemPrice(itemId) {
+    const item = this.data.itemPrices.find(item => item.id === itemId && item.status === 'active');
+    return item ? item.price : 0;
+  }
+
+  updateItemPrice(itemId, newPrice, updatedBy, notes = '') {
+    const item = this.data.itemPrices.find(item => item.id === itemId);
+    if (item) {
+      const oldPrice = item.price;
+      item.price = newPrice;
+      item.lastUpdated = new Date().toISOString();
+      item.updatedBy = updatedBy;
+      
+      this.addToArray('priceAuditLog', {
+        timestamp: new Date().toISOString(),
+        itemId: itemId,
+        itemName: item.name,
+        action: 'price_update',
+        oldPrice: oldPrice,
+        newPrice: newPrice,
+        change: newPrice - oldPrice,
+        changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
+        updatedBy: updatedBy,
+        notes: notes
+      });
+      
+      this.saveToStorage();
+      this.notify('itemPrices', this.data.itemPrices);
+      return true;
+    }
+    return false;
+  }
+
+  addNewItem(itemData, createdBy) {
+    const newItem = {
+      id: itemData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+      name: itemData.name,
+      unit: itemData.unit,
+      price: itemData.price,
+      status: itemData.status || 'active',
+      category: itemData.category || 'general',
+      lastUpdated: new Date().toISOString(),
+      updatedBy: createdBy
+    };
+    
+    this.addToArray('itemPrices', newItem);
+    
+    this.addToArray('priceAuditLog', {
+      timestamp: new Date().toISOString(),
+      itemId: newItem.id,
+      itemName: newItem.name,
+      action: 'item_created',
+      oldPrice: 0,
+      newPrice: newItem.price,
+      change: newItem.price,
+      changePercent: 0,
+      updatedBy: createdBy,
+      notes: 'New item created'
+    });
+    
+    return newItem.id;
+  }
+
+  calculateWastageCost(bagsWasted, boxesWasted, brand) {
+    const bagPrice = this.getItemPrice('vacuum_bags_10kg');
+    const boxItemId = brand === 'Golden Hill' ? 'golden_hill_boxes' : 'extra_boxes';
+    const boxPrice = this.getItemPrice(boxItemId);
+    
+    return (bagsWasted * bagPrice) + (boxesWasted * boxPrice);
+  }
+
   saveToStorage() {
     try {
-      localStorage.setItem('pistachio_enhanced_mes_data', JSON.stringify(this.data));
+      localStorage.setItem('pistachio_integrated_mes_data', JSON.stringify(this.data));
     } catch (e) {
       console.warn('Could not save to localStorage:', e);
     }
@@ -813,7 +1291,7 @@ class EnhancedAppState {
 
   loadFromStorage() {
     try {
-      const saved = localStorage.getItem('pistachio_enhanced_mes_data');
+      const saved = localStorage.getItem('pistachio_integrated_mes_data');
       if (saved) {
         const parsed = JSON.parse(saved);
         this.data = { ...this.data, ...parsed };
@@ -824,8 +1302,80 @@ class EnhancedAppState {
   }
 }
 
+// Equipment data
+const equipmentData = [
+  {code: "Ton", name: "Ton bag opener", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E1", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E2", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin1", name: "Material silo", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E3", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C1", name: "Conveyor", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C2", name: "Conveyor(LR)", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C3", name: "Conveyor(LR)", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C4", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C5", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C6", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C7", name: "Conveyor(LR)", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor1", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor2", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor3", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Sor4", name: "Sorter", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C8", name: "Conveyor", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C9", name: "Conveyor", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C10", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C11", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C12", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C13", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C14", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C15", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C16", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C17", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C18", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C19", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C20", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C21", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C22", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C23", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin2", name: "Product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin3", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin4", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin5", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin6", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin7", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin8", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin9", name: "By product bin", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C24", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C25", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C26", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C27", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C28", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C29", name: "Conveyor", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E4", name: "Z elevator", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E5", name: "Z elevator", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E6", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E7", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin10", name: "Sizing bin", priority: 10, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin11", name: "Sizing bin", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Bin12", name: "Sizing bin", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C30", name: "Conveyor", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "C31", name: "Conveyor", priority: 7, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E8", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E9", name: "Z elevator", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "E10", name: "Z elevator", priority: 10, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Pac-1", name: "Packing and stacking unit", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Pac-2", name: "Packing and stacking unit", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "Wra", name: "Frame wrapper", priority: 5, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "PRE-CL", name: "Pre-Cleaner", priority: 1, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "AGV-1", name: "AVG Robot", priority: 8, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "AGV-2", name: "AVG Robot", priority: 8, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0},
+  {code: "SIZE", name: "Sizer Machine", priority: 3, status: "operational", problem: "", lastUpdate: new Date().toISOString(), downtime: 0}
+];
+
 // Initialize Enhanced State
 window.appState = new EnhancedAppState();
+
+// Initialize equipment data in state
+window.appState.setState('equipment', equipmentData);
 
 // User management
 const users = { admin: 'admin123', operator: 'op123' };
@@ -842,6 +1392,8 @@ function handleLogin(event) {
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('userDisplay').textContent = username;
     
+    showAdminControls();
+    
     // Set today's date
     document.getElementById('productionDate').value = new Date().toISOString().split('T')[0];
     
@@ -849,8 +1401,15 @@ function handleLogin(event) {
     renderLots();
     renderRecords();
     renderInventory();
+    renderEquipmentGrid();
+    renderMaintenanceLog();
     updateProductionLotDropdown();
     updateReportsLotDropdown();
+    
+    if (username === 'admin') {
+      renderItemPricesTable();
+      renderPriceAuditTable();
+    }
   } else {
     alert('Invalid credentials');
   }
@@ -864,6 +1423,15 @@ function logout() {
 
 // Navigation
 function showSection(sectionId) {
+  // Check admin access for restricted sections
+  if (sectionId === 'itemprices') {
+    const currentUser = window.appState.getState('currentUser');
+    if (currentUser !== 'admin') {
+      alert('Access denied: Admin only section');
+      return;
+    }
+  }
+  
   document.querySelectorAll('.section').forEach(section => {
     section.classList.remove('active');
   });
@@ -873,6 +1441,12 @@ function showSection(sectionId) {
   
   document.getElementById(sectionId).classList.add('active');
   event.target.classList.add('active');
+  
+  // Load section-specific data when switching
+  if (sectionId === 'itemprices') {
+    renderItemPricesTable();
+    renderPriceAuditTable();
+  }
 }
 
 // Lot Management Functions
@@ -1279,6 +1853,341 @@ function filterRecords() {
   });
 }
 
+// Maintenance Functions
+function updateEquipmentStatus() {
+  const equipmentCode = document.getElementById('equipmentSelect').value;
+  const newStatus = document.getElementById('equipmentStatus').value;
+  const problem = document.getElementById('problemDescription').value;
+  const cost = parseFloat(document.getElementById('maintenanceCost').value) || 0;
+  
+  const equipment = window.appState.getState('equipment');
+  const equipmentItem = equipment.find(e => e.code === equipmentCode);
+  if (!equipmentItem) return;
+  
+  const oldStatus = equipmentItem.status;
+  
+  let downtimeHours = 0;
+  if (oldStatus !== 'operational' && newStatus === 'operational') {
+    const downStart = new Date(equipmentItem.lastUpdate);
+    const now = new Date();
+    downtimeHours = Math.round((now - downStart) / (1000 * 60 * 60) * 10) / 10;
+  }
+  
+  equipmentItem.status = newStatus;
+  equipmentItem.problem = problem;
+  equipmentItem.lastUpdate = new Date().toISOString();
+  if (newStatus === 'operational') {
+    equipmentItem.downtime = 0;
+  }
+  
+  window.appState.setState('equipment', equipment);
+  
+  window.appState.addToArray('maintenanceLog', {
+    timestamp: new Date().toISOString(),
+    equipment: `${equipmentCode} - ${equipmentItem.name}`,
+    priority: equipmentItem.priority,
+    statusChange: `${oldStatus} → ${newStatus}`,
+    problem: problem || 'Status update',
+    cost: cost,
+    downtime: downtimeHours
+  });
+  
+  document.getElementById('problemDescription').value = '';
+  document.getElementById('maintenanceCost').value = 0;
+  
+  alert('Equipment status updated successfully!');
+  renderEquipmentGrid();
+  renderMaintenanceLog();
+}
+
+function filterEquipment() {
+  const priorityFilter = document.getElementById('priorityFilter').value;
+  const typeFilter = document.getElementById('typeFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+  const sortBy = document.getElementById('sortBy').value;
+  
+  const equipment = window.appState.getState('equipment');
+  let filteredEquipment = [...equipment];
+  
+  if (priorityFilter !== 'all') {
+    filteredEquipment = filteredEquipment.filter(eq => eq.priority == priorityFilter);
+  }
+  
+  if (typeFilter !== 'all') {
+    filteredEquipment = filteredEquipment.filter(eq => {
+      switch(typeFilter) {
+        case 'conveyor': return eq.code.startsWith('C');
+        case 'elevator': return eq.code.startsWith('E');
+        case 'sorter': return eq.code.startsWith('Sor');
+        case 'bin': return eq.code.startsWith('Bin');
+        case 'processing': return ['SIZE', 'PRE-CL', 'Wra', 'Ton'].includes(eq.code);
+        case 'automation': return eq.code.startsWith('AGV');
+        default: return true;
+      }
+    });
+  }
+  
+  if (statusFilter !== 'all') {
+    if (statusFilter === 'operational') {
+      filteredEquipment = filteredEquipment.filter(eq => eq.status === 'operational');
+    } else if (statusFilter === 'issues') {
+      filteredEquipment = filteredEquipment.filter(eq => ['maintenance', 'attention'].includes(eq.status));
+    } else if (statusFilter === 'down') {
+      filteredEquipment = filteredEquipment.filter(eq => ['down', 'offline'].includes(eq.status));
+    }
+  }
+  
+  filteredEquipment.sort((a, b) => {
+    switch(sortBy) {
+      case 'priority': return a.priority - b.priority;
+      case 'code': return a.code.localeCompare(b.code);
+      case 'status': 
+        const statusOrder = {operational: 0, maintenance: 1, attention: 2, down: 3, offline: 4};
+        return statusOrder[a.status] - statusOrder[b.status];
+      default: return 0;
+    }
+  });
+  
+  renderFilteredEquipment(filteredEquipment);
+}
+
+function renderFilteredEquipment(filteredList) {
+  const grid = document.getElementById('equipmentGrid');
+  
+  const equipmentCards = filteredList.map(eq => {
+    const statusColors = {
+      operational: '#22c55e',
+      maintenance: '#f59e0b', 
+      attention: '#f97316',
+      down: '#ef4444',
+      offline: '#6b7280'
+    };
+    
+    const statusLabels = {
+      operational: 'Operational',
+      maintenance: 'Maintenance Due',
+      attention: 'Needs Attention', 
+      down: 'Down/Broken',
+      offline: 'Offline'
+    };
+    
+    return `
+      <div class="stat-card" style="border-left: 5px solid ${statusColors[eq.status]};">
+        <div style="font-weight: bold; font-size: 1.1rem;">${eq.code}</div>
+        <div style="margin: 0.5rem 0; color: ${statusColors[eq.status]}; font-weight: 600;">
+          ${statusLabels[eq.status]}
+        </div>
+        <div style="font-size: 0.9rem; color: #666;">
+          ${eq.name}
+        </div>
+        <div style="font-size: 0.8rem; color: #666;">Priority ${eq.priority}</div>
+        ${eq.problem ? `<div style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">${eq.problem}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  
+  grid.innerHTML = equipmentCards;
+  document.getElementById('shownCount').textContent = filteredList.length;
+}
+
+function renderEquipmentGrid() {
+  const equipment = window.appState.getState('equipment');
+  const grid = document.getElementById('equipmentGrid');
+  
+  const equipmentCards = equipment.map(eq => {
+    const statusColors = {
+      operational: '#22c55e',
+      maintenance: '#f59e0b', 
+      attention: '#f97316',
+      down: '#ef4444',
+      offline: '#6b7280'
+    };
+    
+    const statusLabels = {
+      operational: 'Operational',
+      maintenance: 'Maintenance Due',
+      attention: 'Needs Attention', 
+      down: 'Down/Broken',
+      offline: 'Offline'
+    };
+    
+    return `
+      <div class="stat-card" style="border-left: 5px solid ${statusColors[eq.status]};">
+        <div style="font-weight: bold; font-size: 1.1rem;">${eq.code}</div>
+        <div style="margin: 0.5rem 0; color: ${statusColors[eq.status]}; font-weight: 600;">
+          ${statusLabels[eq.status]}
+        </div>
+        <div style="font-size: 0.9rem; color: #666;">
+          ${eq.name}
+        </div>
+        ${eq.problem ? `<div style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;">${eq.problem}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  
+  grid.innerHTML = equipmentCards;
+  
+  const operational = equipment.filter(e => e.status === 'operational').length;
+  const criticalDown = equipment.filter(e => e.priority <= 3 && e.status !== 'operational').length;
+  const minorIssues = equipment.filter(e => e.priority >= 5 && e.status !== 'operational').length;
+  
+  document.getElementById('operationalEquipment').textContent = operational;
+  document.getElementById('criticalDown').textContent = criticalDown;
+  document.getElementById('minorIssues').textContent = minorIssues;
+}
+
+function renderMaintenanceLog() {
+  const tbody = document.querySelector('#maintenanceTable tbody');
+  tbody.innerHTML = '';
+  
+  const maintenanceLog = window.appState.getState('maintenanceLog') || [];
+  maintenanceLog.slice().reverse().forEach(log => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.equipment}</td>
+      <td style="color: ${log.priority <= 3 ? '#ef4444' : '#22c55e'}; font-weight: bold;">P${log.priority || 'N/A'}</td>
+      <td>${log.statusChange}</td>
+      <td>${log.problem}</td>
+      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.downtime > 0 ? log.downtime : '-'}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function exportMaintenanceReport() {
+  const fromDate = document.getElementById('exportFromDate').value;
+  const toDate = document.getElementById('exportToDate').value;
+  
+  if (!fromDate || !toDate) {
+    alert('Please select both From and To dates');
+    return;
+  }
+  
+  const maintenanceLog = window.appState.getState('maintenanceLog') || [];
+  const filtered = maintenanceLog.filter(log => {
+    const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+    return logDate >= fromDate && logDate <= toDate;
+  });
+  
+  if (filtered.length === 0) {
+    alert('No maintenance records found in the selected date range');
+    return;
+  }
+  
+  const equipmentCosts = {};
+  filtered.forEach(log => {
+    const equipment = log.equipment;
+    if (!equipmentCosts[equipment]) {
+      equipmentCosts[equipment] = {
+        totalCost: 0,
+        activities: [],
+        priority: log.priority || 'N/A'
+      };
+    }
+    equipmentCosts[equipment].totalCost += log.cost || 0;
+    if (log.cost > 0) {
+      equipmentCosts[equipment].activities.push({
+        date: new Date(log.timestamp).toLocaleDateString(),
+        cost: log.cost,
+        problem: log.problem
+      });
+    }
+  });
+  
+  let reportHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Maintenance Cost Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .summary { margin-bottom: 20px; padding: 15px; background: #f5f5f5; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #a32034; color: white; }
+        .equipment-section { margin-bottom: 25px; }
+        .equipment-title { font-weight: bold; font-size: 1.1em; color: #a32034; }
+        .total-cost { font-weight: bold; color: #a32034; }
+        @media print { body { margin: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Al Jameel MES - Maintenance Cost Report</h1>
+        <h3>Pistachio Production Line</h3>
+        <p>Report Period: ${new Date(fromDate).toLocaleDateString()} to ${new Date(toDate).toLocaleDateString()}</p>
+        <p>Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+      </div>
+  `;
+  
+  const grandTotal = Object.values(equipmentCosts).reduce((sum, eq) => sum + eq.totalCost, 0);
+  
+  reportHTML += `
+    <div class="summary">
+      <h3>Summary</h3>
+      <p><strong>Total Equipment with Maintenance:</strong> ${Object.keys(equipmentCosts).length}</p>
+      <p><strong>Total Maintenance Cost:</strong> $${grandTotal.toFixed(2)}</p>
+      <p><strong>Total Activities:</strong> ${filtered.filter(log => log.cost > 0).length}</p>
+    </div>
+  `;
+  
+  reportHTML += `<h3>Equipment Breakdown</h3>`;
+  
+  const sortedEquipment = Object.entries(equipmentCosts).sort((a, b) => b[1].totalCost - a[1].totalCost);
+  
+  sortedEquipment.forEach(([equipment, data]) => {
+    if (data.totalCost > 0) {
+      reportHTML += `
+        <div class="equipment-section">
+          <div class="equipment-title">${equipment} (Priority ${data.priority})</div>
+          <div class="total-cost">Total Cost: $${data.totalCost.toFixed(2)}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Cost</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      data.activities.forEach(activity => {
+        reportHTML += `
+          <tr>
+            <td>${activity.date}</td>
+            <td>$${activity.cost.toFixed(2)}</td>
+            <td>${activity.problem}</td>
+          </tr>
+        `;
+      });
+      
+      reportHTML += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  });
+  
+  reportHTML += `
+    </body>
+    </html>
+  `;
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(reportHTML);
+  printWindow.document.close();
+  printWindow.focus();
+  
+  setTimeout(() => {
+    printWindow.print();
+  }, 250);
+}
+
 // Reports Functions
 function updateReportsLotDropdown() {
   const dropdown = document.getElementById('reportLotSelect');
@@ -1461,41 +2370,6 @@ function generateLotReportHTML(lot, records) {
   
   reportContent.innerHTML = reportHTML;
 }
-// ADD these new functions after the existing generateLotReportHTML function
-
-function toggleLotSelection() {
-  const reportType = document.getElementById('reportType').value;
-  const singleGroup = document.getElementById('singleLotGroup');
-  const multipleGroup = document.getElementById('multipleLotGroup');
-  
-  if (reportType === 'single') {
-    singleGroup.style.display = 'block';
-    multipleGroup.style.display = 'none';
-  } else {
-    singleGroup.style.display = 'none';
-    multipleGroup.style.display = 'block';
-  }
-}
-
-function selectAllLots() {
-  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
-  checkboxes.forEach(cb => cb.checked = true);
-  updateSelectedCount();
-}
-
-function clearAllLots() {
-  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
-  checkboxes.forEach(cb => cb.checked = false);
-  updateSelectedCount();
-}
-
-function updateSelectedCount() {
-  const countElement = document.getElementById('selectedLotsCount');
-  if (countElement) {
-    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
-    countElement.textContent = `${checkboxes.length} lots selected`;
-  }
-}
 
 function generateMultiLotReportHTML(lots, allRecords) {
   const reportContent = document.getElementById('lotReportContent');
@@ -1586,11 +2460,167 @@ function generateMultiLotReportHTML(lots, allRecords) {
   
   reportContent.innerHTML = reportHTML;
 }
+
+function toggleLotSelection() {
+  const reportType = document.getElementById('reportType').value;
+  const singleGroup = document.getElementById('singleLotGroup');
+  const multipleGroup = document.getElementById('multipleLotGroup');
+  
+  if (reportType === 'single') {
+    singleGroup.style.display = 'block';
+    multipleGroup.style.display = 'none';
+  } else {
+    singleGroup.style.display = 'none';
+    multipleGroup.style.display = 'block';
+  }
+}
+
+function selectAllLots() {
+  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = true);
+  updateSelectedCount();
+}
+
+function clearAllLots() {
+  const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = false);
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const countElement = document.getElementById('selectedLotsCount');
+  if (countElement) {
+    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
+    countElement.textContent = `${checkboxes.length} lots selected`;
+  }
+}
+
 function printLotReport() {
   window.print();
 }
 
-// Inventory Functions (Simplified)
+function exportLotReportPDF() {
+  const reportContent = document.getElementById('lotReportContent');
+  if (!reportContent || !reportContent.innerHTML.trim()) {
+    alert('Please generate a lot report first');
+    return;
+  }
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Lot Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; }
+        .lot-status.open { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; }
+        .lot-status.completed { background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 4px; }
+        .shift-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .shift-badge.day { background: #fef3c7; color: #92400e; }
+        .shift-badge.night { background: #e0e7ff; color: #3730a3; }
+        @media print { body { margin: 0; } @page { margin: 1in; } }
+      </style>
+    </head>
+    <body>
+      ${reportContent.innerHTML}
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 250);
+}
+
+function exportLotReportExcel() {
+  const reportType = document.getElementById('reportType') ? document.getElementById('reportType').value : 'single';
+  let selectedLotIds = [];
+  
+  if (reportType === 'single') {
+    const singleLotId = document.getElementById('reportLotSelect').value;
+    if (!singleLotId) {
+      alert('Please generate a lot report first');
+      return;
+    }
+    selectedLotIds = [singleLotId];
+  } else {
+    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
+    selectedLotIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedLotIds.length === 0) {
+      alert('Please generate a lot report first');
+      return;
+    }
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  
+  const selectedLots = lots.filter(lot => selectedLotIds.includes(lot.id));
+  const selectedRecords = productionRecords.filter(record => selectedLotIds.includes(record.lotId));
+  
+  if (!window.XLSX) {
+    alert('Excel export library not loaded');
+    return;
+  }
+  
+  const wb = XLSX.utils.book_new();
+  
+  // Lot Summary Sheet
+  const summaryData = [
+    ['Lot Summary Report'],
+    ['Generated:', new Date().toLocaleString()],
+    [''],
+    ['Lot Number', 'Brand', 'Total Raw (kg)', 'Used (kg)', 'Available (kg)', 'Status']
+  ];
+  
+  selectedLots.forEach(lot => {
+    summaryData.push([
+      lot.lotNumber,
+      lot.brand,
+      lot.totalRawQuantity,
+      lot.usedRawQuantity,
+      lot.availableRawQuantity,
+      lot.status
+    ]);
+  });
+  
+  const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+  XLSX.utils.book_append_sheet(wb, summaryWs, 'Lot Summary');
+  
+  // Production Details Sheet
+  const detailsData = [
+    ['Date', 'Lot Number', 'Brand', 'Shift', 'Raw Input (kg)', '18-21 Size (kg)', '21-25 Size (kg)', 'Finished (kg)', 'Rejects (kg)', 'Efficiency (%)', 'Yield (%)']
+  ];
+  
+  selectedRecords.forEach(record => {
+    detailsData.push([
+      new Date(record.productionDate).toLocaleDateString(),
+      record.lotNumber,
+      record.brand,
+      record.shift,
+      record.rawInputShift,
+      record.kg1821,
+      record.kg2125,
+      record.finishedKg,
+      record.rejectsKg,
+      record.efficiency,
+      record.yield
+    ]);
+  });
+  
+  const detailsWs = XLSX.utils.aoa_to_sheet(detailsData);
+  XLSX.utils.book_append_sheet(wb, detailsWs, 'Production Details');
+  
+  // Save file
+  const filename = selectedLots.length === 1 
+    ? `lot_report_${selectedLots[0].lotNumber}_${new Date().toISOString().split('T')[0]}.xlsx`
+    : `multi_lot_report_${new Date().toISOString().split('T')[0]}.xlsx`;
+  
+  XLSX.writeFile(wb, filename);
+}
+
+// Inventory Functions
 function renderInventory() {
   const currentInventory = window.appState.getState('currentInventory') || {};
   document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags || 0;
@@ -1612,6 +2642,22 @@ function adjustInventory() {
   const success = window.appState.updateInventory(item, action, quantity);
   
   if (success) {
+    // Add inventory log entry
+    let itemName;
+    if (item === 'vacuumBags') itemName = 'Vacuum Bags (10kg)';
+    else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
+    else if (item === 'extraBoxes') itemName = 'Extra Boxes';
+    
+    const result = window.appState.getState('currentInventory')[item];
+    window.appState.addToArray('inventoryLog', {
+      timestamp: new Date().toISOString(),
+      item: itemName,
+      action,
+      quantity,
+      result,
+      notes
+    });
+    
     document.getElementById('invQuantity').value = 0;
     document.getElementById('invNotes').value = '';
     alert('Inventory updated successfully');
@@ -1621,13 +2667,13 @@ function adjustInventory() {
   
   renderInventory();
 }
-// Export Functions
+
 function exportInventoryExcel() {
   const inventoryLog = window.appState.getState('inventoryLog') || [];
   const currentInventory = window.appState.getState('currentInventory') || {};
   
-  if (inventoryLog.length === 0) {
-    alert('No inventory data to export');
+  if (!window.XLSX) {
+    alert('Excel export library not loaded');
     return;
   }
 
@@ -1667,11 +2713,6 @@ function exportInventoryPDF() {
   const inventoryLog = window.appState.getState('inventoryLog') || [];
   const currentInventory = window.appState.getState('currentInventory') || {};
   
-  if (inventoryLog.length === 0) {
-    alert('No inventory data to export');
-    return;
-  }
-
   let pdfContent = `
     <!DOCTYPE html>
     <html>
@@ -1747,121 +2788,270 @@ function exportInventoryPDF() {
   setTimeout(() => printWindow.print(), 250);
 }
 
-function exportLotReportPDF() {
-  const reportContent = document.getElementById('lotReportContent');
-  if (!reportContent || !reportContent.innerHTML.trim()) {
-    alert('Please generate a lot report first');
+// Item Prices Management Functions
+function showAdminControls() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser === 'admin') {
+    document.getElementById('itemPricesBtn').style.display = 'block';
+  } else {
+    document.getElementById('itemPricesBtn').style.display = 'none';
+  }
+}
+
+function renderItemPricesTable() {
+  const tbody = document.querySelector('#itemPricesTable tbody');
+  if (!tbody) return;
+  
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  tbody.innerHTML = '';
+  
+  itemPrices.forEach(item => {
+    const row = document.createElement('tr');
+    const statusColor = item.status === 'active' ? '#22c55e' : '#6b7280';
+    
+    row.innerHTML = `
+      <td><strong>${item.name}</strong></td>
+      <td>${item.unit}</td>
+      <td>${item.price.toFixed(2)}</td>
+      <td style="color: ${statusColor}; font-weight: bold;">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</td>
+      <td>${new Date(item.lastUpdated).toLocaleDateString()}</td>
+      <td>${item.updatedBy}</td>
+      <td>
+        <button onclick="editItemPrice('${item.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;">Edit</button>
+        <button onclick="toggleItemStatus('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" class="btn-secondary">
+          ${item.status === 'active' ? 'Deactivate' : 'Activate'}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function editItemPrice(itemId) {
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    document.getElementById('editItemId').value = itemId;
+    document.getElementById('itemName').value = item.name;
+    document.getElementById('itemUnit').value = item.unit;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemStatus').value = item.status;
+    
+    document.getElementById('itemFormTitle').textContent = 'Edit Item Price';
+    document.getElementById('saveItemBtn').textContent = 'Update Item';
+    
+    document.getElementById('itemPriceForm').scrollIntoView({behavior: 'smooth'});
+  }
+}
+
+function saveItemPrice(event) {
+  event.preventDefault();
+  
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    alert('Access denied: Admin only');
     return;
   }
   
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Lot Report</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 0; }
-        .lot-status.open { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; }
-        .lot-status.completed { background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 4px; }
-        .shift-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .shift-badge.day { background: #fef3c7; color: #92400e; }
-        .shift-badge.night { background: #e0e7ff; color: #3730a3; }
-        @media print { body { margin: 0; } @page { margin: 1in; } }
-      </style>
-    </head>
-    <body>
-      ${reportContent.innerHTML}
-    </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.focus();
-  setTimeout(() => printWindow.print(), 250);
-}
-
-function exportLotReportExcel() {
-  const reportType = document.getElementById('reportType') ? document.getElementById('reportType').value : 'single';
-  let selectedLotIds = [];
+  const itemId = document.getElementById('editItemId').value;
+  const itemData = {
+    name: document.getElementById('itemName').value,
+    unit: document.getElementById('itemUnit').value,
+    price: parseFloat(document.getElementById('itemPrice').value),
+    status: document.getElementById('itemStatus').value
+  };
   
-  if (reportType === 'single') {
-    const singleLotId = document.getElementById('reportLotSelect').value;
-    if (!singleLotId) {
-      alert('Please generate a lot report first');
-      return;
-    }
-    selectedLotIds = [singleLotId];
-  } else {
-    const checkboxes = document.querySelectorAll('#lotCheckboxes input[type="checkbox"]:checked');
-    selectedLotIds = Array.from(checkboxes).map(cb => cb.value);
+  if (itemId) {
+    const success = window.appState.updateItemPrice(itemId, itemData.price, currentUser, 'Manual price update');
     
-    if (selectedLotIds.length === 0) {
-      alert('Please generate a lot report first');
-      return;
+    if (success) {
+      const itemPrices = window.appState.getState('itemPrices');
+      const item = itemPrices.find(item => item.id === itemId);
+      if (item) {
+        item.name = itemData.name;
+        item.unit = itemData.unit;
+        item.status = itemData.status;
+        item.lastUpdated = new Date().toISOString();
+        item.updatedBy = currentUser;
+        window.appState.setState('itemPrices', itemPrices);
+      }
+      
+      alert('Item updated successfully!');
+    } else {
+      alert('Failed to update item');
+    }
+  } else {
+    const newItemId = window.appState.addNewItem(itemData, currentUser);
+    if (newItemId) {
+      alert('New item added successfully!');
+    } else {
+      alert('Failed to add item');
     }
   }
   
-  const lots = window.appState.getState('lots') || [];
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  
-  const selectedLot = lots.find(lot => lot.id === lotId);
-  const lotRecords = productionRecords.filter(record => record.lotId === lotId);
-  
-  const wb = XLSX.utils.book_new();
-  
-  // Lot Summary Sheet
-  const summaryData = [
-    ['Lot Information', ''],
-    ['Lot Number', selectedLot.lotNumber],
-    ['Brand', selectedLot.brand],
-    ['Total Containers', selectedLot.totalContainers],
-    ['Bags per Container', selectedLot.bagsPerContainer],
-    ['Kg per Bag', selectedLot.kgPerBag],
-    ['Total Raw Quantity (kg)', selectedLot.totalRawQuantity],
-    ['Status', selectedLot.status],
-    ['', ''],
-    ['Production Summary', ''],
-    ['Total Shifts', lotRecords.length],
-    ['Raw Used (kg)', lotRecords.reduce((sum, r) => sum + r.rawInputShift, 0)],
-    ['Finished (kg)', lotRecords.reduce((sum, r) => sum + r.finishedKg, 0)],
-    ['Rejects (kg)', lotRecords.reduce((sum, r) => sum + r.rejectsKg, 0)]
-  ];
-  const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(wb, summaryWs, 'Lot Summary');
-  
-  // Production Details Sheet
-  const detailsData = [
-    ['Date', 'Shift', 'Raw Input (kg)', '18-21 Size (kg)', '21-25 Size (kg)', 'Finished (kg)', 'Rejects (kg)', 'Efficiency (%)', 'Yield (%)'],
-    ...lotRecords.map(record => [
-      new Date(record.productionDate).toLocaleDateString(),
-      record.shift,
-      record.rawInputShift,
-      record.kg1821,
-      record.kg2125,
-      record.finishedKg,
-      record.rejectsKg,
-      record.efficiency,
-      record.yield
-    ])
-  ];
-  const detailsWs = XLSX.utils.aoa_to_sheet(detailsData);
-  XLSX.utils.book_append_sheet(wb, detailsWs, 'Production Details');
-  
-  XLSX.writeFile(wb, `lot_report_${selectedLot.lotNumber}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  cancelItemEdit();
+  renderItemPricesTable();
+  renderPriceAuditTable();
 }
+
+function cancelItemEdit() {
+  document.getElementById('itemPriceForm').reset();
+  document.getElementById('editItemId').value = '';
+  document.getElementById('itemFormTitle').textContent = 'Add New Item';
+  document.getElementById('saveItemBtn').textContent = 'Add Item';
+}
+
+function toggleItemStatus(itemId) {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    alert('Access denied: Admin only');
+    return;
+  }
+  
+  const itemPrices = window.appState.getState('itemPrices');
+  const item = itemPrices.find(item => item.id === itemId);
+  
+  if (item) {
+    const oldStatus = item.status;
+    item.status = item.status === 'active' ? 'inactive' : 'active';
+    item.lastUpdated = new Date().toISOString();
+    item.updatedBy = currentUser;
+    
+    window.appState.addToArray('priceAuditLog', {
+      timestamp: new Date().toISOString(),
+      itemId: itemId,
+      itemName: item.name,
+      action: 'status_change',
+      oldPrice: item.price,
+      newPrice: item.price,
+      change: 0,
+      changePercent: 0,
+      updatedBy: currentUser,
+      notes: `Status changed from ${oldStatus} to ${item.status}`
+    });
+    
+    window.appState.setState('itemPrices', itemPrices);
+    alert(`Item ${item.status === 'active' ? 'activated' : 'deactivated'}!`);
+    renderItemPricesTable();
+    renderPriceAuditTable();
+  }
+}
+
+function applyBulkUpdate() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    alert('Access denied: Admin only');
+    return;
+  }
+  
+  const updateType = document.getElementById('bulkUpdateType').value;
+  const amount = parseFloat(document.getElementById('bulkUpdateAmount').value);
+  const filter = document.getElementById('bulkUpdateFilter').value;
+  
+  if (!amount || amount === 0) {
+    alert('Please enter a valid update amount');
+    return;
+  }
+  
+  const itemPrices = window.appState.getState('itemPrices');
+  let itemsToUpdate = itemPrices.filter(item => item.status === 'active');
+  
+  let updatedCount = 0;
+  
+  itemsToUpdate.forEach(item => {
+    const oldPrice = item.price;
+    let newPrice;
+    
+    if (updateType === 'percentage') {
+      newPrice = oldPrice * (1 + (amount / 100));
+    } else {
+      newPrice = oldPrice + amount;
+    }
+    
+    newPrice = Math.max(0, Math.round(newPrice * 100) / 100);
+    
+    if (newPrice !== oldPrice) {
+      item.price = newPrice;
+      item.lastUpdated = new Date().toISOString();
+      item.updatedBy = currentUser;
+      
+      window.appState.addToArray('priceAuditLog', {
+        timestamp: new Date().toISOString(),
+        itemId: item.id,
+        itemName: item.name,
+        action: 'bulk_update',
+        oldPrice: oldPrice,
+        newPrice: newPrice,
+        change: newPrice - oldPrice,
+        changePercent: oldPrice > 0 ? ((newPrice - oldPrice) / oldPrice * 100).toFixed(2) : 0,
+        updatedBy: currentUser,
+        notes: `Bulk ${updateType} update: ${amount > 0 ? '+' : ''}${amount}${updateType === 'percentage' ? '%' : '}`
+      });
+      
+      updatedCount++;
+    }
+  });
+  
+  window.appState.setState('itemPrices', itemPrices);
+  alert(`Bulk update applied to ${updatedCount} items!`);
+  
+  document.getElementById('bulkUpdateAmount').value = '';
+  
+  renderItemPricesTable();
+  renderPriceAuditTable();
+}
+
+function renderPriceAuditTable() {
+  const tbody = document.querySelector('#priceAuditTable tbody');
+  if (!tbody) return;
+  
+  const auditLog = window.appState.getState('priceAuditLog') || [];
+  tbody.innerHTML = '';
+  
+  auditLog.slice().reverse().forEach(log => {
+    const row = document.createElement('tr');
+    const changeColor = log.change > 0 ? '#22c55e' : log.change < 0 ? '#ef4444' : '#6b7280';
+    
+    row.innerHTML = `
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+      <td>${log.itemName}</td>
+      <td style="text-transform: capitalize;">${log.action.replace('_', ' ')}</td>
+      <td>${log.oldPrice.toFixed(2)}</td>
+      <td>${log.newPrice.toFixed(2)}</td>
+      <td style="color: ${changeColor}; font-weight: bold;">
+        ${log.change > 0 ? '+' : ''}${log.change.toFixed(2)} 
+        ${log.changePercent != 0 ? `(${log.changePercent > 0 ? '+' : ''}${log.changePercent}%)` : ''}
+      </td>
+      <td>${log.updatedBy}</td>
+      <td>${log.notes}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
 // Initialize on load
 window.addEventListener('load', () => {
   calculateLotTotals();
   updateProductionSummary();
   
-  // Set today's date
+  // Set today's date for various date inputs
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('productionDate').value = today;
+  
+  const monthAgo = new Date();
+  monthAgo.setMonth(monthAgo.getMonth() - 1);
+  const monthAgoString = monthAgo.toISOString().split('T')[0];
+  
+  document.getElementById('exportToDate').value = today;
+  document.getElementById('exportFromDate').value = monthAgoString;
   
   // Subscribe to state changes
   window.appState.subscribe('lots', renderLots);
   window.appState.subscribe('productionRecords', renderRecords);
   window.appState.subscribe('currentInventory', renderInventory);
+  window.appState.subscribe('equipment', renderEquipmentGrid);
+  window.appState.subscribe('maintenanceLog', renderMaintenanceLog);
 });
 </script>
 
