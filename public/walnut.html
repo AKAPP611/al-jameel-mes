@@ -2603,15 +2603,7 @@ function generateReportHTML(records) {
     brandStats[record.brand].count += 1;
   });
 
-  // Product type analysis
-  const productStats = {
-    'Half Kernel': records.reduce((sum, r) => sum + (r.halfKernel || 0), 0),
-    'Quarter': records.reduce((sum, r) => sum + (r.quarter || 0), 0),
-    'Large Pieces': records.reduce((sum, r) => sum + (r.largePieces || 0), 0),
-    'Amber': records.reduce((sum, r) => sum + (r.amber || 0), 0)
-  };
-
-  const reportHTML = `
+ 'Half Kernel': records.reduce((sum, r) => sum + (r.halfKernel || 0), 0),
     <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #8B4513 0%, #D2B48C 100%); color: white; border-radius: 0.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
@@ -2684,6 +2676,125 @@ function generateReportHTML(records) {
           { label: 'Large Pieces', value: productStats['Large Pieces'], color: '#CD853F' },
           { label: 'Amber', value: productStats['Amber'], color: '#DEB887' }
         ])}
+      </div>
+    </div>
+
+    <!-- Materials Usage and Cost Analysis -->
+    <div class="chart-container">
+      <div class="chart-title">Materials Usage & Cost Analysis</div>
+      
+      <!-- Pouches Analysis -->
+      <div style="margin-bottom: 2rem;">
+        <h4 style="color: var(--primary); margin-bottom: 1rem;">Pouches Usage</h4>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: var(--primary); color: white;">
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Item</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Used (qty)</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Unit Price</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Used Cost</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Wasted (qty)</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Wastage Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">5kg Pouches</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.pouches5kgUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}5kg_pouch`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${pouchCosts.pouches5kgUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.pouches5kgWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${pouchCosts.pouches5kgWasted.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">10kg Pouches</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.pouches10kgUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}10kg_pouch`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${pouchCosts.pouches10kgUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.pouches10kgWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${pouchCosts.pouches10kgWasted.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Boxes Analysis -->
+      <div style="margin-bottom: 2rem;">
+        <h4 style="color: var(--primary); margin-bottom: 1rem;">Boxes Usage</h4>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: var(--primary); color: white;">
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Box Type</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Used (qty)</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Unit Price</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Used Cost</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Wasted (qty)</th>
+                <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Wastage Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">Half Kernel Boxes</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.halfKernelBoxesUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}_half_kernel_box`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${boxCosts.halfKernelUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.halfKernelBoxesWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${boxCosts.halfKernelWasted.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">Quarter Boxes</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.quarterBoxesUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}_quarter_box`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${boxCosts.quarterUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.quarterBoxesWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${boxCosts.quarterWasted.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">Large Pieces Boxes</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.largePiecesBoxesUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}_large_pieces_box`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${boxCosts.largePiecesUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.largePiecesBoxesWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${boxCosts.largePiecesWasted.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">Amber Boxes</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.amberBoxesUsed.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}_amber_box`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${boxCosts.amberUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.amberBoxesWasted.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${boxCosts.amberWasted.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Total Box Loss Summary -->
+      <div style="background: #fff3cd; padding: 1.5rem; border-radius: 0.5rem; border: 2px solid #f59e0b; margin-bottom: 1rem;">
+        <h4 style="color: #856404; margin: 0 0 1rem 0; display: flex; align-items: center;">
+          <span style="font-size: 1.5rem; margin-right: 0.5rem;">⚠️</span>
+          Total Box Wastage Loss Summary
+        </h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <p style="margin: 0.5rem 0; font-weight: 600; color: #856404;">
+              <strong>Total Boxes Wasted:</strong> ${totalBoxesWasted.toLocaleString()} units
+            </p>
+            <p style="margin: 0.5rem 0; font-weight: 600; color: #856404;">
+              <strong>Total Wastage Cost:</strong> $${totalBoxWastageCost.toFixed(2)}
+            </p>
+          </div>
+          <div style="font-size: 0.9rem; color: #856404;">
+            <p style="margin: 0.25rem 0;">Half Kernel: ${materialsAnalysis.halfKernelBoxesWasted} boxes ($${boxCosts.halfKernelWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Quarter: ${materialsAnalysis.quarterBoxesWasted} boxes ($${boxCosts.quarterWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Large Pieces: ${materialsAnalysis.largePiecesBoxesWasted} boxes ($${boxCosts.largePiecesWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Amber: ${materialsAnalysis.amberBoxesWasted} boxes ($${boxCosts.amberWasted.toFixed(2)})</p>
+          </div>
+        </div>
       </div>
     </div>
 
