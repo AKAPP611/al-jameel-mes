@@ -20,43 +20,30 @@ function Progress({ value = 0 }) {
   `;
 }
 
-function Card({ icon, title, subtitle, content, href = '#/' }) {
+function Card({ icon, title, href = '#/' }) {
   return `
-    <article class="card factory-card" role="listitem">
+    <article class="card factory-card" role="listitem" style="text-align: center; padding: 2rem;">
       <a class="card-link" href="${href}" style="display:block; color:inherit; text-decoration:none" aria-label="${title}">
-        <div>
-          <div class="title">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+          <div style="font-size: 5rem; line-height: 1;">
             ${icon || ''}
-            <span>${title}</span>
           </div>
-          <div class="subtitle">${subtitle || ''}</div>
+          <div class="title" style="font-size: 1.5rem; font-weight: 900; margin: 0;">
+            ${title}
+          </div>
         </div>
-        <div>${content || ''}</div>
       </a>
     </article>
   `;
 }
 
 // Factory data
+// Factory data - names only
 const factories = [
   { key: "Pistachio", name: "Pistachio" },
   { key: "Walnut", name: "Walnut" },
   { key: "Cardamom", name: "Cardamom" }
 ];
-
-const productionData = {
-  Pistachio: { actualKg: 5600, targetKg: 6000, efficiency: 94, rejectRate: 1.4 },
-  Walnut: { actualKg: 7200, targetKg: 7000, efficiency: 97, rejectRate: 2.1 },
-  Cardamom: { actualKg: 3100, targetKg: 4000, efficiency: 78, rejectRate: 0.9 }
-};
-
-// QC data for Quality Control dashboard
-const qcData = {
-  todayInspections: 25,
-  passRate: 94.2,
-  pendingTests: 6,
-  criticalIssues: 1
-};
 
 export function FactorySelectView(mount) {
   mount.innerHTML = `
@@ -66,7 +53,7 @@ export function FactorySelectView(mount) {
              style="width:64px; height:64px; margin-bottom:0.5rem;" 
              onerror="this.style.display='none'">
         <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
-        <p class="section-sub">Pick a workspace to view today's performance.</p>
+        <p class="section-sub">Pick a workspace to get started.</p>
       </div>
       <div id="factoryGrid" class="grid grid-3" role="list">
         <div class="skel skel-card"></div>
@@ -79,17 +66,13 @@ export function FactorySelectView(mount) {
 
   // Simulate loading delay then render cards with QC
   setTimeout(() => {
-    renderCards(mount.querySelector('#factoryGrid'), factories, productionData, qcData);
+   renderCards(mount.querySelector('#factoryGrid'), factories);
   }, 500);
 }
 
-function renderCards(grid, factories, prod, qc) {
-  // Generate factory cards
+function renderCards(grid, factories) {
+  // Generate simplified factory cards with enlarged logos
   const factoryCards = factories.map(f => {
-    const p = prod[f.key] || { actualKg: 0, targetKg: 0, efficiency: 0, rejectRate: 0 };
-    const effClass = p.efficiency >= 95 ? 'ok' : (p.efficiency >= 90 ? 'warn' : 'bad');
-    const progressPct = Math.min(100, Math.round((p.actualKg / Math.max(1, p.targetKg)) * 100));
-    
     // Determine href for each factory
     let href = '#/';
     if (f.key === 'Pistachio') {
@@ -102,69 +85,28 @@ function renderCards(grid, factories, prod, qc) {
       href = `#/dashboard?factory=${encodeURIComponent(f.key)}`;
     }
     
-    // Factory icons
+    // Factory icons - enlarged for better visibility
     let iconMarkup = '';
     if (f.key === 'Pistachio') {
-      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 40px; height: 40px; margin-right: 8px;" onerror="this.outerHTML=\'🥜\'">';
+      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 80px; height: 80px;" onerror="this.outerHTML=\'🥜\'">';
     } else if (f.key === 'Walnut') {
-      iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="" style="width: 40px; height: 40px; margin-right: 8px;" onerror="this.outerHTML=\'🌰\'">';
+      iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="" style="width: 80px; height: 80px;" onerror="this.outerHTML=\'🌰\'">';
     } else if (f.key === 'Cardamom') {
-      iconMarkup = '🌿';
+      iconMarkup = '<span style="font-size: 5rem;">🌿</span>';
     }
 
     return Card({
       icon: iconMarkup,
       title: f.name,
-      subtitle: `${getText('today')}: ${p.actualKg.toLocaleString()} kg`,
-      href: href,
-      content: `
-        <div class="grid grid-3" aria-label="Key performance indicators">
-          ${KpiTile({ 
-            label: getText('efficiency'), 
-            value: `${p.efficiency}%`, 
-            state: effClass 
-          })}
-          ${KpiTile({ 
-            label: getText('rejectRate'), 
-            value: `${p.rejectRate}%`, 
-            state: p.rejectRate < 2 ? 'ok' : (p.rejectRate < 5 ? 'warn' : 'bad') 
-          })}
-          <div class="kpi" role="group" aria-label="Target progress">
-            <div class="label">Target Progress</div>
-            <div><strong>${progressPct}%</strong> · ${p.actualKg.toLocaleString()} / ${p.targetKg.toLocaleString()} kg</div>
-            ${Progress({ value: progressPct })}
-          </div>
-        </div>
-      `
+      href: href
     });
   });
 
-  // Generate QC card
-  const qcPassRateClass = qc.passRate >= 95 ? 'ok' : (qc.passRate >= 90 ? 'warn' : 'bad');
+  // Add QC card with enlarged icon
   const qcCard = Card({
-    icon: '🔬',
+    icon: '<span style="font-size: 5rem;">🔬</span>',
     title: 'Quality Control',
-    subtitle: `Today: ${qc.todayInspections} inspections`,
-    href: './qc.html',
-    content: `
-      <div class="grid grid-3" aria-label="QC overview">
-        ${KpiTile({ 
-          label: 'Pass Rate', 
-          value: `${qc.passRate}%`, 
-          state: qcPassRateClass 
-        })}
-        ${KpiTile({ 
-          label: 'Pending Tests', 
-          value: `${qc.pendingTests}`, 
-          state: qc.pendingTests === 0 ? 'ok' : 'warn' 
-        })}
-        ${KpiTile({ 
-          label: 'Critical Issues', 
-          value: `${qc.criticalIssues}`, 
-          state: qc.criticalIssues === 0 ? 'ok' : 'bad' 
-        })}
-      </div>
-    `
+    href: './qc.html'
   });
 
   // Combine all cards and render
