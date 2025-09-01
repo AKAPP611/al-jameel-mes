@@ -1364,6 +1364,25 @@ class AppState {
     }
   }
 
+  updateArrayItem(key, itemId, updateFn) {
+    if (!Array.isArray(this.data[key])) {
+      return false;
+    }
+    
+    const index = this.data[key].findIndex(item => 
+      item.id === itemId || item.lotNumber === itemId
+    );
+    
+    if (index === -1) {
+      return false;
+    }
+    
+    this.data[key][index] = updateFn(this.data[key][index]);
+    this.saveToStorage();
+    this.notify(key, this.data[key]);
+    return true;
+  }
+
   updateInventory(item, action, quantity) {
     const current = this.data.currentInventory[item] || 0;
     let newValue;
