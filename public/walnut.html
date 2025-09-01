@@ -204,7 +204,26 @@
       border-radius: 0.5rem;
       margin: 1rem 0;
     }
+.progress-bar {
+      background: #e5e7eb;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
 
+    .progress-fill {
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
     /* Section header with walnut image */
     .section-header-with-image {
       display: flex;
@@ -425,6 +444,7 @@
   <div class="container">
    <div class="nav-buttons">
   <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+     <button class="nav-btn" onclick="showSection('lotmanagement')">Lot Management</button>
   <button class="nav-btn" onclick="showSection('production')">New Production</button>
   <button class="nav-btn" onclick="showSection('records')">View Records</button>
   <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
@@ -455,7 +475,74 @@
       </div>
       <p>KPIs update automatically when you submit production records.</p>
     </section>
+<!-- Lot Management Section -->
+    <section id="lotmanagement" class="section">
+      <div class="section-header-with-image">
+        <img src="src/assets/icons/Walnut.png" alt="Walnut" onerror="this.outerHTML='🌰 '">
+        <h2>Lot Management</h2>
+      </div>
+      
+      <!-- Create New Lot -->
+      <div class="materials-section">
+        <h3>Create New Lot</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Lot Number</label>
+            <input id="lotNumber" type="text" placeholder="e.g., WN-240315-01" required>
+          </div>
+          <div class="form-group">
+            <label>Brand</label>
+            <select id="lotBrand">
+              <option>Al Jameel</option>
+              <option>Abu Taj</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Total Containers</label>
+            <input id="totalContainers" type="number" min="1" value="1" onchange="calculateLotTotals()">
+          </div>
+          <div class="form-group">
+            <label>Bags per Container</label>
+            <input id="bagsPerContainer" type="number" min="1" value="40" onchange="calculateLotTotals()">
+          </div>
+          <div class="form-group">
+            <label>Kg per Bag</label>
+            <input id="kgPerBag" type="number" min="0.1" step="0.1" value="25" onchange="calculateLotTotals()">
+          </div>
+          <div class="form-group">
+            <label>Total Raw Quantity (kg)</label>
+            <input id="totalRawQuantity" type="number" readonly style="background: #f8f9fa;">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Container Numbers (one per line or comma-separated)</label>
+            <textarea id="containerNumbers" placeholder="e.g., CONT-001, CONT-002, CONT-003 or enter each on a new line"></textarea>
+          </div>
+        </div>
+        <button onclick="createLot()">Create Lot</button>
+      </div>
 
+      <!-- Active Lots Table -->
+      <h3>Current Lots Status</h3>
+      <div style="overflow-x: auto;">
+        <table id="lotsTable">
+          <thead>
+            <tr>
+              <th>Lot Number</th>
+              <th>Brand</th>
+              <th>Total Containers</th>
+              <th>Total Raw (kg)</th>
+              <th>Used (kg)</th>
+              <th>Available (kg)</th>
+              <th>Progress</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Container Numbers</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
     <!-- Production Entry Section -->
     <section id="production" class="section">
       <div class="section-header-with-image">
@@ -496,15 +583,27 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Lot Number</label>
-          <input id="lotNo" type="text" placeholder="e.g., WN-240315-01">
-        </div>
+  <label>Select Lot</label>
+  <select id="productionLot" onchange="updateLotInfo()" required>
+    <option value="">Select a lot...</option>
+  </select>
+</div>
         <div class="form-group">
           <label>Raw Input (kg)</label>
           <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
         </div>
       </div>
-
+<!-- Lot Info Display -->
+<div id="lotInfoDisplay" class="materials-section" style="display: none;">
+  <h4>Selected Lot Information</h4>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+    <div><strong>Lot Number:</strong> <span id="selectedLotNumber">-</span></div>
+    <div><strong>Brand:</strong> <span id="selectedLotBrand">-</span></div>
+    <div><strong>Available Raw:</strong> <span id="selectedLotAvailable">-</span> kg</div>
+    <div><strong>Total Containers:</strong> <span id="selectedLotContainers">-</span></div>
+    <div style="grid-column: 1 / -1;"><strong>Container Numbers:</strong> <span id="selectedLotContainerNumbers">-</span></div>
+  </div>
+</div>
       <!-- Product Type Outputs -->
       <h3>Product Type Outputs (kg)</h3>
       <div class="form-grid">
@@ -1086,6 +1185,7 @@ class AppState {
   constructor() {
     this.data = {
       productionRecords: [],
+      lots: [],
       inventoryLog: [],
       maintenanceLog: [],
       wastageLog: [],
@@ -1371,7 +1471,164 @@ class AppState {
     return newItem.id;
   }
 }
+// After line ~195 (after AppState class closes)
+// Before: window.appState = new AppState();
 
+// ===== VALIDATION SYSTEM =====
+class FormValidator {
+  constructor() {
+    this.rules = {};
+    this.setupStyles();
+  }
+
+  setupStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .form-field-error {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+      }
+      .form-field-success {
+        border-color: #22c55e !important;
+      }
+      .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+      }
+      .form-group.has-error label {
+        color: #ef4444;
+      }
+      .success-toast, .error-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        z-index: 1001;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+      .success-toast {
+        background: #22c55e;
+      }
+      .error-toast {
+        background: #ef4444;
+      }
+      .success-toast.show, .error-toast.show {
+        transform: translateX(0);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  addRule(fieldId, validator, message) {
+    if (!this.rules[fieldId]) {
+      this.rules[fieldId] = [];
+    }
+    this.rules[fieldId].push({ validator, message });
+  }
+
+  validateField(fieldId) {
+    const field = document.getElementById(fieldId);
+    const rules = this.rules[fieldId];
+    
+    if (!field || !rules) return true;
+
+    this.clearFieldError(fieldId);
+    
+    for (const rule of rules) {
+      if (!rule.validator(field.value, field)) {
+        this.showFieldError(fieldId, rule.message);
+        return false;
+      }
+    }
+    
+    this.showFieldSuccess(fieldId);
+    return true;
+  }
+
+  validateForm() {
+    let isValid = true;
+    const fieldIds = Object.keys(this.rules);
+    
+    fieldIds.forEach(fieldId => {
+      if (!this.validateField(fieldId)) {
+        isValid = false;
+      }
+    });
+    
+    return isValid;
+  }
+
+  showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.add('form-field-error');
+    field.classList.remove('form-field-success');
+    formGroup.classList.add('has-error');
+    
+    const errorMsg = document.createElement('span');
+    errorMsg.className = 'error-message';
+    errorMsg.textContent = message;
+    formGroup.appendChild(errorMsg);
+  }
+
+  showFieldSuccess(fieldId) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.remove('form-field-error');
+    field.classList.add('form-field-success');
+    formGroup.classList.remove('has-error');
+  }
+
+  clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    const formGroup = field.closest('.form-group');
+    
+    field.classList.remove('form-field-error', 'form-field-success');
+    formGroup.classList.remove('has-error');
+    
+    const errorMsg = formGroup.querySelector('.error-message');
+    if (errorMsg) {
+      errorMsg.remove();
+    }
+  }
+
+  showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `${type}-toast`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+}
+
+// ===== VALIDATION RULES =====
+const ValidationRules = {
+  required: (value) => value.trim() !== '',
+  positiveNumber: (value) => !isNaN(value) && parseFloat(value) >= 0,
+  range: (min, max) => (value) => {
+    const num = parseFloat(value);
+    return !isNaN(num) && num >= min && num <= max;
+  },
+  lotNumberFormat: (value) => {
+    return /^WN-\d{6}-\d{2}$/.test(value);  // Walnut format: WN-YYMMDD-##
+  }
+};
+
+window.formValidator = new FormValidator();
 // ===== INITIALIZE GLOBAL OBJECTS =====
 window.appState = new AppState();
 
@@ -1547,13 +1804,181 @@ function clearForm() {
   
   updateSummary();
 }
+// After clearForm() function (around line ~980)
+// Before submitProduction() function
 
+// Lot Management Functions
+function calculateLotTotals() {
+  const containers = parseInt(document.getElementById('totalContainers').value) || 0;
+  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
+  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
+  
+  const totalRawQuantity = containers * bagsPerContainer * kgPerBag;
+  document.getElementById('totalRawQuantity').value = totalRawQuantity;
+}
+
+function createLot() {
+  const lotNumber = document.getElementById('lotNumber').value.trim();
+  const brand = document.getElementById('lotBrand').value;
+  const totalContainers = parseInt(document.getElementById('totalContainers').value) || 0;
+  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
+  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
+  const totalRawQuantity = parseFloat(document.getElementById('totalRawQuantity').value) || 0;
+  
+  if (!lotNumber) {
+    window.formValidator.showToast('Please enter a lot number', 'error');
+    return;
+  }
+  
+  if (totalContainers <= 0 || bagsPerContainer <= 0 || kgPerBag <= 0) {
+    window.formValidator.showToast('Please enter valid quantities', 'error');
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  if (lots.some(lot => lot.lotNumber === lotNumber)) {
+    window.formValidator.showToast('Lot number already exists', 'error');
+    return;
+  }
+  
+  const containerNumbersInput = document.getElementById('containerNumbers').value.trim();
+  const containerNumbers = containerNumbersInput
+    .split(/[,\n]+/)
+    .map(num => num.trim())
+    .filter(num => num.length > 0);
+
+  const newLot = {
+    id: Date.now().toString(),
+    lotNumber,
+    brand,
+    totalContainers,
+    bagsPerContainer,
+    kgPerBag,
+    totalRawQuantity,
+    availableRawQuantity: totalRawQuantity,
+    usedRawQuantity: 0,
+    status: 'Open',
+    createdDate: new Date().toISOString(),
+    containerNumbers: containerNumbers
+  };
+  
+  window.appState.addToArray('lots', newLot);
+
+  document.getElementById('lotNumber').value = '';
+  document.getElementById('totalContainers').value = '1';
+  document.getElementById('bagsPerContainer').value = '40';
+  document.getElementById('kgPerBag').value = '25';
+  document.getElementById('totalRawQuantity').value = '';
+  document.getElementById('containerNumbers').value = '';
+
+  window.formValidator.showToast('Lot created successfully!', 'success');
+  renderLots();
+  updateProductionLotDropdown();
+}
+
+function renderLots() {
+  const tbody = document.querySelector('#lotsTable tbody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = '';
+  
+  const lots = window.appState.getState('lots') || [];
+  lots.forEach(lot => {
+    const progressPercent = lot.totalRawQuantity > 0 
+      ? Math.round((lot.usedRawQuantity / lot.totalRawQuantity) * 100) 
+      : 0;
+    
+    const statusColor = lot.status === 'Open' ? '#22c55e' : '#6b7280';
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${lot.lotNumber}</strong></td>
+      <td>${lot.brand}</td>
+      <td>${lot.totalContainers}</td>
+      <td>${lot.totalRawQuantity.toLocaleString()}</td>
+      <td>${lot.usedRawQuantity.toLocaleString()}</td>
+      <td>${lot.availableRawQuantity.toLocaleString()}</td>
+      <td>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${progressPercent}%;">
+            ${progressPercent}%
+          </div>
+        </div>
+      </td>
+      <td style="color: ${statusColor}; font-weight: bold;">${lot.status}</td>
+      <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
+      <td style="max-width: 200px; font-size: 0.85rem;">
+        ${lot.containerNumbers && lot.containerNumbers.length > 0 
+          ? lot.containerNumbers.slice(0, 3).join(', ') + (lot.containerNumbers.length > 3 ? '...' : '')
+          : 'N/A'}
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function updateProductionLotDropdown() {
+  const dropdown = document.getElementById('productionLot');
+  if (!dropdown) return;
+  
+  dropdown.innerHTML = '<option value="">Select a lot...</option>';
+  
+  const lots = window.appState.getState('lots') || [];
+  const openLots = lots.filter(lot => lot.status === 'Open' && lot.availableRawQuantity > 0);
+  
+  openLots.forEach(lot => {
+    const option = document.createElement('option');
+    option.value = lot.id;
+    option.textContent = `${lot.lotNumber} (${lot.brand}) - ${lot.availableRawQuantity} kg available`;
+    dropdown.appendChild(option);
+  });
+}
+
+function updateLotInfo() {
+  const lotId = document.getElementById('productionLot').value;
+  const lotDisplay = document.getElementById('lotInfoDisplay');
+  
+  if (!lotId) {
+    lotDisplay.style.display = 'none';
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const selectedLot = lots.find(lot => lot.id === lotId);
+  
+  if (selectedLot) {
+    document.getElementById('selectedLotNumber').textContent = selectedLot.lotNumber;
+    document.getElementById('selectedLotBrand').textContent = selectedLot.brand;
+    document.getElementById('selectedLotAvailable').textContent = selectedLot.availableRawQuantity.toLocaleString();
+    document.getElementById('selectedLotContainers').textContent = selectedLot.totalContainers;
+    document.getElementById('selectedLotContainerNumbers').textContent = 
+      selectedLot.containerNumbers && selectedLot.containerNumbers.length > 0 
+        ? selectedLot.containerNumbers.join(', ') 
+        : 'No container numbers specified';
+    lotDisplay.style.display = 'block';
+  }
+}
 function submitProduction() {
-  const brand = document.getElementById('brand').value;
-  const rawMaterialType = document.getElementById('rawMaterialType').value; // "Walnut Inshell"
+  const lotId = document.getElementById('productionLot').value;
+  
+  if (!lotId) {
+    window.formValidator.showToast('Please select a lot', 'error');
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const selectedLot = lots.find(lot => lot.id === lotId);
+  
+  if (!selectedLot) {
+    window.formValidator.showToast('Selected lot not found', 'error');
+    return;
+  }
+  
+  const brand = selectedLot.brand; // Use lot's brand
+  const rawMaterialType = document.getElementById('rawMaterialType').value;
   const supplier = document.getElementById('supplier').value;
   const rawFormat = document.getElementById('rawFormat').value;
-  const lotNo = document.getElementById('lotNo').value;
+  const lotNo = selectedLot.lotNumber;
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   
   // Get product type quantities
@@ -1704,10 +2129,17 @@ function submitProduction() {
       boxCalculationMethod: 'auto-calculated from product weight (10kg per box)'
     }
   };
-  
+  // Update lot quantities
+window.appState.updateArrayItem('lots', lotId, (lot) => {
+  lot.usedRawQuantity += rawInput;
+  lot.availableRawQuantity -= rawInput;
+  if (lot.availableRawQuantity <= 0) {
+    lot.status = 'Completed';
+  }
+  return lot;
+});
   // Add to production records
   window.appState.addToArray('productionRecords', record);
-  
   // Update inventory - pouches
   window.appState.updateInventory(pouch5kgType, 'remove', totalPouches5kgNeeded);
   window.appState.updateInventory(pouch10kgType, 'remove', totalPouches10kgNeeded);
@@ -3239,6 +3671,9 @@ window.addEventListener('load', () => {
   updateInventoryDisplay();
   renderEquipmentGrid();
   renderMaintenanceTable();
+  renderLots();
+updateProductionLotDropdown();
+calculateLotTotals();
   initializeReportDates();
 });
 </script>
