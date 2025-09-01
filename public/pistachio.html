@@ -2847,7 +2847,46 @@ records.forEach(record => {
     record.containerNumbers.forEach(container => allContainers.add(container));
   }
 });
-
+function generateContainerSummaryRows(records) {
+  // Group records by lot to get unique container sets
+  const lotContainerMap = {};
+  
+  records.forEach(record => {
+    if (!lotContainerMap[record.lot]) {
+      lotContainerMap[record.lot] = {
+        brand: record.brand,
+        containers: new Set()
+      };
+    }
+    
+    if (record.containerNumbers && record.containerNumbers.length > 0) {
+      record.containerNumbers.forEach(container => {
+        lotContainerMap[record.lot].containers.add(container);
+      });
+    }
+  });
+  
+  // Generate rows
+  return Object.entries(lotContainerMap).map(([lotNumber, data]) => {
+    const containerArray = Array.from(data.containers);
+    const containerCount = containerArray.length;
+    
+    return `
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">${lotNumber}</td>
+        <td style="padding: 0.75rem; border: 1px solid #ddd;">${data.brand}</td>
+        <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center; font-weight: 600; color: #0066cc;">
+          ${containerCount > 0 ? containerCount : 'None'}
+        </td>
+        <td style="padding: 0.75rem; border: 1px solid #ddd; line-height: 1.8;">
+          ${containerCount > 0 
+            ? containerArray.map(c => `<span style="background: #e3f2fd; padding: 2px 8px; border-radius: 4px; margin: 2px; display: inline-block;">${c}</span>`).join(' ')
+            : '<span style="color: #999;">No container numbers specified for this lot</span>'}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
 // Calculate total materials cost (not just waste)
 let totalMaterialsCost = 0;
 const bagPrice = window.appState.getItemPrice('vacuum_bags_10kg');
@@ -3003,10 +3042,10 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
-<td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
+<td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem; max-width: 300px;">
   ${record.containerNumbers && record.containerNumbers.length > 0 
-    ? record.containerNumbers.slice(0, 2).join(', ') + (record.containerNumbers.length > 2 ? '...' : '')
-    : 'N/A'}
+    ? record.containerNumbers.join(', ')
+    : 'No containers specified'}
 </td>
 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg1821 || 0).toLocaleString()}</td>
@@ -3020,7 +3059,25 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
         </table>
       </div>
     </div>
-
+<!-- Container Summary Table -->
+    <div class="chart-container">
+      <div class="chart-title">Container Numbers by Lot</div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+          <thead>
+            <tr style="background: #0066cc; color: white;">
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left; width: 25%;">Lot Number</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left; width: 15%;">Brand</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: center; width: 10%;">Container Count</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left; width: 50%;">Container Numbers</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${generateContainerSummaryRows(records)}
+          </tbody>
+        </table>
+      </div>
+    </div>
     ${wastageData.length > 0 ? `
       <div class="chart-container">
         <div class="chart-title">Wastage Details</div>
