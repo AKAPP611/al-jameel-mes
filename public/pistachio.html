@@ -1680,7 +1680,9 @@ window.appState.setState('equipment', equipmentData);
 
 // User management
 const users = { admin: 'admin123', operator: 'op123' };
-
+// Reports variables
+let availableLots = [];
+let selectedLotsList = [];
 // ===== UPDATED FUNCTIONS WITH VALIDATION =====
 function setupProductionValidation() {
   const validator = window.formValidator;
@@ -1936,9 +1938,6 @@ function updateSummary() {
   
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
-  
-  const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
-  const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
   
   document.getElementById('productionSummary').textContent = 
     `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
@@ -2688,8 +2687,6 @@ function showAllWastage() {
   renderWastageTable();
 }
 // ===== REPORTS FUNCTIONALITY =====
-let availableLots = [];
-let selectedLotsList = [];
 
 function loadAvailableLots() {
   const fromDate = document.getElementById('reportFromDate').value;
