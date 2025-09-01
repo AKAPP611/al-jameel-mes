@@ -539,6 +539,10 @@
             <label>Total Raw Quantity (kg)</label>
             <input id="totalRawQuantity" type="number" readonly style="background: #f8f9fa;">
           </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+  <label>Container Numbers (one per line or comma-separated)</label>
+  <textarea id="containerNumbers" placeholder="e.g., CONT-001, CONT-002, CONT-003 or enter each on a new line"></textarea>
+</div>
         </div>
         <button onclick="createLot()">Create Lot</button>
       </div>
@@ -548,18 +552,19 @@
       <div style="overflow-x: auto;">
         <table id="lotsTable">
           <thead>
-            <tr>
-              <th>Lot Number</th>
-              <th>Brand</th>
-              <th>Total Containers</th>
-              <th>Total Raw (kg)</th>
-              <th>Used (kg)</th>
-              <th>Available (kg)</th>
-              <th>Progress</th>
-              <th>Status</th>
-              <th>Created</th>
-            </tr>
-          </thead>
+  <tr>
+    <th>Lot Number</th>
+    <th>Brand</th>
+    <th>Total Containers</th>
+    <th>Total Raw (kg)</th>
+    <th>Used (kg)</th>
+    <th>Available (kg)</th>
+    <th>Progress</th>
+    <th>Status</th>
+    <th>Created</th>
+    <th>Container Numbers</th>
+  </tr>
+</thead>
           <tbody></tbody>
         </table>
       </div>
@@ -597,15 +602,16 @@
       </div>
 
       <!-- Lot Info Display -->
-      <div id="lotInfoDisplay" class="materials-section" style="display: none;">
-        <h4>Selected Lot Information</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-          <div><strong>Lot Number:</strong> <span id="selectedLotNumber">-</span></div>
-          <div><strong>Brand:</strong> <span id="selectedLotBrand">-</span></div>
-          <div><strong>Available Raw:</strong> <span id="selectedLotAvailable">-</span> kg</div>
-          <div><strong>Total Containers:</strong> <span id="selectedLotContainers">-</span></div>
-        </div>
-      </div>
+     <div id="lotInfoDisplay" class="materials-section" style="display: none;">
+  <h4>Selected Lot Information</h4>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+    <div><strong>Lot Number:</strong> <span id="selectedLotNumber">-</span></div>
+    <div><strong>Brand:</strong> <span id="selectedLotBrand">-</span></div>
+    <div><strong>Available Raw:</strong> <span id="selectedLotAvailable">-</span> kg</div>
+    <div><strong>Total Containers:</strong> <span id="selectedLotContainers">-</span></div>
+    <div style="grid-column: 1 / -1;"><strong>Container Numbers:</strong> <span id="selectedLotContainerNumbers">-</span></div>
+  </div>
+</div>
 <h3>Final Goods Output</h3>
 <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
   <div class="form-group">
@@ -1812,29 +1818,38 @@ function createLot() {
     return;
   }
   
-  const newLot = {
-    id: Date.now().toString(),
-    lotNumber,
-    brand,
-    totalContainers,
-    bagsPerContainer,
-    kgPerBag,
-    totalRawQuantity,
-    availableRawQuantity: totalRawQuantity,
-    usedRawQuantity: 0,
-    status: 'Open',
-    createdDate: new Date().toISOString()
-  };
+  // Parse container numbers from textarea
+const containerNumbersInput = document.getElementById('containerNumbers').value.trim();
+const containerNumbers = containerNumbersInput
+  .split(/[,\n]+/) // Split by comma or newline
+  .map(num => num.trim())
+  .filter(num => num.length > 0); // Remove empty entries
+
+const newLot = {
+  id: Date.now().toString(),
+  lotNumber,
+  brand,
+  totalContainers,
+  bagsPerContainer,
+  kgPerBag,
+  totalRawQuantity,
+  availableRawQuantity: totalRawQuantity,
+  usedRawQuantity: 0,
+  status: 'Open',
+  createdDate: new Date().toISOString(),
+  containerNumbers: containerNumbers // Add container numbers
+};
   
-  window.appState.addToArray('lots', newLot);
-  
-  document.getElementById('lotNumber').value = '';
-  document.getElementById('totalContainers').value = '1';
-  document.getElementById('bagsPerContainer').value = '50';
-  document.getElementById('kgPerBag').value = '25';
-  document.getElementById('totalRawQuantity').value = '';
-  
-  alert('Lot created successfully!');
+ window.appState.addToArray('lots', newLot);
+
+document.getElementById('lotNumber').value = '';
+document.getElementById('totalContainers').value = '1';
+document.getElementById('bagsPerContainer').value = '50';
+document.getElementById('kgPerBag').value = '25';
+document.getElementById('totalRawQuantity').value = '';
+document.getElementById('containerNumbers').value = '';  // Add this line here
+
+alert('Lot created successfully!');
   renderLots();
   updateProductionLotDropdown();
 }
@@ -1870,8 +1885,13 @@ function renderLots() {
       </td>
       <td style="color: ${statusColor}; font-weight: bold;">${lot.status}</td>
       <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
-    `;
-    tbody.appendChild(row);
+<td style="max-width: 200px; font-size: 0.85rem;">
+  ${lot.containerNumbers && lot.containerNumbers.length > 0 
+    ? lot.containerNumbers.slice(0, 3).join(', ') + (lot.containerNumbers.length > 3 ? '...' : '')
+    : 'N/A'}
+</td>
+`;
+tbody.appendChild(row);
   });
 }
 
@@ -1904,12 +1924,17 @@ function updateLotInfo() {
   const lots = window.appState.getState('lots') || [];
   const selectedLot = lots.find(lot => lot.id === lotId);
   
-  if (selectedLot) {
-    document.getElementById('selectedLotNumber').textContent = selectedLot.lotNumber;
-    document.getElementById('selectedLotBrand').textContent = selectedLot.brand;
-    document.getElementById('selectedLotAvailable').textContent = selectedLot.availableRawQuantity.toLocaleString();
-    document.getElementById('selectedLotContainers').textContent = selectedLot.totalContainers;
-    lotDisplay.style.display = 'block';
+ if (selectedLot) {
+  document.getElementById('selectedLotNumber').textContent = selectedLot.lotNumber;
+  document.getElementById('selectedLotBrand').textContent = selectedLot.brand;
+  document.getElementById('selectedLotAvailable').textContent = selectedLot.availableRawQuantity.toLocaleString();
+  document.getElementById('selectedLotContainers').textContent = selectedLot.totalContainers;
+  // Add container numbers display
+  document.getElementById('selectedLotContainerNumbers').textContent = 
+    selectedLot.containerNumbers && selectedLot.containerNumbers.length > 0 
+      ? selectedLot.containerNumbers.join(', ') 
+      : 'No container numbers specified';
+  lotDisplay.style.display = 'block';
     
     // Auto-set brand
     // TODO: Add logic here if you want to auto-set the brand based on the selected lot
@@ -2058,26 +2083,27 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
   
   const record = {
-    timestamp: new Date().toISOString(),
-    lotId: lotId,
-    lotNumber: selectedLot.lotNumber,
-    runType,
-    brand: brand,
-    lot: selectedLot.lotNumber,
-    rawInput,
-    kg1821: bags1821,
-    kg2125: bags2125,
-    totalKg: totalBags,
-    finishedKg,
-    rejectsKg,
-    efficiency,
-    materials: {
-      bagsUsed: bagsUsed,
-      boxesUsed: boxesUsed,
-      bagsWasted: bagsWasted,
-      boxesWasted: boxesWasted
-    }
-  };
+  timestamp: new Date().toISOString(),
+  lotId: lotId,
+  lotNumber: selectedLot.lotNumber,
+  runType,
+  brand: brand,
+  lot: selectedLot.lotNumber,
+  containerNumbers: selectedLot.containerNumbers || [],  // Add this line
+  rawInput,
+  kg1821: bags1821,
+  kg2125: bags2125,
+  totalKg: totalBags,
+  finishedKg,
+  rejectsKg,
+  efficiency,
+  materials: {
+    bagsUsed: bagsUsed,
+    boxesUsed: boxesUsed,
+    bagsWasted: bagsWasted,
+    boxesWasted: boxesWasted
+  }
+};
   
   // Add to state
   window.appState.addToArray('productionRecords', record);
@@ -2814,6 +2840,13 @@ function generateReportHTML(records, wastageData) {
   const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
   const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const totalWasteCost = wastageData.reduce((sum, w) => sum + w.estimatedCost, 0);
+  // Calculate unique containers
+const allContainers = new Set();
+records.forEach(record => {
+  if (record.containerNumbers && record.containerNumbers.length > 0) {
+    record.containerNumbers.forEach(container => allContainers.add(container));
+  }
+});
 
 // Calculate total materials cost (not just waste)
 let totalMaterialsCost = 0;
@@ -2858,6 +2891,7 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
           <p style="margin: 0.25rem 0;"><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
           <p style="margin: 0.25rem 0;"><strong>Lots Analyzed:</strong> ${selectedLotsList.length}</p>
           <p style="margin: 0.25rem 0;"><strong>Total Records:</strong> ${records.length}</p>
+          <p style="margin: 0.25rem 0;"><strong>Total Containers Used:</strong> ${allContainers.size}</p>
         </div>
       </div>
     </div>
@@ -2949,11 +2983,13 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
       <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
           <thead>
-            <tr style="background: var(--primary); color: white;">
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
+           <thead>
+  <tr style="background: var(--primary); color: white;">
+    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Containers</th>
+    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
               <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">18-21 kg</th>
               <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">21-25 kg</th>
               <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
@@ -2965,9 +3001,14 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
             ${records.map(record => `
               <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
+<td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
+<td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
+<td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem;">
+  ${record.containerNumbers && record.containerNumbers.length > 0 
+    ? record.containerNumbers.slice(0, 2).join(', ') + (record.containerNumbers.length > 2 ? '...' : '')
+    : 'N/A'}
+</td>
+<td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg1821 || 0).toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg2125 || 0).toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;"><strong>${record.finishedKg.toLocaleString()}</strong></td>
