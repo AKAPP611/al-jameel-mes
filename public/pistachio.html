@@ -2696,34 +2696,46 @@ function loadAvailableLots() {
   const toDate = document.getElementById('reportToDate').value;
   const brand = document.getElementById('reportBrand').value;
   
+  const lots = window.appState.getState('lots') || [];
   const productionRecords = window.appState.getState('productionRecords') || [];
   
-  // Filter records based on date and brand
-  let filteredRecords = productionRecords.filter(record => {
-    let dateMatch = true;
-    let brandMatch = true;
-    
-    if (fromDate || toDate) {
-      const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
-      if (fromDate && recordDate < fromDate) dateMatch = false;
-      if (toDate && recordDate > toDate) dateMatch = false;
+  // First, get all lots that match the brand filter
+  let filteredLots = lots.filter(lot => {
+    if (brand !== 'all' && lot.brand !== brand) {
+      return false;
     }
-    
-    if (brand !== 'all' && record.brand !== brand) {
-      brandMatch = false;
-    }
-    
-    return dateMatch && brandMatch;
+    return true;
   });
   
-  // Extract unique lots
-  availableLots = [...new Set(filteredRecords.map(record => ({
-    lot: record.lot,
-    brand: record.brand,
-    date: new Date(record.timestamp).toLocaleDateString(),
-    finished: record.finishedKg,
-    rejects: record.rejectsKg
-  })))];
+  // Create lot data with production info if available
+  availableLots = filteredLots.map(lot => {
+    // Find production records for this lot within date range
+    const lotRecords = productionRecords.filter(record => {
+      if (record.lotNumber !== lot.lotNumber) return false;
+      
+      if (fromDate || toDate) {
+        const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+        if (fromDate && recordDate < fromDate) return false;
+        if (toDate && recordDate > toDate) return false;
+      }
+      
+      return true;
+    });
+    
+    // Calculate totals from production records if any
+    const totalFinished = lotRecords.reduce((sum, r) => sum + r.finishedKg, 0);
+    const totalRejects = lotRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
+    
+    return {
+      lot: lot.lotNumber,
+      brand: lot.brand,
+      date: new Date(lot.createdDate).toLocaleDateString(),
+      finished: totalFinished,
+      rejects: totalRejects,
+      status: lot.status,
+      available: lot.availableRawQuantity
+    };
+  });
   
   renderLotOptions();
   window.formValidator.showToast(`Found ${availableLots.length} lots`, 'success');
