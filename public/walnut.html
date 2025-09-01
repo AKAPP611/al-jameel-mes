@@ -3053,7 +3053,71 @@ function generateReportHTML(records) {
     brandStats[record.brand].rejects += record.rejectsKg;
     brandStats[record.brand].count += 1;
   });
+function generateContainerTable(records) {
+  const lots = window.appState.getState('lots') || [];
+  const uniqueLotNumbers = [...new Set(records.map(r => r.lot))];
+  
+  // Get container info for each lot
+  const containerData = uniqueLotNumbers.map(lotNumber => {
+    const lotInfo = lots.find(lot => lot.lotNumber === lotNumber);
+    const lotRecords = records.filter(r => r.lot === lotNumber);
+    
+    return {
+      lotNumber: lotNumber,
+      brand: lotInfo ? lotInfo.brand : lotRecords[0]?.brand || 'Unknown',
+      totalContainers: lotInfo ? lotInfo.totalContainers : 'N/A',
+      containerNumbers: lotInfo && lotInfo.containerNumbers ? lotInfo.containerNumbers : [],
+      totalProduction: lotRecords.reduce((sum, r) => sum + r.finishedKg, 0),
+      recordCount: lotRecords.length
+    };
+  });
 
+  if (containerData.length === 0) {
+    return '<p style="text-align: center; color: #666;">No container information available</p>';
+  }
+
+  return `
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <thead>
+          <tr style="background: var(--primary); color: white;">
+            <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot Number</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">Total Containers</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Container Numbers</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Production (kg)</th>
+            <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">Records</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${containerData.map(data => `
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 0.5rem; border: 1px solid #ddd; font-weight: 600;">${data.lotNumber}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd;">${data.brand}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${data.totalContainers}</td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.9rem;">
+                ${data.containerNumbers.length > 0 
+                  ? `<div style="max-height: 60px; overflow-y: auto;">${data.containerNumbers.join(', ')}</div>` 
+                  : '<span style="color: #999; font-style: italic;">No container numbers recorded</span>'}
+              </td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600;">
+                ${data.totalProduction.toLocaleString()}
+              </td>
+              <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">${data.recordCount}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 0.5rem; border-left: 4px solid #0ea5e9;">
+      <p style="margin: 0; font-size: 0.9rem; color: #0369a1;">
+        <strong>Container Tracking Summary:</strong> ${containerData.length} lot(s) analyzed, 
+        ${containerData.reduce((sum, d) => sum + (d.containerNumbers.length || 0), 0)} containers tracked, 
+        ${containerData.reduce((sum, d) => sum + d.totalProduction, 0).toLocaleString()} kg total production
+      </p>
+    </div>
+  `;
+}
   // Product type analysis
   const productStats = {
     'Half Kernel': records.reduce((sum, r) => sum + (r.halfKernel || 0), 0),
@@ -3141,6 +3205,12 @@ function generateReportHTML(records) {
         <div class="metric-value">${totalInput.toLocaleString()}</div>
         <div class="metric-label">Total Raw Input (kg)</div>
       </div>
+   </div>
+
+    <!-- Container Information Table -->
+    <div class="chart-container">
+      <div class="chart-title">Container Tracking Information</div>
+      ${generateContainerTable(records)}
     </div>
 
     <!-- Professional Charts Grid -->
