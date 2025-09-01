@@ -2197,7 +2197,9 @@ const gainColor = materialGain > 0 ? '#22c55e' : '#ef4444';
 
 row.innerHTML = `
   <td>${new Date(record.timestamp).toLocaleString()}</td>
-  <td>${record.runType}</td>
+  <td style="font-weight: 600; color: ${record.runType === 'huller' ? '#22c55e' : '#3b82f6'};">
+  ${record.runType === 'huller' ? 'Huller Run' : 'Repacking Only'}
+</td>
   <td>${record.brand}</td>
   <td>${record.lot}</td>
   <td>${record.rawInput}</td>
@@ -2838,6 +2840,11 @@ function generateReportHTML(records, wastageData) {
   const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
   const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
   const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
+  // Calculate run type statistics
+const hullerRuns = records.filter(r => r.runType === 'huller').length;
+const repackingRuns = records.filter(r => r.runType === 'repack').length;
+const hullerOutput = records.filter(r => r.runType === 'huller').reduce((sum, r) => sum + r.finishedKg, 0);
+const repackingOutput = records.filter(r => r.runType === 'repack').reduce((sum, r) => sum + r.finishedKg, 0);
   const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const totalWasteCost = wastageData.reduce((sum, w) => sum + w.estimatedCost, 0);
   // Calculate unique containers
@@ -2957,6 +2964,14 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
   <div class="metric-value">$${totalMaterialsCost.toFixed(0)}</div>
   <div class="metric-label">Total Materials Cost</div>
 </div>
+<div class="metric-card">
+  <div class="metric-value">${hullerRuns}/${repackingRuns}</div>
+  <div class="metric-label">Huller/Repack Runs</div>
+</div>
+<div class="metric-card">
+  <div class="metric-value">${hullerOutput.toLocaleString()}/${repackingOutput.toLocaleString()}</div>
+  <div class="metric-label">Huller/Repack Output (kg)</div>
+</div>
     </div>
 
     <!-- Professional Charts Grid -->
@@ -3005,7 +3020,28 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
         ${generateProductionBarChart(records)}
       </div>
     </div>
-
+<!-- Run Type Analysis -->
+<div class="chart-container">
+  <div class="chart-title">Production by Run Type</div>
+  <div class="metrics-grid" style="margin: 1rem 0;">
+    <div class="metric-card" style="background: linear-gradient(135deg, #22c55e10 0%, #22c55e20 100%);">
+      <div class="metric-value" style="color: #22c55e;">${hullerRuns}</div>
+      <div class="metric-label">Huller Runs</div>
+      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+        <strong>${hullerOutput.toLocaleString()} kg</strong> output<br>
+        <strong>${records.filter(r => r.runType === 'huller').reduce((sum, r) => sum + r.rejectsKg, 0).toLocaleString()} kg</strong> rejects
+      </div>
+    </div>
+    <div class="metric-card" style="background: linear-gradient(135deg, #3b82f610 0%, #3b82f620 100%);">
+      <div class="metric-value" style="color: #3b82f6;">${repackingRuns}</div>
+      <div class="metric-label">Repacking Runs</div>
+      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+        <strong>${repackingOutput.toLocaleString()} kg</strong> output<br>
+        <span style="color: #666;">No reject tracking</span>
+      </div>
+    </div>
+  </div>
+</div>
     ${wastageData.length > 0 ? `
       <!-- Wastage Cost Analysis -->
       <div class="chart-container">
@@ -3025,6 +3061,7 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
            <thead>
   <tr style="background: var(--primary); color: white;">
     <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Run Type</th>
     <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
     <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
     <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Containers</th>
@@ -3040,6 +3077,8 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
             ${records.map(record => `
               <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; font-weight: 600; color: ${record.runType === 'huller' ? '#22c55e' : '#3b82f6'};">
+  ${record.runType === 'huller' ? 'Huller Run' : 'Repacking Only'}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem; max-width: 300px;">
