@@ -1939,10 +1939,13 @@ function updateSummary() {
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
   
+  // ADD THESE TWO MISSING LINES:
+  const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
+  const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
+  
   document.getElementById('productionSummary').textContent = 
     `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
 }
-
 
 function autoCalculateMaterials() {
   const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
