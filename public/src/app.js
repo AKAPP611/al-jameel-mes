@@ -364,19 +364,11 @@ async function render() {
           }
           break;
         // ADDED: New inventory routes for pistachio factory
-        case '#/inventory/pistachio':
+       case '#/inventory/pistachio':
           {
-            // Phase 1: Show placeholder while data layer is ready
-            renderInventoryPlaceholder(mount, 'pistachio');
-            
-            // Initialize the inventory state (Phase 1 feature)
-            try {
-              const { inventoryState } = await import('./src/data/inventory-state.js');
-              await inventoryState.loadSeedIfEmpty('pistachio');
-              console.log('Pistachio inventory state loaded');
-            } catch (error) {
-              console.warn('Could not load inventory state:', error);
-            }
+            // Phase 2: Full inventory management UI
+            const { InventoryView } = await loadView('./views/inventory-view.js');
+            InventoryView(mount, { t, factoryId: 'pistachio' });
           }
           break;
         case '#/orders/pistachio':
