@@ -45,7 +45,6 @@ const factories = [
 ];
 
 export function FactorySelectView(mount) {
-  // First render the loading skeleton
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
       <div style="text-align:center">
@@ -57,7 +56,7 @@ export function FactorySelectView(mount) {
       </div>
       
       <!-- Master Inventory Overview Button -->
-      <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1rem; border: 2px solid #22c55e;">
+      <div class="text-center" style="margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1rem; border: 2px solid #22c55e;">
         <button class="btn" onclick="goTo('#/inventory/overview')" style="font-size: 1.2rem; padding: 1rem 2rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
           📦 Master Inventory Overview
         </button>
@@ -93,9 +92,8 @@ export function FactorySelectView(mount) {
 }
 
 function renderCards(grid, factories) {
-  // Generate simplified factory cards with enlarged logos
+  // Generate factory cards
   const factoryCards = factories.map(f => {
-    // Determine href for each factory
     let href = '#/';
     if (f.key === 'Pistachio') {
       href = './pistachio.html';
@@ -103,11 +101,32 @@ function renderCards(grid, factories) {
       href = './walnut.html';
     } else if (f.key === 'Cardamom') {
       href = './cardamom.html';
-    } else {
-      href = `#/dashboard?factory=${encodeURIComponent(f.key)}`;
     }
     
-    // Factory icons - enlarged for better visibility
     let iconMarkup = '';
     if (f.key === 'Pistachio') {
-      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon"
+      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 80px; height: 80px;" onerror="this.outerHTML=\'🥜\'">';
+    } else if (f.key === 'Walnut') {
+      iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="" style="width: 80px; height: 80px;" onerror="this.outerHTML=\'🌰\'">';
+    } else if (f.key === 'Cardamom') {
+      iconMarkup = '<span style="font-size: 5rem;">🌿</span>';
+    }
+
+    return Card({
+      icon: iconMarkup,
+      title: f.name,
+      href: href
+    });
+  });
+
+  // Add QC card
+  const qcCard = Card({
+    icon: '<span style="font-size: 5rem;">🔬</span>',
+    title: 'Quality Control',
+    href: './qc.html'
+  });
+
+  // Render all cards
+  const allCards = factoryCards.concat(qcCard);
+  grid.innerHTML = allCards.join('');
+}
