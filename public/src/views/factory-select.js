@@ -19,27 +19,7 @@ function Progress({ value = 0 }) {
     </div>
   `;
 }
-mount.innerHTML = `
-  <div class="container">
-    <h1 class="text-center">Al Jameel MES</h1>
-    <p class="text-center subtitle">Pick a workspace to get started.</p>
-    
-    <!-- ADD THIS SECTION -->
-    <div style="text-align: center; margin: 2rem 0;">
-      <button class="btn" onclick="goTo('#/inventory/overview')" style="font-size: 1.1rem; padding: 1rem 2rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
-        📦 Master Inventory Overview
-      </button>
-      <p style="margin: 0.5rem 0 0 0; color: var(--muted); font-size: 0.9rem;">
-        View inventory across all factories and warehouses
-      </p>
-    </div>
-    
-    <!-- Existing factory cards below -->
-    <div class="factory-grid">
-      ${factoryCards}
-    </div>
-  </div>
-`;
+
 function Card({ icon, title, href = '#/' }) {
   return `
     <article class="card factory-card" role="listitem" style="text-align: center; padding: 2rem;">
@@ -58,7 +38,6 @@ function Card({ icon, title, href = '#/' }) {
 }
 
 // Factory data
-// Factory data - names only
 const factories = [
   { key: "Pistachio", name: "Pistachio" },
   { key: "Walnut", name: "Walnut" },
@@ -66,6 +45,7 @@ const factories = [
 ];
 
 export function FactorySelectView(mount) {
+  // First render the loading skeleton
   mount.innerHTML = `
     <section class="grid" aria-labelledby="sectionTitle">
       <div style="text-align:center">
@@ -75,6 +55,17 @@ export function FactorySelectView(mount) {
         <h2 id="sectionTitle" class="section">Al Jameel MES</h2>
         <p class="section-sub">Pick a workspace to get started.</p>
       </div>
+      
+      <!-- Master Inventory Overview Button -->
+      <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1rem; border: 2px solid #22c55e;">
+        <button class="btn" onclick="goTo('#/inventory/overview')" style="font-size: 1.2rem; padding: 1rem 2rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
+          📦 Master Inventory Overview
+        </button>
+        <p style="margin: 0.75rem 0 0 0; color: var(--muted); font-size: 0.95rem; font-weight: 500;">
+          Centralized warehouse management across all factories
+        </p>
+      </div>
+      
       <div id="factoryGrid" class="grid grid-3" role="list">
         <div class="skel skel-card"></div>
         <div class="skel skel-card"></div>
@@ -84,9 +75,20 @@ export function FactorySelectView(mount) {
     </section>
   `;
 
-  // Simulate loading delay then render cards with QC
+  // Make goTo function available globally
+  if (typeof window.goTo === 'undefined') {
+    window.goTo = function(path) {
+      if (path.startsWith('#/')) {
+        window.location.hash = path;
+      } else {
+        window.location.href = path;
+      }
+    };
+  }
+
+  // Simulate loading delay then render cards
   setTimeout(() => {
-   renderCards(mount.querySelector('#factoryGrid'), factories);
+    renderCards(mount.querySelector('#factoryGrid'), factories);
   }, 500);
 }
 
@@ -108,28 +110,4 @@ function renderCards(grid, factories) {
     // Factory icons - enlarged for better visibility
     let iconMarkup = '';
     if (f.key === 'Pistachio') {
-      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon" alt="" style="width: 80px; height: 80px;" onerror="this.outerHTML=\'🥜\'">';
-    } else if (f.key === 'Walnut') {
-      iconMarkup = '<img src="src/assets/icons/Walnut.png" class="ws-icon walnut-icon" alt="" style="width: 80px; height: 80px;" onerror="this.outerHTML=\'🌰\'">';
-    } else if (f.key === 'Cardamom') {
-      iconMarkup = '<span style="font-size: 5rem;">🌿</span>';
-    }
-
-    return Card({
-      icon: iconMarkup,
-      title: f.name,
-      href: href
-    });
-  });
-
-  // Add QC card with enlarged icon
-  const qcCard = Card({
-    icon: '<span style="font-size: 5rem;">🔬</span>',
-    title: 'Quality Control',
-    href: './qc.html'
-  });
-
-  // Combine all cards and render
-  const allCards = factoryCards.concat(qcCard);
-  grid.innerHTML = allCards.join('');
-}
+      iconMarkup = '<img src="src/assets/icons/pistachio.png" class="ws-icon pistachio-icon"
