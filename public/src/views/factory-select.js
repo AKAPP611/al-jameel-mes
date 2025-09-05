@@ -19,7 +19,27 @@ function Progress({ value = 0 }) {
     </div>
   `;
 }
-
+mount.innerHTML = `
+  <div class="container">
+    <h1 class="text-center">Al Jameel MES</h1>
+    <p class="text-center subtitle">Pick a workspace to get started.</p>
+    
+    <!-- ADD THIS SECTION -->
+    <div style="text-align: center; margin: 2rem 0;">
+      <button class="btn" onclick="goTo('#/inventory/overview')" style="font-size: 1.1rem; padding: 1rem 2rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">
+        📦 Master Inventory Overview
+      </button>
+      <p style="margin: 0.5rem 0 0 0; color: var(--muted); font-size: 0.9rem;">
+        View inventory across all factories and warehouses
+      </p>
+    </div>
+    
+    <!-- Existing factory cards below -->
+    <div class="factory-grid">
+      ${factoryCards}
+    </div>
+  </div>
+`;
 function Card({ icon, title, href = '#/' }) {
   return `
     <article class="card factory-card" role="listitem" style="text-align: center; padding: 2rem;">
