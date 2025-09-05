@@ -371,10 +371,11 @@ async function render() {
             InventoryView(mount, { t, factoryId: 'pistachio' });
           }
           break;
-        case '#/orders/pistachio':
+       case '#/orders/pistachio':
           {
-            // Phase 1: Show placeholder for future order management
-            renderOrdersPlaceholder(mount, 'pistachio');
+            // Phase 3: Full order management
+            const { OrderView } = await loadView('./views/order-view.js');
+            OrderView(mount, { t, factoryId: 'pistachio' });
           }
           break;
         default:
