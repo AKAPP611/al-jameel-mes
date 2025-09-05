@@ -7,8 +7,13 @@ export function PistachioHome(mount, { t }) {
       <div class="card">
         <h2 class="section">🥜 ${t('pistachioWS')}</h2>
         <p class="section-sub">Golden Hill & Extra — sizes 18–21 / 21–25</p>
-        <div class="row" style="gap:12px;margin-top:12px;">
-          <button class="btn" id="goShift">${t('shiftEntry')}</button>
+       <div class="row" style="gap:12px;margin-top:12px;">
+          <button class="btn" id="goDashboard">📊 Dashboard</button>
+          <button class="btn" id="goInventory">📦 Inventory</button>
+          <button class="btn" id="goOrders">📋 Orders</button>
+        </div>
+        <div class="row" style="gap:12px;margin-top:8px;">
+          <button class="ghost" id="goShift">${t('shiftEntry')}</button>
           <button class="ghost" id="goMaterials">${t('materials')}</button>
         </div>
       </div>
@@ -40,9 +45,30 @@ export function PistachioHome(mount, { t }) {
     </section>
   `;
 
-  // Event listeners
+  /// Event listeners
+  const dashboardBtn = mount.querySelector('#goDashboard');
+  const inventoryBtn = mount.querySelector('#goInventory');
+  const ordersBtn = mount.querySelector('#goOrders');
   const shiftBtn = mount.querySelector('#goShift');
   const materialsBtn = mount.querySelector('#goMaterials');
+
+  if (dashboardBtn) {
+    dashboardBtn.addEventListener('click', () => {
+      goTo('#/dashboard/pistachio');
+    });
+  }
+
+  if (inventoryBtn) {
+    inventoryBtn.addEventListener('click', () => {
+      goTo('#/inventory/pistachio');
+    });
+  }
+
+  if (ordersBtn) {
+    ordersBtn.addEventListener('click', () => {
+      goTo('#/orders/pistachio');
+    });
+  }
 
   if (shiftBtn) {
     shiftBtn.addEventListener('click', () => {
