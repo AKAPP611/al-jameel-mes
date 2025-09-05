@@ -372,6 +372,14 @@ async function render() {
 }
 break;
 
+case '#/inventory/overview':
+{
+  // Master inventory overview for all factories
+  const { MasterInventoryView } = await loadView('./views/master-inventory-view.js');
+  MasterInventoryView(mount, { t });
+}
+break;
+
 case '#/inventory/pistachio':
 {
   // Phase 2: Full inventory management UI
