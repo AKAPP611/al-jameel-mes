@@ -364,13 +364,21 @@ async function render() {
           }
           break;
         // ADDED: New inventory routes for pistachio factory
-       case '#/inventory/pistachio':
-          {
-            // Phase 2: Full inventory management UI
-            const { InventoryView } = await loadView('./views/inventory-view.js');
-            InventoryView(mount, { t, factoryId: 'pistachio' });
-          }
-          break;
+       case '#/inventory/overview':
+{
+  // Master inventory overview for all factories
+  const { MasterInventoryView } = await loadView('./views/master-inventory-view.js');
+  MasterInventoryView(mount, { t });
+}
+break;
+
+case '#/inventory/pistachio':
+{
+  // Phase 2: Full inventory management UI
+  const { InventoryView } = await loadView('./views/inventory-view.js');
+  InventoryView(mount, { t, factoryId: 'pistachio' });
+}
+break;
        case '#/orders/pistachio':
           {
             // Phase 3: Full order management
