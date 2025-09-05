@@ -243,7 +243,70 @@ function ensureBackButton() {
   
   return __backBtn;
 }
+/* ADDED: Inventory placeholder views for Phase 1 */
+function renderInventoryPlaceholder(mount, factoryId) {
+  mount.innerHTML = `
+    <section class="grid">
+      <div class="card">
+        <h2 class="section">📦 Inventory - ${factoryId.charAt(0).toUpperCase() + factoryId.slice(1)}</h2>
+        <p class="section-sub">Inventory Management System (Phase 1 - Data Layer Ready)</p>
+        
+        <div class="grid grid-3" style="margin-top: 1rem;">
+          <div class="kpi">
+            <div class="label">Data Layer</div>
+            <div class="value" style="color: #22c55e;">✓ Ready</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Factory ID</div>
+            <div class="value">${factoryId}</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Phase</div>
+            <div class="value">1 of 4</div>
+          </div>
+        </div>
+      </div>
 
+      <div class="card">
+        <h3 class="title">🔧 Phase 1 - Data Layer Complete</h3>
+        <ul style="margin: 1rem 0 0 1rem; line-height: 1.8;">
+          <li><strong>✅ State Management:</strong> Central inventory state with localStorage persistence</li>
+          <li><strong>✅ Factory Scoping:</strong> All data isolated by factoryId: "${factoryId}"</li>
+          <li><strong>✅ Seed Data:</strong> Initial pistachio items, locations, and inventory</li>
+          <li><strong>✅ CRUD Operations:</strong> Add/update items, stock movements</li>
+          <li><strong>✅ Storage Keys:</strong> inv:${factoryId}:v1</li>
+        </ul>
+        
+        <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 0.5rem; border-left: 4px solid #0ea5e9;">
+          <strong>Ready for Phase 2:</strong> Stock Operations UI
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="title">🧪 Test the Data Layer</h3>
+        <p style="margin: 0.5rem 0;">Open browser console and try:</p>
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 0.5rem; font-family: monospace; font-size: 0.85rem;">
+          <div style="color: #0066cc;">import('./src/data/inventory-state.js').then(m => console.log(m.inventoryState.getState('pistachio')))</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderOrdersPlaceholder(mount, factoryId) {
+  mount.innerHTML = `
+    <section class="grid">
+      <div class="card">
+        <h2 class="section">📋 Orders - ${factoryId.charAt(0).toUpperCase() + factoryId.slice(1)}</h2>
+        <p class="section-sub">Order Management System (Phase 3)</p>
+        
+        <div style="margin-top: 1.5rem; padding: 1rem; background: #fff7ed; border-radius: 0.5rem; border-left: 4px solid #f59e0b;">
+          <strong>Coming in Phase 3:</strong> Reserve → Fulfill → Deduct → Cancel workflows
+        </div>
+      </div>
+    </section>
+  `;
+}
 /* Main Render Function with enhanced error handling and dynamic imports */
 async function render() {
   try {
@@ -298,6 +361,28 @@ async function render() {
           {
             const { MaterialsView } = await loadView('./views/materials.js');
             MaterialsView(mount, { t });
+          }
+          break;
+        // ADDED: New inventory routes for pistachio factory
+        case '#/inventory/pistachio':
+          {
+            // Phase 1: Show placeholder while data layer is ready
+            renderInventoryPlaceholder(mount, 'pistachio');
+            
+            // Initialize the inventory state (Phase 1 feature)
+            try {
+              const { inventoryState } = await import('./src/data/inventory-state.js');
+              await inventoryState.loadSeedIfEmpty('pistachio');
+              console.log('Pistachio inventory state loaded');
+            } catch (error) {
+              console.warn('Could not load inventory state:', error);
+            }
+          }
+          break;
+        case '#/orders/pistachio':
+          {
+            // Phase 1: Show placeholder for future order management
+            renderOrdersPlaceholder(mount, 'pistachio');
           }
           break;
         default:
