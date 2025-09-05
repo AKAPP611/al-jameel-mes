@@ -469,7 +469,12 @@
   <button class="nav-btn" onclick="showSection('lotmanagement')">Lot Management</button>
   <button class="nav-btn" onclick="showSection('production')">New Production</button>
   <button class="nav-btn" onclick="showSection('records')">View Records</button>
-  <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
+  <button class="nav-btn" onclick="redirectToAdvancedInventory()" style="background: linear-gradient(135deg, #a32034 0%, #d5a333 100%); position: relative;">
+  Inventory
+  <span style="font-size: 0.7rem; opacity: 0.8; margin-left: 0.5rem;">→ Advanced</span>
+</button>
+  <button class="nav-btn" onclick="redirectToOrderManagement()">Orders</button>
+  <button class="nav-btn" onclick="redirectToDashboard()">Advanced Dashboard</button>
   <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
   <button class="nav-btn" onclick="showSection('reports')">Reports</button>
   <button class="nav-btn" id="itemPricesBtn" onclick="showSection('itemprices')" style="display: none;">Item Prices</button>
@@ -3748,6 +3753,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+ // ===== NAVIGATION TO ADVANCED INVENTORY SYSTEM =====
+function redirectToAdvancedInventory() {
+  window.location.href = 'index.html#/inventory/pistachio';
+}
+
+function redirectToOrderManagement() {
+  window.location.href = 'index.html#/orders/pistachio';
+}
+
+function redirectToDashboard() {
+  window.location.href = 'index.html#/dashboard/pistachio';
+} 
 </script>
 </body>
 </html>
