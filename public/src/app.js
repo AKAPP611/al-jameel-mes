@@ -378,6 +378,14 @@ async function render() {
             OrderView(mount, { t, factoryId: 'pistachio' });
           }
           break;
+        // ADD THIS NEW CASE HERE:
+        case '#/dashboard/pistachio':
+          {
+            // Phase 4: Complete inventory dashboard
+            const { DashboardView } = await loadView('./views/dashboard-view.js');
+            DashboardView(mount, { t, factoryId: 'pistachio' });
+          }
+          break;
         default:
           mount.innerHTML = `
             <div class="card">
