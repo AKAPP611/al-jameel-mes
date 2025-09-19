@@ -486,24 +486,24 @@
         <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
         <h2>Production Dashboard</h2>
       </div>
-     <div class="stats-grid">
-        <div class="stat-card">
-          <div>Active Lots</div>
-          <div class="stat-value" id="kpiActiveLots">0</div>
-        </div>
-        <div class="stat-card">
-          <div>Total Finished (kg)</div>
-          <div class="stat-value" id="kpiFinished">0</div>
-        </div>
-        <div class="stat-card">
-          <div>Efficiency (%)</div>
-          <div class="stat-value" id="kpiEff">0</div>
-        </div>
-        <div class="stat-card">
-          <div>Reject Rate (%)</div>
-          <div class="stat-value" id="kpiReject">0.0</div>
-        </div>
-      </div>
+    <div class="stats-grid">
+  <div class="stat-card">
+    <div>Raw Materials</div>
+    <div class="stat-value" id="invRawMaterialsQty">0 kg</div>
+  </div>
+  <div class="stat-card">
+    <div>Finished Products</div>
+    <div class="stat-value" id="invFinishedQty">0 kg</div>
+  </div>
+  <div class="stat-card">
+    <div>Packaging Items</div>
+    <div class="stat-value" id="invPackagingQty">0 pieces</div>
+  </div>
+  <div class="stat-card">
+    <div>Total Inventory Value</div>
+    <div class="stat-value" id="invTotalValue">AED 0</div>
+  </div>
+</div>
       <p>KPIs update automatically when you submit production records.</p>
     </section>
 <!-- Lot Management Section -->
@@ -1215,17 +1215,25 @@
       <div class="form-group">
         <label>Item</label>
         <select id="invItem">
-          <optgroup label="Raw Materials">
-            <option value="rawPistachioInshell">Raw Pistachio (In-shell)</option>
-            <option value="rawPistachioCalifornia">Raw Pistachio (California)</option>
-            <option value="rawPistachioIranian">Raw Pistachio (Iranian)</option>
-          </optgroup>
-          <optgroup label="Packaging Materials">
-            <option value="vacuumBags">Vacuum Bags (10kg)</option>
-            <option value="goldenHillBoxes">Golden Hill Boxes</option>
-            <option value="extraBoxes">Extra Boxes</option>
-          </optgroup>
-        </select>
+  <optgroup label="Raw Materials">
+    <option value="rawPistachioInshell">Raw Pistachio (In-shell)</option>
+  </optgroup>
+  <optgroup label="Finished Products">
+    <option value="golden1821">Golden Hill 18-21 Size</option>
+    <option value="golden2125">Golden Hill 21-25 Size</option>
+    <option value="extra1821">Extra 18-21 Size</option>
+    <option value="extra2125">Extra 21-25 Size</option>
+  </optgroup>
+  <optgroup label="Rejects">
+    <option value="goldenRejects">Golden Hill Rejects</option>
+    <option value="extraRejects">Extra Rejects</option>
+  </optgroup>
+  <optgroup label="Packaging Materials">
+    <option value="vacuumBags">Vacuum Bags (10kg)</option>
+    <option value="goldenHillBoxes">Golden Hill Boxes</option>
+    <option value="extraBoxes">Extra Boxes</option>
+  </optgroup>
+</select>
       </div>
       <div class="form-group">
         <label>Action</label>
@@ -1437,8 +1445,8 @@ class AppState {
       inventoryLog: [],
       maintenanceLog: [],
       wastageLog: [],
-     itemPrices: [
-  // Raw Materials for Pistachio Factory
+    itemPrices: [
+  // Raw Materials
   {
     id: 'raw_pistachio_inshell',
     name: 'Raw Pistachio (In-shell)',
@@ -1446,43 +1454,73 @@ class AppState {
     price: 12.50, // AED per kg
     status: 'active',
     category: 'raw_material',
-    supplier: 'Various',
     lastUpdated: new Date().toISOString(),
     updatedBy: 'system'
   },
-       {
-    id: 'raw_pistachio_california',
-    name: 'Raw Pistachio (California Grade)',
+  // Finished Products
+  {
+    id: 'golden_18_21',
+    name: 'Golden Hill 18-21 Size',
     unit: 'kg',
-    price: 15.75,
+    price: 25.00,
     status: 'active',
-    category: 'raw_material',
-    supplier: 'California Imports',
+    category: 'finished_product',
     lastUpdated: new Date().toISOString(),
     updatedBy: 'system'
   },
   {
-    id: 'raw_pistachio_iranian',
-    name: 'Raw Pistachio (Iranian Grade)',
-    unit: 'kg',
-    price: 14.25,
+    id: 'golden_21_25',
+    name: 'Golden Hill 21-25 Size',
+    unit: 'kg', 
+    price: 28.00,
     status: 'active',
-    category: 'raw_material',
-    supplier: 'Iranian Suppliers',
+    category: 'finished_product',
     lastUpdated: new Date().toISOString(),
     updatedBy: 'system'
   },
-        {
-          id: 'golden_hill_boxes',
-          name: 'Golden Hill Boxes',
-          unit: 'piece', 
-          price: 1.25,
-          status: 'active',
-          category: 'packaging',
-          lastUpdated: new Date().toISOString(),
-          updatedBy: 'system'
-        },
-       {
+  {
+    id: 'extra_18_21',
+    name: 'Extra 18-21 Size',
+    unit: 'kg',
+    price: 22.00,
+    status: 'active',
+    category: 'finished_product',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'extra_21_25',
+    name: 'Extra 21-25 Size',
+    unit: 'kg',
+    price: 24.50,
+    status: 'active',
+    category: 'finished_product',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  // Reject Products
+  {
+    id: 'golden_rejects',
+    name: 'Golden Hill Rejects (All Categories)',
+    unit: 'kg',
+    price: 8.00,
+    status: 'active',
+    category: 'rejects',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'extra_rejects',
+    name: 'Extra Rejects (All Categories)',
+    unit: 'kg',
+    price: 6.50,
+    status: 'active',
+    category: 'rejects',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  // Packaging Materials (keep existing)
+  {
     id: 'vacuum_bags_10kg',
     name: 'Vacuum Bags (10kg)',
     unit: 'piece',
@@ -1492,23 +1530,39 @@ class AppState {
     lastUpdated: new Date().toISOString(),
     updatedBy: 'system'
   },
-        {
-          id: 'extra_boxes',
-          name: 'Extra Boxes',
-          unit: 'piece',
-          price: 1.00,
-          status: 'active', 
-          category: 'packaging',
-          lastUpdated: new Date().toISOString(),
-          updatedBy: 'system'
-        }
-      ],
+  {
+    id: 'golden_hill_boxes',
+    name: 'Golden Hill Boxes',
+    unit: 'piece',
+    price: 1.25,
+    status: 'active',
+    category: 'packaging',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'extra_boxes',
+    name: 'Extra Boxes',
+    unit: 'piece',
+    price: 1.00,
+    status: 'active',
+    category: 'packaging',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  }
+],
       priceAuditLog: [],
       currentInventory: {
   // Raw Materials
   rawPistachioInshell: 0,
-  rawPistachioCalifornia: 0,
-  rawPistachioIranian: 0,
+  // Finished Products
+  golden1821: 0,
+  golden2125: 0,
+  extra1821: 0,
+  extra2125: 0,
+  // Rejects
+  goldenRejects: 0,
+  extraRejects: 0,
   // Packaging Materials
   vacuumBags: 0,
   goldenHillBoxes: 0,
@@ -2660,9 +2714,11 @@ function renderInventory() {
   const currentInventory = window.appState.getState('currentInventory') || {};
   const itemPrices = window.appState.getState('itemPrices') || [];
   
-  // Calculate values
-  let rawMaterialsValue = 0;
-  let packagingValue = 0;
+  // Calculate quantities and values correctly
+  let rawMaterialsQty = 0;
+  let finishedProductsQty = 0;
+  let packagingQty = 0;
+  let totalValue = 0;
   let lowStockCount = 0;
   
   // Update current stock table
@@ -2673,39 +2729,49 @@ function renderInventory() {
     itemPrices.forEach(item => {
       const stockKey = getStockKey(item.id);
       const currentStock = currentInventory[stockKey] || 0;
-      const totalValue = currentStock * item.price;
+      const itemValue = currentStock * item.price;
+      totalValue += itemValue;
       
+      // Categorize quantities by type, not value
       if (item.category === 'raw_material') {
-        rawMaterialsValue += totalValue;
-      } else {
-        packagingValue += totalValue;
+        rawMaterialsQty += currentStock;
+      } else if (item.category === 'finished_product' || item.category === 'rejects') {
+        finishedProductsQty += currentStock;
+      } else if (item.category === 'packaging') {
+        packagingQty += currentStock;
       }
       
-      if (currentStock < 100) lowStockCount++; // Threshold can be adjusted
+      // Determine stock status based on category
+      let threshold = 100; // Default threshold
+      if (item.category === 'raw_material') threshold = 500;
+      if (item.category === 'packaging') threshold = 50;
+      
+      if (currentStock < threshold) lowStockCount++;
       
       const row = document.createElement('tr');
-      const statusColor = currentStock < 50 ? '#ef4444' : currentStock < 100 ? '#f59e0b' : '#22c55e';
-      const statusText = currentStock < 50 ? 'Critical' : currentStock < 100 ? 'Low' : 'Good';
+      const statusColor = currentStock < (threshold * 0.5) ? '#ef4444' : 
+                         currentStock < threshold ? '#f59e0b' : '#22c55e';
+      const statusText = currentStock < (threshold * 0.5) ? 'Critical' : 
+                        currentStock < threshold ? 'Low' : 'Good';
       
       row.innerHTML = `
         <td><strong>${item.name}</strong></td>
         <td style="text-transform: capitalize;">${item.category.replace('_', ' ')}</td>
         <td>${currentStock.toLocaleString()} ${item.unit}</td>
         <td>AED ${item.price.toFixed(2)}</td>
-        <td><strong>AED ${totalValue.toFixed(2)}</strong></td>
+        <td><strong>AED ${itemValue.toFixed(2)}</strong></td>
         <td style="color: ${statusColor}; font-weight: bold;">${statusText}</td>
       `;
       currentStockTbody.appendChild(row);
     });
   }
   
-  // Update summary cards
-  const totalValue = rawMaterialsValue + packagingValue;
-  if (document.getElementById('invRawMaterialsValue')) {
-    document.getElementById('invRawMaterialsValue').textContent = `AED ${rawMaterialsValue.toFixed(0)}`;
-    document.getElementById('invPackagingValue').textContent = `AED ${packagingValue.toFixed(0)}`;
+  // Update summary cards with correct units
+  if (document.getElementById('invRawMaterialsQty')) {
+    document.getElementById('invRawMaterialsQty').textContent = `${rawMaterialsQty.toLocaleString()} kg`;
+    document.getElementById('invFinishedQty').textContent = `${finishedProductsQty.toLocaleString()} kg`;
+    document.getElementById('invPackagingQty').textContent = `${packagingQty.toLocaleString()} pieces`;
     document.getElementById('invTotalValue').textContent = `AED ${totalValue.toFixed(0)}`;
-    document.getElementById('invLowStockCount').textContent = lowStockCount;
   }
   
   // Show/hide quick actions based on user role
@@ -2722,15 +2788,18 @@ function renderInventory() {
 function getStockKey(itemId) {
   const mapping = {
     'raw_pistachio_inshell': 'rawPistachioInshell',
-    'raw_pistachio_california': 'rawPistachioCalifornia',
-    'raw_pistachio_iranian': 'rawPistachioIranian',
+    'golden_18_21': 'golden1821',
+    'golden_21_25': 'golden2125',
+    'extra_18_21': 'extra1821',
+    'extra_21_25': 'extra2125',
+    'golden_rejects': 'goldenRejects',
+    'extra_rejects': 'extraRejects',
     'vacuum_bags_10kg': 'vacuumBags',
     'golden_hill_boxes': 'goldenHillBoxes',
     'extra_boxes': 'extraBoxes'
   };
   return mapping[itemId] || itemId;
 }
-
 function renderInventoryLog(filteredData = null) {
   const tbody = document.querySelector('#inventoryTable tbody');
   if (!tbody) return;
