@@ -2088,7 +2088,6 @@ const canDelete = lot.usedRawQuantity === 0;
     ${!canEdit && !canDelete ? '<br><small style="color: #666;">Lot in use/completed</small>' : ''}
   ` : '-'}
 </td>
-`;
       <td>
   ${(() => {
     const user = window.appState.getState('currentUser');
