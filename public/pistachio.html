@@ -204,26 +204,6 @@
       border-radius: 0.5rem;
       margin: 1rem 0;
     }
-    .progress-bar {
-  background: #e5e7eb;
-  height: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-  margin: 0.5rem 0;
-}
-
-.progress-fill {
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  height: 100%;
-  border-radius: 10px;
-  transition: width 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
 
     /* Section header with pistachio image */
     .section-header-with-image {
@@ -466,15 +446,9 @@
   <div class="container">
    <div class="nav-buttons">
   <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
-  <button class="nav-btn" onclick="showSection('lotmanagement')">Lot Management</button>
   <button class="nav-btn" onclick="showSection('production')">New Production</button>
   <button class="nav-btn" onclick="showSection('records')">View Records</button>
-  <button class="nav-btn" onclick="redirectToAdvancedInventory()" style="background: linear-gradient(135deg, #a32034 0%, #d5a333 100%); position: relative;">
-  Inventory
-  <span style="font-size: 0.7rem; opacity: 0.8; margin-left: 0.5rem;">→ Advanced</span>
-</button>
-  <button class="nav-btn" onclick="redirectToOrderManagement()">Orders</button>
-  <button class="nav-btn" onclick="redirectToDashboard()">Advanced Dashboard</button>
+  <button class="nav-btn" onclick="showSection('inventory')">Inventory</button>
   <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
   <button class="nav-btn" onclick="showSection('reports')">Reports</button>
   <button class="nav-btn" id="itemPricesBtn" onclick="showSection('itemprices')" style="display: none;">Item Prices</button>
@@ -486,139 +460,23 @@
         <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
         <h2>Production Dashboard</h2>
       </div>
-    <div class="stats-grid">
-  <div class="stat-card">
-    <div>Raw Materials</div>
-    <div class="stat-value" id="invRawMaterialsQty">0 kg</div>
-  </div>
-  <div class="stat-card">
-    <div>Finished Products</div>
-    <div class="stat-value" id="invFinishedQty">0 kg</div>
-  </div>
-  <div class="stat-card">
-    <div>Packaging Items</div>
-    <div class="stat-value" id="invPackagingQty">0 pieces</div>
-  </div>
-  <div class="stat-card">
-    <div>Total Inventory Value</div>
-    <div class="stat-value" id="invTotalValue">AED 0</div>
-  </div>
-</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Total Finished (kg)</div>
+          <div class="stat-value" id="kpiFinished">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Efficiency (%)</div>
+          <div class="stat-value" id="kpiEff">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Reject Rate (%)</div>
+          <div class="stat-value" id="kpiReject">0.0</div>
+        </div>
+      </div>
       <p>KPIs update automatically when you submit production records.</p>
     </section>
-<!-- Lot Management Section -->
-    <section id="lotmanagement" class="section">
-      <div class="section-header-with-image">
-        <img src="src/assets/icons/pistachio.png" alt="Pistachio" onerror="this.outerHTML='🥜 '">
-        <h2>Lot Management</h2>
-      </div>
-      
-      <!-- Create New Lot -->
-      <div class="materials-section">
-        <h3>Create New Lot</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Lot Number</label>
-            <input id="lotNumber" type="text" placeholder="e.g., Lot-01-02-03-2024" required>
-          </div>
-          <div class="form-group">
-            <label>Brand</label>
-            <select id="lotBrand">
-              <option>Golden Hill</option>
-              <option>Extra</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Total Containers</label>
-            <input id="totalContainers" type="number" min="1" value="1" onchange="calculateLotTotals()">
-          </div>
-          <div class="form-group">
-            <label>Bags per Container</label>
-            <input id="bagsPerContainer" type="number" min="1" value="50" onchange="calculateLotTotals()">
-          </div>
-          <div class="form-group">
-            <label>Kg per Bag</label>
-            <input id="kgPerBag" type="number" min="0.1" step="0.1" value="25" onchange="calculateLotTotals()">
-          </div>
-          <div class="form-group">
-            <label>Total Raw Quantity (kg)</label>
-            <input id="totalRawQuantity" type="number" readonly style="background: #f8f9fa;">
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-  <label>Container Numbers (one per line or comma-separated)</label>
-  <textarea id="containerNumbers" placeholder="e.g., CONT-001, CONT-002, CONT-003 or enter each on a new line"></textarea>
-</div>
-        </div>
-        <button onclick="createLot()">Create Lot</button>
-      </div>
-<!-- Edit Lot Form -->
-<div id="editLotSection" class="materials-section" style="display: none;">
-  <h3>Edit Lot</h3>
-  <div class="warning-box">
-    <strong>Note:</strong> You can only edit lots that have no production records.
-  </div>
-  <div class="form-grid">
-    <input type="hidden" id="editLotId">
-    <div class="form-group">
-      <label>Lot Number</label>
-      <input id="editLotNumber" type="text" placeholder="e.g., Lot-01-02-03-2024" required>
-    </div>
-    <div class="form-group">
-      <label>Brand</label>
-      <select id="editLotBrand">
-        <option>Golden Hill</option>
-        <option>Extra</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Total Containers</label>
-      <input id="editTotalContainers" type="number" min="1" value="1" onchange="calculateEditLotTotals()">
-    </div>
-    <div class="form-group">
-      <label>Bags per Container</label>
-      <input id="editBagsPerContainer" type="number" min="1" value="50" onchange="calculateEditLotTotals()">
-    </div>
-    <div class="form-group">
-      <label>Kg per Bag</label>
-      <input id="editKgPerBag" type="number" min="0.1" step="0.1" value="25" onchange="calculateEditLotTotals()">
-    </div>
-    <div class="form-group">
-      <label>Total Raw Quantity (kg)</label>
-      <input id="editTotalRawQuantity" type="number" readonly style="background: #f8f9fa;">
-    </div>
-    <div class="form-group" style="grid-column: 1 / -1;">
-      <label>Container Numbers (one per line or comma-separated)</label>
-      <textarea id="editContainerNumbers" placeholder="e.g., CONT-001, CONT-002, CONT-003"></textarea>
-    </div>
-  </div>
-  <div style="margin-top: 1rem;">
-    <button onclick="updateLot()">Update Lot</button>
-    <button onclick="cancelEditLot()" class="btn-secondary" style="margin-left: 1rem;">Cancel</button>
-  </div>
-</div>
-      <!-- Active Lots Table -->
-      <h3>Current Lots Status</h3>
-      <div style="overflow-x: auto;">
-        <table id="lotsTable">
-          <thead>
-  <tr>
-    <th>Lot Number</th>
-    <th>Brand</th>
-    <th>Total Containers</th>
-    <th>Total Raw (kg)</th>
-    <th>Used (kg)</th>
-    <th>Available (kg)</th>
-    <th>Progress</th>
-    <th>Status</th>
-    <th>Created</th>
-    <th>Container Numbers</th>
-    <th>Actions</th>
-  </tr>
-</thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+
     <!-- Production Entry Section -->
     <section id="production" class="section">
       <div class="section-header-with-image">
@@ -626,17 +484,11 @@
         <h2>New Production Entry</h2>
       </div>
       
-       <div class="warning-box">
-        <strong>Note:</strong> Select an active lot to record production. Huller Run shows rejects, Repacking Only hides them.
+      <div class="warning-box">
+        <strong>Note:</strong> Huller Run shows rejects section, Repacking Only hides it.
       </div>
 
       <div class="form-grid">
-        <div class="form-group">
-          <label>Select Lot</label>
-          <select id="productionLot" onchange="updateLotInfo()" required>
-            <option value="">Select a lot...</option>
-          </select>
-        </div>
         <div class="form-group">
           <label>Run Type</label>
           <select id="runType" onchange="updateFormVisibility()">
@@ -644,35 +496,43 @@
             <option value="repack">Repacking Only</option>
           </select>
         </div>
-
+        <div class="form-group">
+          <label>Brand</label>
+          <select id="brand" onchange="updateInventoryDisplay()">
+            <option>Golden Hill</option>
+            <option>Extra</option>
+          </select>
+        </div>
+        <div class="form-group" id="sizeGroup">
+          <label>Size</label>
+          <select id="size">
+            <option>18-21</option>
+            <option>21-25</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lot Number</label>
+          <input id="lotNo" type="text" placeholder="e.g., GH-240315-01">
+        </div>
         <div class="form-group">
           <label>Raw Input (kg)</label>
           <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
         </div>
       </div>
 
-      <!-- Lot Info Display -->
-     <div id="lotInfoDisplay" class="materials-section" style="display: none;">
-  <h4>Selected Lot Information</h4>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-    <div><strong>Lot Number:</strong> <span id="selectedLotNumber">-</span></div>
-    <div><strong>Brand:</strong> <span id="selectedLotBrand">-</span></div>
-    <div><strong>Available Raw:</strong> <span id="selectedLotAvailable">-</span> kg</div>
-    <div><strong>Total Containers:</strong> <span id="selectedLotContainers">-</span></div>
-    <div style="grid-column: 1 / -1;"><strong>Container Numbers:</strong> <span id="selectedLotContainerNumbers">-</span></div>
-  </div>
-</div>
-<h3>Final Goods Output</h3>
-<div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-  <div class="form-group">
-    <label>18-21 Size (kg)</label>
-    <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
-  </div>
-  <div class="form-group">
-    <label>21-25 Size (kg)</label>
-    <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
-  </div>
-</div>
+      <!-- Final Goods -->
+      <h3>Final Goods Output</h3>
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="form-group">
+          <label>18-21 Size (kg)</label>
+          <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>21-25 Size (kg)</label>
+          <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+        </div>
+      </div>
+
       <!-- Materials -->
       <div class="materials-section">
         <h3>Materials Usage</h3>
@@ -1184,390 +1044,160 @@
         </div>
       </div>
     </section>
-   <!-- Inventory Section -->
-<section id="inventory" class="section">
-  <h2 style="margin-bottom: 1rem;">📦 Advanced Inventory Management</h2>
-  
-  <!-- Inventory Summary Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div>Raw Materials Value</div>
-      <div class="stat-value" id="invRawMaterialsValue">AED 0</div>
-    </div>
-    <div class="stat-card">
-      <div>Packaging Value</div>
-      <div class="stat-value" id="invPackagingValue">AED 0</div>
-    </div>
-    <div class="stat-card">
-      <div>Total Inventory Value</div>
-      <div class="stat-value" id="invTotalValue">AED 0</div>
-    </div>
-    <div class="stat-card">
-      <div>Low Stock Items</div>
-      <div class="stat-value" id="invLowStockCount">0</div>
-    </div>
-  </div>
+    <!-- Inventory Section -->
+    <section id="inventory" class="section">
+      <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Vacuum Bags (10kg)</div>
+          <div class="stat-value" id="invVacuumBags">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Golden Hill Boxes</div>
+          <div class="stat-value" id="invGoldenHillBoxes">0</div>
+        </div>
+        <div class="stat-card">
+          <div>Extra Boxes</div>
+          <div class="stat-value" id="invExtraBoxes">0</div>
+        </div>
+      </div>
 
-  <!-- Quick Actions Panel (Mobile-friendly) -->
-  <div class="materials-section" id="quickActionsPanel">
-    <h3>Quick Actions (Admin Only)</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Item</label>
-        <select id="invItem">
-  <optgroup label="Raw Materials">
-    <option value="rawPistachioInshell">Raw Pistachio (In-shell)</option>
-  </optgroup>
-  <optgroup label="Finished Products">
-    <option value="golden1821">Golden Hill 18-21 Size</option>
-    <option value="golden2125">Golden Hill 21-25 Size</option>
-    <option value="extra1821">Extra 18-21 Size</option>
-    <option value="extra2125">Extra 21-25 Size</option>
-  </optgroup>
-  <optgroup label="Rejects">
-    <option value="goldenRejects">Golden Hill Rejects</option>
-    <option value="extraRejects">Extra Rejects</option>
-  </optgroup>
-  <optgroup label="Packaging Materials">
-    <option value="vacuumBags">Vacuum Bags (10kg)</option>
-    <option value="goldenHillBoxes">Golden Hill Boxes</option>
-    <option value="extraBoxes">Extra Boxes</option>
-  </optgroup>
-</select>
+      <div class="materials-section">
+        <h3>Stock Adjustment</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Item</label>
+            <select id="invItem">
+              <option value="vacuumBags">Vacuum Bags (10kg)</option>
+              <option value="goldenHillBoxes">Golden Hill Boxes</option>
+              <option value="extraBoxes">Extra Boxes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Action</label>
+            <select id="invAction">
+              <option value="add">Add Stock</option>
+              <option value="remove">Remove Stock</option>
+              <option value="set">Set Exact Amount</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input id="invQuantity" type="number" min="0" step="1" value="0">
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input id="invNotes" type="text" placeholder="Reason for adjustment">
+          </div>
+        </div>
+        <button onclick="adjustInventory()">Update Inventory</button>
       </div>
-      <div class="form-group">
-        <label>Action</label>
-        <select id="invAction">
-          <option value="add">Add Stock</option>
-          <option value="remove">Remove Stock</option>
-          <option value="set">Set Exact Amount</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Quantity</label>
-        <input id="invQuantity" type="number" min="0" step="1" value="0">
-      </div>
-      <div class="form-group">
-        <label>Batch/Lot Number</label>
-        <input id="invBatchNumber" type="text" placeholder="e.g., BATCH-2024-001">
-      </div>
-      <div class="form-group">
-        <label>Linked Lot/Order</label>
-        <input id="invLinkedLot" type="text" placeholder="e.g., Lot-01-02-03-2024">
-      </div>
-      <div class="form-group">
-        <label>Notes</label>
-        <input id="invNotes" type="text" placeholder="Reason for adjustment">
-      </div>
-    </div>
-    <button onclick="adjustInventory()">Update Inventory</button>
-  </div>
 
-  <!-- Search and Filter -->
-  <div class="materials-section">
-    <h3>Search & Filter</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Search Items</label>
-        <input id="invSearch" type="text" placeholder="Search by item name..." onkeyup="filterInventoryLog()">
+      <h3>Stock Movement Log</h3>
+      <div style="overflow-x: auto;">
+        <table id="inventoryTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Item</th>
+              <th>Action</th>
+              <th>Quantity</th>
+              <th>Result</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <div class="form-group">
-        <label>Filter by Category</label>
-        <select id="invCategoryFilter" onchange="filterInventoryLog()">
-          <option value="all">All Categories</option>
-          <option value="raw_material">Raw Materials</option>
-          <option value="packaging">Packaging Materials</option>
-        </select>
+      <h3>Wastage Analysis</h3>
+      <div class="materials-section">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Filter by Date Range</label>
+            <input id="wastageFromDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input id="wastageToDate" type="date">
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="filterWastageByDate()" style="width: 100%;">Filter Wastage</button>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="showAllWastage()" style="width: 100%;" class="btn-secondary">Show All</button>
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Filter by Action</label>
-        <select id="invActionFilter" onchange="filterInventoryLog()">
-          <option value="all">All Actions</option>
-          <option value="add">Add Stock</option>
-          <option value="remove">Remove Stock</option>
-          <option value="set">Set Amount</option>
-          <option value="auto">Automatic</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Date Range</label>
-        <input id="invDateFrom" type="date" onchange="filterInventoryLog()">
-      </div>
-    </div>
-  </div>
 
-  <!-- Current Stock Levels -->
-  <h3>Current Stock Levels</h3>
-  <div style="overflow-x: auto;">
-    <table id="currentStockTable">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Category</th>
-          <th>Current Stock</th>
-          <th>Unit Price (AED)</th>
-          <th>Total Value (AED)</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+      <div style="overflow-x: auto;">
+        <table id="wastageTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Lot Number</th>
+              <th>Brand</th>
+              <th>Bags Wasted</th>
+              <th>Boxes Wasted</th>
+              <th>Total Waste Cost</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
   </div>
-
-  <!-- Stock Movement Log -->
-  <h3>Stock Movement Log</h3>
-  <div style="overflow-x: auto;">
-    <table id="inventoryTable">
-      <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>Item</th>
-          <th>Category</th>
-          <th>Action</th>
-          <th>Quantity</th>
-          <th>Result</th>
-          <th>Value (AED)</th>
-          <th>Batch/Lot</th>
-          <th>Linked Lot/Order</th>
-          <th>User</th>
-          <th>Factory</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- Enhanced Wastage Analysis -->
-  <div class="materials-section">
-    <h3>Enhanced Wastage Analysis</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Analysis Period</label>
-        <select id="wastageAnalysisPeriod" onchange="updateWastageAnalysis()">
-          <option value="30">Last 30 Days</option>
-          <option value="90">Last 90 Days</option>
-          <option value="365">Last Year</option>
-          <option value="custom">Custom Range</option>
-        </select>
-      </div>
-      <div class="form-group" id="customWastageDateRange" style="display: none;">
-        <label>From Date</label>
-        <input id="wastageCustomFrom" type="date" onchange="updateWastageAnalysis()">
-      </div>
-      <div class="form-group" id="customWastageDateRange2" style="display: none;">
-        <label>To Date</label>
-        <input id="wastageCustomTo" type="date" onchange="updateWastageAnalysis()">
-      </div>
-      <div class="form-group">
-        <label>&nbsp;</label>
-        <button onclick="exportWastageReport()" class="btn-secondary">Export Wastage Report</button>
-      </div>
-    </div>
-    
-    <!-- Wastage KPIs -->
-    <div class="stats-grid" style="margin: 1rem 0;">
-      <div class="stat-card">
-        <div>Total Waste Cost</div>
-        <div class="stat-value" id="totalWasteCost">AED 0</div>
-      </div>
-      <div class="stat-card">
-        <div>Average Waste %</div>
-        <div class="stat-value" id="avgWastePercent">0%</div>
-      </div>
-      <div class="stat-card">
-        <div>Worst Performing Lot</div>
-        <div class="stat-value" id="worstLot" style="font-size: 1rem;">-</div>
-      </div>
-    </div>
-  </div>
-
-  <div style="overflow-x: auto;">
-    <table id="enhancedWastageTable">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Lot Number</th>
-          <th>Brand</th>
-          <th>Input (kg)</th>
-          <th>Output (kg)</th>
-          <th>Waste (kg)</th>
-          <th>Waste %</th>
-          <th>Waste Cost (AED)</th>
-          <th>Efficiency</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- Reporting Section -->
-  <div class="materials-section">
-    <h3>Inventory Reports</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Report Type</label>
-        <select id="reportType">
-          <option value="consumption">Monthly Consumption</option>
-          <option value="cost_analysis">Cost Analysis</option>
-          <option value="materials_vs_output">Materials vs Output</option>
-          <option value="stock_valuation">Stock Valuation</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Period</label>
-        <select id="reportPeriod">
-          <option value="current_month">Current Month</option>
-          <option value="last_month">Last Month</option>
-          <option value="last_3_months">Last 3 Months</option>
-          <option value="custom">Custom Period</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>&nbsp;</label>
-        <button onclick="generateInventoryReport()">Generate Report</button>
-      </div>
-      <div class="form-group">
-        <label>&nbsp;</label>
-        <button onclick="exportInventoryData()" class="btn-secondary">Export All Data</button>
-      </div>
-    </div>
-  </div>
-</section>
+</div>
  
 <script>
 // ===== STATE MANAGEMENT =====
 class AppState {
   constructor() {
     this.data = {
-      lots: [],
       productionRecords: [],
       inventoryLog: [],
       maintenanceLog: [],
       wastageLog: [],
-    itemPrices: [
-  // Raw Materials
-  {
-    id: 'raw_pistachio_inshell',
-    name: 'Raw Pistachio (In-shell)',
-    unit: 'kg',
-    price: 12.50, // AED per kg
-    status: 'active',
-    category: 'raw_material',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  // Finished Products
-  {
-    id: 'golden_18_21',
-    name: 'Golden Hill 18-21 Size',
-    unit: 'kg',
-    price: 25.00,
-    status: 'active',
-    category: 'finished_product',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  {
-    id: 'golden_21_25',
-    name: 'Golden Hill 21-25 Size',
-    unit: 'kg', 
-    price: 28.00,
-    status: 'active',
-    category: 'finished_product',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  {
-    id: 'extra_18_21',
-    name: 'Extra 18-21 Size',
-    unit: 'kg',
-    price: 22.00,
-    status: 'active',
-    category: 'finished_product',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  {
-    id: 'extra_21_25',
-    name: 'Extra 21-25 Size',
-    unit: 'kg',
-    price: 24.50,
-    status: 'active',
-    category: 'finished_product',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  // Reject Products
-  {
-    id: 'golden_rejects',
-    name: 'Golden Hill Rejects (All Categories)',
-    unit: 'kg',
-    price: 8.00,
-    status: 'active',
-    category: 'rejects',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  {
-    id: 'extra_rejects',
-    name: 'Extra Rejects (All Categories)',
-    unit: 'kg',
-    price: 6.50,
-    status: 'active',
-    category: 'rejects',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  // Packaging Materials (keep existing)
-  {
-    id: 'vacuum_bags_10kg',
-    name: 'Vacuum Bags (10kg)',
-    unit: 'piece',
-    price: 2.50,
-    status: 'active',
-    category: 'packaging',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  {
-    id: 'golden_hill_boxes',
-    name: 'Golden Hill Boxes',
-    unit: 'piece',
-    price: 1.25,
-    status: 'active',
-    category: 'packaging',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  },
-  {
-    id: 'extra_boxes',
-    name: 'Extra Boxes',
-    unit: 'piece',
-    price: 1.00,
-    status: 'active',
-    category: 'packaging',
-    lastUpdated: new Date().toISOString(),
-    updatedBy: 'system'
-  }
-],
+      itemPrices: [
+        {
+          id: 'vacuum_bags_10kg',
+          name: 'Vacuum Bags (10kg)',
+          unit: 'piece',
+          price: 2.50,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'golden_hill_boxes',
+          name: 'Golden Hill Boxes',
+          unit: 'piece', 
+          price: 1.25,
+          status: 'active',
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        },
+        {
+          id: 'extra_boxes',
+          name: 'Extra Boxes',
+          unit: 'piece',
+          price: 1.00,
+          status: 'active', 
+          category: 'packaging',
+          lastUpdated: new Date().toISOString(),
+          updatedBy: 'system'
+        }
+      ],
       priceAuditLog: [],
       currentInventory: {
-  // Raw Materials
-  rawPistachioInshell: 0,
-  // Finished Products
-  golden1821: 0,
-  golden2125: 0,
-  extra1821: 0,
-  extra2125: 0,
-  // Rejects
-  goldenRejects: 0,
-  extraRejects: 0,
-  // Packaging Materials
-  vacuumBags: 0,
-  goldenHillBoxes: 0,
-  extraBoxes: 0
-},
+        vacuumBags: 0,
+        goldenHillBoxes: 0,
+        extraBoxes: 0
+      },
       equipment: [], // Will be populated below
       currentUser: null
     };
@@ -1599,23 +1229,13 @@ class AppState {
   }
 
   addToArray(key, item) {
-  if (Array.isArray(this.data[key])) {
-    this.data[key].push(item);
-    this.saveToStorage();
-    this.notify(key, this.data[key]);
-  }
-}
-
-updateArrayItem(key, id, updater) {
-  if (Array.isArray(this.data[key])) {
-    const index = this.data[key].findIndex(item => item.id === id);
-    if (index !== -1) {
-      this.data[key][index] = updater(this.data[key][index]);
+    if (Array.isArray(this.data[key])) {
+      this.data[key].push(item);
       this.saveToStorage();
       this.notify(key, this.data[key]);
     }
   }
-}
+
   updateInventory(item, action, quantity) {
     const current = this.data.currentInventory[item] || 0;
     let newValue;
@@ -1965,9 +1585,7 @@ window.appState.setState('equipment', equipmentData);
 
 // User management
 const users = { admin: 'admin123', operator: 'op123' };
-// Reports variables
-let availableLots = [];
-let selectedLotsList = [];
+
 // ===== UPDATED FUNCTIONS WITH VALIDATION =====
 function setupProductionValidation() {
   const validator = window.formValidator;
@@ -2002,11 +1620,9 @@ function handleLogin(event) {
     showAdminControls();
     
     updateDashboard();
-    renderLots();
     renderRecords();
     renderInventory();
     renderEquipmentGrid();
-    updateProductionLotDropdown();
     
     if (username === 'admin') {
       renderItemPricesTable();
@@ -2054,320 +1670,18 @@ function showSection(sectionId) {
 // Form handling
 function updateFormVisibility() {
   const runType = document.getElementById('runType').value;
+  const sizeGroup = document.getElementById('sizeGroup');
   const rejectsSection = document.getElementById('rejectsSection');
   
   if (runType === 'huller') {
+    sizeGroup.style.display = 'none';
     rejectsSection.style.display = 'block';
   } else {
+    sizeGroup.style.display = 'block';
     rejectsSection.style.display = 'none';
   }
   updateSummary();
 }
-// Lot Management Functions
-function calculateLotTotals() {
-  const containers = parseInt(document.getElementById('totalContainers').value) || 0;
-  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
-  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
-  
-  const totalRawQuantity = containers * bagsPerContainer * kgPerBag;
-  document.getElementById('totalRawQuantity').value = totalRawQuantity;
-}
-
-function createLot() {
-  const lotNumber = document.getElementById('lotNumber').value.trim();
-  const brand = document.getElementById('lotBrand').value;
-  const totalContainers = parseInt(document.getElementById('totalContainers').value) || 0;
-  const bagsPerContainer = parseInt(document.getElementById('bagsPerContainer').value) || 0;
-  const kgPerBag = parseFloat(document.getElementById('kgPerBag').value) || 0;
-  const totalRawQuantity = parseFloat(document.getElementById('totalRawQuantity').value) || 0;
-  
-  if (!lotNumber) {
-    alert('Please enter a lot number');
-    return;
-  }
-  
-  if (totalContainers <= 0 || bagsPerContainer <= 0 || kgPerBag <= 0) {
-    alert('Please enter valid quantities');
-    return;
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  if (lots.some(lot => lot.lotNumber === lotNumber)) {
-    alert('Lot number already exists');
-    return;
-  }
-  
-  // Parse container numbers from textarea
-const containerNumbersInput = document.getElementById('containerNumbers').value.trim();
-const containerNumbers = containerNumbersInput
-  .split(/[,\n]+/) // Split by comma or newline
-  .map(num => num.trim())
-  .filter(num => num.length > 0); // Remove empty entries
-
-const newLot = {
-  id: Date.now().toString(),
-  lotNumber,
-  brand,
-  totalContainers,
-  bagsPerContainer,
-  kgPerBag,
-  totalRawQuantity,
-  availableRawQuantity: totalRawQuantity,
-  usedRawQuantity: 0,
-  status: 'Open',
-  createdDate: new Date().toISOString(),
-  containerNumbers: containerNumbers // Add container numbers
-};
-  
- window.appState.addToArray('lots', newLot);
-
-document.getElementById('lotNumber').value = '';
-document.getElementById('totalContainers').value = '1';
-document.getElementById('bagsPerContainer').value = '50';
-document.getElementById('kgPerBag').value = '25';
-document.getElementById('totalRawQuantity').value = '';
-document.getElementById('containerNumbers').value = '';  // Add this line here
-
-alert('Lot created successfully!');
-  renderLots();
-  updateProductionLotDropdown();
-}
-function calculateEditLotTotals() {
-  const containers = parseInt(document.getElementById('editTotalContainers').value) || 0;
-  const bagsPerContainer = parseInt(document.getElementById('editBagsPerContainer').value) || 0;
-  const kgPerBag = parseFloat(document.getElementById('editKgPerBag').value) || 0;
-  
-  const totalRawQuantity = containers * bagsPerContainer * kgPerBag;
-  document.getElementById('editTotalRawQuantity').value = totalRawQuantity;
-}
-
-function editLot(lotId) {
-  const currentUser = window.appState.getState('currentUser');
-  if (currentUser !== 'admin') {
-    window.formValidator.showToast('Access denied: Admin only', 'error');
-    return;
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  const lot = lots.find(l => l.id === lotId);
-  
-  if (!lot) {
-    window.formValidator.showToast('Lot not found', 'error');
-    return;
-  }
-  
-  // Check if lot is completed/closed
-if (lot.status === 'Completed') {
-  window.formValidator.showToast('Cannot edit completed lots', 'error');
-  return;
-}
-  
-  // Populate edit form
-  document.getElementById('editLotId').value = lot.id;
-  document.getElementById('editLotNumber').value = lot.lotNumber;
-  document.getElementById('editLotBrand').value = lot.brand;
-  document.getElementById('editTotalContainers').value = lot.totalContainers;
-  document.getElementById('editBagsPerContainer').value = lot.bagsPerContainer;
-  document.getElementById('editKgPerBag').value = lot.kgPerBag;
-  document.getElementById('editTotalRawQuantity').value = lot.totalRawQuantity;
-  document.getElementById('editContainerNumbers').value = lot.containerNumbers ? lot.containerNumbers.join(', ') : '';
-  
-  // Show edit form
-  document.getElementById('editLotSection').style.display = 'block';
-  document.getElementById('editLotSection').scrollIntoView({behavior: 'smooth'});
-}
-
-function updateLot() {
-  const lotId = document.getElementById('editLotId').value;
-  const lotNumber = document.getElementById('editLotNumber').value.trim();
-  const brand = document.getElementById('editLotBrand').value;
-  const totalContainers = parseInt(document.getElementById('editTotalContainers').value) || 0;
-  const bagsPerContainer = parseInt(document.getElementById('editBagsPerContainer').value) || 0;
-  const kgPerBag = parseFloat(document.getElementById('editKgPerBag').value) || 0;
-  const totalRawQuantity = parseFloat(document.getElementById('editTotalRawQuantity').value) || 0;
-  
-  if (!lotNumber || totalContainers <= 0 || bagsPerContainer <= 0 || kgPerBag <= 0) {
-    window.formValidator.showToast('Please fill all required fields with valid values', 'error');
-    return;
-  }
-  
-  // Check if lot number is unique (excluding current lot)
-  const lots = window.appState.getState('lots') || [];
-  const duplicateLot = lots.find(lot => lot.lotNumber === lotNumber && lot.id !== lotId);
-  if (duplicateLot) {
-    window.formValidator.showToast('Lot number already exists', 'error');
-    return;
-  }
-  
-  // Parse container numbers
-  const containerNumbersInput = document.getElementById('editContainerNumbers').value.trim();
-  const containerNumbers = containerNumbersInput
-    .split(/[,\n]+/)
-    .map(num => num.trim())
-    .filter(num => num.length > 0);
-  
-  // Update lot
-  window.appState.updateArrayItem('lots', lotId, (lot) => {
-    const usedRaw = lot.usedRawQuantity || 0;
-    
-    return {
-      ...lot,
-      lotNumber,
-      brand,
-      totalContainers,
-      bagsPerContainer,
-      kgPerBag,
-      totalRawQuantity,
-      availableRawQuantity: totalRawQuantity - usedRaw,
-      containerNumbers,
-      lastModified: new Date().toISOString()
-    };
-  });
-  
-  window.formValidator.showToast('Lot updated successfully!', 'success');
-  cancelEditLot();
-  renderLots();
-  updateProductionLotDropdown();
-}
-
-function cancelEditLot() {
-  document.getElementById('editLotSection').style.display = 'none';
-  document.getElementById('editLotId').value = '';
-}
-
-function deleteLot(lotId) {
-  const currentUser = window.appState.getState('currentUser');
-  if (currentUser !== 'admin') {
-    window.formValidator.showToast('Access denied: Admin only', 'error');
-    return;
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  const lot = lots.find(l => l.id === lotId);
-  
-  if (!lot) {
-    window.formValidator.showToast('Lot not found', 'error');
-    return;
-  }
-  
- // Check if lot has been used in production
-if (lot.usedRawQuantity > 0) {
-  window.formValidator.showToast('Cannot delete lot that has been used in production', 'error');
-  return;
-}
-  
-  if (confirm(`Are you sure you want to delete lot "${lot.lotNumber}"? This action cannot be undone.`)) {
-    const updatedLots = lots.filter(l => l.id !== lotId);
-    window.appState.setState('lots', updatedLots);
-    
-    window.formValidator.showToast('Lot deleted successfully!', 'success');
-    renderLots();
-    updateProductionLotDropdown();
-  }
-}
-function renderLots() {
-  const tbody = document.querySelector('#lotsTable tbody');
-  if (!tbody) return;
-  
-  tbody.innerHTML = '';
-  
-  const lots = window.appState.getState('lots') || [];
-  const currentUser = window.appState.getState('currentUser');
-  
-  lots.forEach(lot => {
-    const progressPercent = lot.totalRawQuantity > 0 
-      ? Math.round((lot.usedRawQuantity / lot.totalRawQuantity) * 100) 
-      : 0;
-    
-    const statusColor = lot.status === 'Open' ? '#22c55e' : '#6b7280';
-    
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td><strong>${lot.lotNumber}</strong></td>
-      <td>${lot.brand}</td>
-      <td>${lot.totalContainers}</td>
-      <td>${lot.totalRawQuantity.toLocaleString()}</td>
-      <td>${lot.usedRawQuantity.toLocaleString()}</td>
-      <td>${lot.availableRawQuantity.toLocaleString()}</td>
-      <td>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${progressPercent}%;">
-            ${progressPercent}%
-          </div>
-        </div>
-      </td>
-      <td style="color: ${statusColor}; font-weight: bold;">${lot.status}</td>
-      <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
-      <td style="max-width: 200px; font-size: 0.85rem;">
-  ${lot.containerNumbers && lot.containerNumbers.length > 0 
-    ? lot.containerNumbers.slice(0, 3).join(', ') + (lot.containerNumbers.length > 3 ? '...' : '')
-    : 'N/A'}
-</td>
-<td>
-  ${(() => {
-    const user = window.appState.getState('currentUser');
-    if (user === 'admin') {
-      const canEdit = lot.status === 'Open';
-      const canDelete = lot.usedRawQuantity === 0;
-      return `
-        <button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;" ${!canEdit ? 'disabled' : ''}>Edit</button>
-        <button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;" ${!canDelete ? 'disabled' : ''}>Delete</button>
-        ${!canEdit && !canDelete ? '<br><small style="color: #666;">Lot in use/completed</small>' : ''}
-      `;
-    }
-    return '-';
-  })()}
-</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-function updateProductionLotDropdown() {
-  const dropdown = document.getElementById('productionLot');
-  if (!dropdown) return;
-  
-  dropdown.innerHTML = '<option value="">Select a lot...</option>';
-  
-  const lots = window.appState.getState('lots') || [];
-  const openLots = lots.filter(lot => lot.status === 'Open' && lot.availableRawQuantity > 0);
-  
-  openLots.forEach(lot => {
-    const option = document.createElement('option');
-    option.value = lot.id;
-    option.textContent = `${lot.lotNumber} (${lot.brand}) - ${lot.availableRawQuantity} kg available`;
-    dropdown.appendChild(option);
-  });
-}
-
-function updateLotInfo() {
-  const lotId = document.getElementById('productionLot').value;
-  const lotDisplay = document.getElementById('lotInfoDisplay');
-  
-  if (!lotId) {
-    lotDisplay.style.display = 'none';
-    return;
-  }
-  
-  const lots = window.appState.getState('lots') || [];
-  const selectedLot = lots.find(lot => lot.id === lotId);
-  
- if (selectedLot) {
-  document.getElementById('selectedLotNumber').textContent = selectedLot.lotNumber;
-  document.getElementById('selectedLotBrand').textContent = selectedLot.brand;
-  document.getElementById('selectedLotAvailable').textContent = selectedLot.availableRawQuantity.toLocaleString();
-  document.getElementById('selectedLotContainers').textContent = selectedLot.totalContainers;
-  // Add container numbers display
-  document.getElementById('selectedLotContainerNumbers').textContent = 
-    selectedLot.containerNumbers && selectedLot.containerNumbers.length > 0 
-      ? selectedLot.containerNumbers.join(', ') 
-      : 'No container numbers specified';
-  lotDisplay.style.display = 'block';
-    
-    // Auto-set brand
-    // TODO: Add logic here if you want to auto-set the brand based on the selected lot
-  }
-} 
 
 function updateInventoryDisplay() {
   renderInventory();
@@ -2392,7 +1706,6 @@ function updateSummary() {
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
   
-  // ADD THESE TWO MISSING LINES:
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
   const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
   
@@ -2400,25 +1713,11 @@ function updateSummary() {
     `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
 }
 
-function autoCalculateMaterials() {
-  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
-  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const totalKg = kg1821 + kg2125;
-  
-  // Each vacuum bag holds 10kg
-  const requiredBags = Math.ceil(totalKg / 10);
-  
-  // Each box typically holds 12 bags (adjust as needed)
-  const requiredBoxes = Math.ceil(requiredBags / 12);
-  
-  // Auto-fill the materials fields
-  document.getElementById('bagsUsed').value = requiredBags;
-  document.getElementById('boxesUsed').value = requiredBoxes;
-}
 function clearForm() {
   document.querySelectorAll('#production input[type="number"]').forEach(input => {
     input.value = 0;
   });
+  document.getElementById('lotNo').value = '';
   updateSummary();
 }
 
@@ -2426,13 +1725,6 @@ function submitProduction() {
   // Validate form first
   if (!window.formValidator.validateForm()) {
     window.formValidator.showToast('Please fix the errors before submitting', 'error');
-    return;
-  }
-
-  const lotId = document.getElementById('productionLot').value;
-  
-  if (!lotId) {
-    window.formValidator.showToast('Please select a lot', 'error');
     return;
   }
 
@@ -2445,41 +1737,7 @@ function submitProduction() {
     return;
   }
   
-  const lots = window.appState.getState('lots') || [];
-  const selectedLot = lots.find(lot => lot.id === lotId);
-  
-  if (!selectedLot) {
-    window.formValidator.showToast('Selected lot not found', 'error');
-    return;
-  }
-  
-  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
-
-if (rawInput > selectedLot.availableRawQuantity) {
-  window.formValidator.showToast(`Insufficient raw material. Available: ${selectedLot.availableRawQuantity} kg`, 'error');
-  return;
-}
-
-// New validation: Check if output matches input
-const runType = document.getElementById('runType').value;
-let rejectsKg = 0;
-if (runType === 'huller') {
-  const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
-                    'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
-  rejectsKg = rejectIds.reduce((sum, id) => {
-    return sum + (parseInt(document.getElementById(id).value) || 0);
-  }, 0);
-}
-
-const totalOutput = totalBags + rejectsKg;
-const tolerance = 5; // Allow 5kg tolerance for measurement differences
-
-if (Math.abs(rawInput - totalOutput) > tolerance) {
-  window.formValidator.showToast(`Output (${totalOutput}kg) must match input (${rawInput}kg). Difference: ${Math.abs(rawInput - totalOutput)}kg`, 'error');
-  return;
-}
-  
-  const brand = selectedLot.brand; // Use lot's brand
+  const brand = document.getElementById('brand').value;
   const boxType = brand === 'Golden Hill' ? 'goldenHillBoxes' : 'extraBoxes';
   
   const bagsUsed = parseInt(document.getElementById('bagsUsed').value) || 0;
@@ -2503,51 +1761,47 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
     return;
   }
   
+  const runType = document.getElementById('runType').value;
   const finishedKg = totalBags;
   
+  let rejectsKg = 0;
+  if (runType === 'huller') {
+    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
+                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
+    rejectsKg = rejectIds.reduce((sum, id) => {
+      return sum + (parseInt(document.getElementById(id).value) || 0);
+    }, 0);
+  }
   
-  
+  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
   const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
   const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
   
   const record = {
-  timestamp: new Date().toISOString(),
-  lotId: lotId,
-  lotNumber: selectedLot.lotNumber,
-  runType,
-  brand: brand,
-  lot: selectedLot.lotNumber,
-  containerNumbers: selectedLot.containerNumbers || [],  // Add this line
-  rawInput,
-  kg1821: bags1821,
-  kg2125: bags2125,
-  totalKg: totalBags,
-  finishedKg,
-  rejectsKg,
-  efficiency,
-  materials: {
-    bagsUsed: bagsUsed,
-    boxesUsed: boxesUsed,
-    bagsWasted: bagsWasted,
-    boxesWasted: boxesWasted
-  }
-};
+    timestamp: new Date().toISOString(),
+    runType,
+    brand: brand,
+    size: document.getElementById('size').value,
+    lot: document.getElementById('lotNo').value,
+    rawInput,
+    kg1821: bags1821,
+    kg2125: bags2125,
+    totalKg: totalBags,
+    finishedKg,
+    rejectsKg,
+    efficiency,
+    materials: {
+      bagsUsed: bagsUsed,
+      boxesUsed: boxesUsed,
+      bagsWasted: bagsWasted,
+      boxesWasted: boxesWasted
+    }
+  };
   
-  // Add to state
+  // Add to state instead of local array
   window.appState.addToArray('productionRecords', record);
   trackWastage(record);
-  
-  // Update lot quantities
-  window.appState.updateArrayItem('lots', lotId, (lot) => {
-    lot.usedRawQuantity += rawInput;
-    lot.availableRawQuantity -= rawInput;
-    if (lot.availableRawQuantity <= 0) {
-      lot.status = 'Completed';
-    }
-    return lot;
-  });
-  
-  // Update inventory
+  // Update inventory using state methods
   window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
   window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
   
@@ -2580,17 +1834,11 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   updateDashboard();
   renderRecords();
   renderInventory();
-  renderLots();
-  updateProductionLotDropdown();
 }
 
 // Dashboard updates
 function updateDashboard() {
-  const lots = window.appState.getState('lots') || [];
   const productionRecords = window.appState.getState('productionRecords') || [];
-  
-  const activeLots = lots.filter(lot => lot.status === 'Open').length;
-  
   let totalFinished = 0;
   let totalRejects = 0;
   let totalInput = 0;
@@ -2604,7 +1852,6 @@ function updateDashboard() {
   const efficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const rejectRate = totalInput > 0 ? Math.round((totalRejects / totalInput) * 1000) / 10 : 0;
   
-  document.getElementById('kpiActiveLots').textContent = activeLots;
   document.getElementById('kpiFinished').textContent = totalFinished;
   document.getElementById('kpiEff').textContent = efficiency;
   document.getElementById('kpiReject').textContent = rejectRate.toFixed(1);
@@ -2625,9 +1872,7 @@ const gainColor = materialGain > 0 ? '#22c55e' : '#ef4444';
 
 row.innerHTML = `
   <td>${new Date(record.timestamp).toLocaleString()}</td>
-  <td style="font-weight: 600; color: ${record.runType === 'huller' ? '#22c55e' : '#3b82f6'};">
-  ${record.runType === 'huller' ? 'Huller Run' : 'Repacking Only'}
-</td>
+  <td>${record.runType}</td>
   <td>${record.brand}</td>
   <td>${record.lot}</td>
   <td>${record.rawInput}</td>
@@ -2645,58 +1890,36 @@ row.innerHTML = `
 
 // Inventory management
 function adjustInventory() {
-  const currentUser = window.appState.getState('currentUser');
-  if (currentUser !== 'admin') {
-    window.formValidator.showToast('Access denied: Only admins can adjust inventory', 'error');
-    return;
-  }
-  
   const item = document.getElementById('invItem').value;
   const action = document.getElementById('invAction').value;
   const quantity = parseInt(document.getElementById('invQuantity').value) || 0;
   const notes = document.getElementById('invNotes').value;
-  const batchNumber = document.getElementById('invBatchNumber').value;
-  const linkedLot = document.getElementById('invLinkedLot').value;
   
   if (quantity <= 0 && action !== 'set') {
     window.formValidator.showToast('Please enter a valid quantity', 'error');
     return;
   }
   
-  const itemData = getItemDetails(item);
-  if (!itemData) {
-    window.formValidator.showToast('Item not found', 'error');
-    return;
-  }
+  let itemName;
+  if (item === 'vacuumBags') itemName = 'Vacuum Bags (10kg)';
+  else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
+  else if (item === 'extraBoxes') itemName = 'Extra Boxes';
   
   const success = window.appState.updateInventory(item, action, quantity);
   
   if (success) {
     const result = window.appState.getState('currentInventory')[item];
-    const aedValue = result * itemData.price;
-    
     window.appState.addToArray('inventoryLog', {
       timestamp: new Date().toISOString(),
-      item: itemData.name,
-      itemId: item,
-      category: itemData.category,
+      item: itemName,
       action,
       quantity,
       result,
-      aedValue: aedValue.toFixed(2),
-      notes,
-      batchNumber,
-      linkedLot,
-      user: currentUser,
-      factory: 'Pistachio'
+      notes
     });
     
-    // Clear form
     document.getElementById('invQuantity').value = 0;
     document.getElementById('invNotes').value = '';
-    document.getElementById('invBatchNumber').value = '';
-    document.getElementById('invLinkedLot').value = '';
-    
     window.formValidator.showToast('Inventory updated successfully', 'success');
   } else {
     window.formValidator.showToast('Failed to update inventory', 'error');
@@ -2705,323 +1928,36 @@ function adjustInventory() {
   renderInventory();
 }
 
-function getItemDetails(itemId) {
-  const itemPrices = window.appState.getState('itemPrices') || [];
-  return itemPrices.find(item => item.id === itemId);
-}
-
 function renderInventory() {
   const currentInventory = window.appState.getState('currentInventory') || {};
-  const itemPrices = window.appState.getState('itemPrices') || [];
+  document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags || 0;
+  document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes || 0;
+  document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes || 0;
   
-  // Calculate quantities and values correctly
-  let rawMaterialsQty = 0;
-  let finishedProductsQty = 0;
-  let packagingQty = 0;
-  let totalValue = 0;
-  let lowStockCount = 0;
-  
-  // Update current stock table
-  const currentStockTbody = document.querySelector('#currentStockTable tbody');
-  if (currentStockTbody) {
-    currentStockTbody.innerHTML = '';
-    
-    itemPrices.forEach(item => {
-      const stockKey = getStockKey(item.id);
-      const currentStock = currentInventory[stockKey] || 0;
-      const itemValue = currentStock * item.price;
-      totalValue += itemValue;
-      
-      // Categorize quantities by type, not value
-      if (item.category === 'raw_material') {
-        rawMaterialsQty += currentStock;
-      } else if (item.category === 'finished_product' || item.category === 'rejects') {
-        finishedProductsQty += currentStock;
-      } else if (item.category === 'packaging') {
-        packagingQty += currentStock;
-      }
-      
-      // Determine stock status based on category
-      let threshold = 100; // Default threshold
-      if (item.category === 'raw_material') threshold = 500;
-      if (item.category === 'packaging') threshold = 50;
-      
-      if (currentStock < threshold) lowStockCount++;
-      
-      const row = document.createElement('tr');
-      const statusColor = currentStock < (threshold * 0.5) ? '#ef4444' : 
-                         currentStock < threshold ? '#f59e0b' : '#22c55e';
-      const statusText = currentStock < (threshold * 0.5) ? 'Critical' : 
-                        currentStock < threshold ? 'Low' : 'Good';
-      
-      row.innerHTML = `
-        <td><strong>${item.name}</strong></td>
-        <td style="text-transform: capitalize;">${item.category.replace('_', ' ')}</td>
-        <td>${currentStock.toLocaleString()} ${item.unit}</td>
-        <td>AED ${item.price.toFixed(2)}</td>
-        <td><strong>AED ${itemValue.toFixed(2)}</strong></td>
-        <td style="color: ${statusColor}; font-weight: bold;">${statusText}</td>
-      `;
-      currentStockTbody.appendChild(row);
-    });
+  if (document.getElementById('currentBags')) {
+    document.getElementById('currentBags').textContent = currentInventory.vacuumBags || 0;
+    document.getElementById('currentGoldenBoxes').textContent = currentInventory.goldenHillBoxes || 0;
+    document.getElementById('currentExtraBoxes').textContent = currentInventory.extraBoxes || 0;
   }
   
-  // Update summary cards with correct units
-  if (document.getElementById('invRawMaterialsQty')) {
-    document.getElementById('invRawMaterialsQty').textContent = `${rawMaterialsQty.toLocaleString()} kg`;
-    document.getElementById('invFinishedQty').textContent = `${finishedProductsQty.toLocaleString()} kg`;
-    document.getElementById('invPackagingQty').textContent = `${packagingQty.toLocaleString()} pieces`;
-    document.getElementById('invTotalValue').textContent = `AED ${totalValue.toFixed(0)}`;
-  }
-  
-  // Show/hide quick actions based on user role
-  const currentUser = window.appState.getState('currentUser');
-  const quickActionsPanel = document.getElementById('quickActionsPanel');
-  if (quickActionsPanel) {
-    quickActionsPanel.style.display = currentUser === 'admin' ? 'block' : 'none';
-  }
-  
-  renderInventoryLog();
-  renderEnhancedWastageTable();
-}
-
-function getStockKey(itemId) {
-  const mapping = {
-    'raw_pistachio_inshell': 'rawPistachioInshell',
-    'golden_18_21': 'golden1821',
-    'golden_21_25': 'golden2125',
-    'extra_18_21': 'extra1821',
-    'extra_21_25': 'extra2125',
-    'golden_rejects': 'goldenRejects',
-    'extra_rejects': 'extraRejects',
-    'vacuum_bags_10kg': 'vacuumBags',
-    'golden_hill_boxes': 'goldenHillBoxes',
-    'extra_boxes': 'extraBoxes'
-  };
-  return mapping[itemId] || itemId;
-}
-function renderInventoryLog(filteredData = null) {
   const tbody = document.querySelector('#inventoryTable tbody');
-  if (!tbody) return;
-  
-  const inventoryData = filteredData || window.appState.getState('inventoryLog') || [];
   tbody.innerHTML = '';
   
-  inventoryData.slice().reverse().forEach(log => {
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
+  inventoryLog.slice().reverse().forEach(log => {
     const row = document.createElement('tr');
-    const actionColor = log.action === 'add' ? '#22c55e' : log.action === 'remove' ? '#ef4444' : '#3b82f6';
-    
     row.innerHTML = `
       <td>${new Date(log.timestamp).toLocaleString()}</td>
       <td>${log.item}</td>
-      <td style="text-transform: capitalize;">${(log.category || 'unknown').replace('_', ' ')}</td>
-      <td style="color: ${actionColor}; font-weight: bold; text-transform: capitalize;">${log.action}</td>
+      <td>${log.action}</td>
       <td>${log.quantity}</td>
       <td>${log.result}</td>
-      <td><strong>AED ${log.aedValue || '0.00'}</strong></td>
-      <td>${log.batchNumber || '-'}</td>
-      <td>${log.linkedLot || '-'}</td>
-      <td>${log.user || '-'}</td>
-      <td>${log.factory || 'Pistachio'}</td>
-      <td>${log.notes || '-'}</td>
+      <td>${log.notes}</td>
     `;
     tbody.appendChild(row);
   });
 }
-function filterInventoryLog() {
-  const searchTerm = document.getElementById('invSearch').value.toLowerCase();
-  const categoryFilter = document.getElementById('invCategoryFilter').value;
-  const actionFilter = document.getElementById('invActionFilter').value;
-  const dateFrom = document.getElementById('invDateFrom').value;
-  
-  const inventoryLog = window.appState.getState('inventoryLog') || [];
-  
-  let filteredLog = inventoryLog.filter(log => {
-    // Search filter
-    if (searchTerm && !log.item.toLowerCase().includes(searchTerm)) {
-      return false;
-    }
-    
-    // Category filter
-    if (categoryFilter !== 'all' && log.category !== categoryFilter) {
-      return false;
-    }
-    
-    // Action filter
-    if (actionFilter !== 'all' && log.action !== actionFilter) {
-      return false;
-    }
-    
-    // Date filter
-    if (dateFrom) {
-      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
-      if (logDate < dateFrom) {
-        return false;
-      }
-    }
-    
-    return true;
-  });
-  
-  renderInventoryLog(filteredLog);
-}
 
-function renderEnhancedWastageTable() {
-  const tbody = document.querySelector('#enhancedWastageTable tbody');
-  if (!tbody) return;
-  
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  tbody.innerHTML = '';
-  
-  let totalWasteCost = 0;
-  let totalWastePercent = 0;
-  let worstWastePercent = 0;
-  let worstLot = '-';
-  
-  productionRecords.slice().reverse().forEach(record => {
-    const wasteKg = record.rejectsKg || 0;
-    const wastePercent = record.rawInput > 0 ? ((wasteKg / record.rawInput) * 100).toFixed(1) : 0;
-    const wasteCost = calculateWasteCostInAED(record);
-    
-    totalWasteCost += wasteCost;
-    totalWastePercent += parseFloat(wastePercent);
-    
-    if (parseFloat(wastePercent) > worstWastePercent) {
-      worstWastePercent = parseFloat(wastePercent);
-      worstLot = record.lot;
-    }
-    
-    const row = document.createElement('tr');
-    const wasteColor = wastePercent > 10 ? '#ef4444' : wastePercent > 5 ? '#f59e0b' : '#22c55e';
-    
-    row.innerHTML = `
-      <td>${new Date(record.timestamp).toLocaleDateString()}</td>
-      <td>${record.lot}</td>
-      <td>${record.brand}</td>
-      <td>${record.rawInput.toLocaleString()}</td>
-      <td>${record.finishedKg.toLocaleString()}</td>
-      <td>${wasteKg.toLocaleString()}</td>
-      <td style="color: ${wasteColor}; font-weight: bold;">${wastePercent}%</td>
-      <td style="color: ${wasteColor}; font-weight: bold;">AED ${wasteCost.toFixed(2)}</td>
-      <td>${record.efficiency}%</td>
-    `;
-    tbody.appendChild(row);
-  });
-  
-  // Update KPIs
-  const avgWastePercent = productionRecords.length > 0 ? 
-    (totalWastePercent / productionRecords.length).toFixed(1) : 0;
-  
-  if (document.getElementById('totalWasteCost')) {
-    document.getElementById('totalWasteCost').textContent = `AED ${totalWasteCost.toFixed(0)}`;
-    document.getElementById('avgWastePercent').textContent = `${avgWastePercent}%`;
-    document.getElementById('worstLot').textContent = worstLot;
-  }
-}
-
-function calculateWasteCostInAED(record) {
-  // Calculate waste cost based on raw material price
-  const rawMaterialPricePerKg = 12.50; // Average AED price per kg
-  const wasteKg = record.rejectsKg || 0;
-  return wasteKg * rawMaterialPricePerKg;
-}
-
-function updateWastageAnalysis() {
-  const period = document.getElementById('wastageAnalysisPeriod').value;
-  const customRangeElements = document.querySelectorAll('[id^="customWastageDate"]');
-  
-  customRangeElements.forEach(el => {
-    el.style.display = period === 'custom' ? 'block' : 'none';
-  });
-  
-  renderEnhancedWastageTable();
-}
-
-function generateInventoryReport() {
-  const reportType = document.getElementById('reportType').value;
-  const period = document.getElementById('reportPeriod').value;
-  
-  window.formValidator.showToast(`Generating ${reportType.replace('_', ' ')} report for ${period.replace('_', ' ')}...`, 'success');
-  
-  // Implementation for different report types would go here
-  // For now, showing a placeholder
-  setTimeout(() => {
-    alert(`${reportType.replace('_', ' ')} report generated successfully! This would normally open a detailed report.`);
-  }, 1000);
-}
-
-function exportInventoryData() {
-  const inventoryLog = window.appState.getState('inventoryLog') || [];
-  const csvContent = generateCSVFromInventoryData(inventoryLog);
-  downloadCSV(csvContent, 'pistachio_inventory_data.csv');
-}
-
-function exportWastageReport() {
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  const csvContent = generateCSVFromWastageData(productionRecords);
-  downloadCSV(csvContent, 'pistachio_wastage_report.csv');
-}
-
-function generateCSVFromInventoryData(data) {
-  const headers = ['Timestamp', 'Item', 'Category', 'Action', 'Quantity', 'Result', 'AED Value', 'Batch', 'Linked Lot', 'User', 'Factory', 'Notes'];
-  const csvRows = [headers.join(',')];
-  
-  data.forEach(log => {
-    const row = [
-      log.timestamp,
-      log.item,
-      log.category || '',
-      log.action,
-      log.quantity,
-      log.result,
-      log.aedValue || '0.00',
-      log.batchNumber || '',
-      log.linkedLot || '',
-      log.user || '',
-      log.factory || 'Pistachio',
-      `"${log.notes || ''}"`
-    ];
-    csvRows.push(row.join(','));
-  });
-  
-  return csvRows.join('\n');
-}
-
-function generateCSVFromWastageData(data) {
-  const headers = ['Date', 'Lot', 'Brand', 'Input (kg)', 'Output (kg)', 'Waste (kg)', 'Waste %', 'Waste Cost (AED)', 'Efficiency %'];
-  const csvRows = [headers.join(',')];
-  
-  data.forEach(record => {
-    const wasteKg = record.rejectsKg || 0;
-    const wastePercent = record.rawInput > 0 ? ((wasteKg / record.rawInput) * 100).toFixed(1) : 0;
-    const wasteCost = calculateWasteCostInAED(record);
-    
-    const row = [
-      new Date(record.timestamp).toLocaleDateString(),
-      record.lot,
-      record.brand,
-      record.rawInput,
-      record.finishedKg,
-      wasteKg,
-      wastePercent,
-      wasteCost.toFixed(2),
-      record.efficiency
-    ];
-    csvRows.push(row.join(','));
-  });
-  
-  return csvRows.join('\n');
-}
-
-function downloadCSV(csvContent, filename) {
-  const blob = new Blob([csvContent], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  window.URL.revokeObjectURL(url);
-}
 // Equipment & Maintenance management (keeping your original functions but using state)
 function updateEquipmentStatus() {
   const equipmentCode = document.getElementById('equipmentSelect').value;
@@ -3450,52 +2386,42 @@ function showAllWastage() {
   renderWastageTable();
 }
 // ===== REPORTS FUNCTIONALITY =====
+let availableLots = [];
+let selectedLotsList = [];
 
 function loadAvailableLots() {
   const fromDate = document.getElementById('reportFromDate').value;
   const toDate = document.getElementById('reportToDate').value;
   const brand = document.getElementById('reportBrand').value;
   
-  const lots = window.appState.getState('lots') || [];
   const productionRecords = window.appState.getState('productionRecords') || [];
   
-  // First, get all lots that match the brand filter
-  let filteredLots = lots.filter(lot => {
-    if (brand !== 'all' && lot.brand !== brand) {
-      return false;
+  // Filter records based on date and brand
+  let filteredRecords = productionRecords.filter(record => {
+    let dateMatch = true;
+    let brandMatch = true;
+    
+    if (fromDate || toDate) {
+      const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+      if (fromDate && recordDate < fromDate) dateMatch = false;
+      if (toDate && recordDate > toDate) dateMatch = false;
     }
-    return true;
+    
+    if (brand !== 'all' && record.brand !== brand) {
+      brandMatch = false;
+    }
+    
+    return dateMatch && brandMatch;
   });
   
-  // Create lot data with production info if available
-  availableLots = filteredLots.map(lot => {
-    // Find production records for this lot within date range
-    const lotRecords = productionRecords.filter(record => {
-      if (record.lotNumber !== lot.lotNumber) return false;
-      
-      if (fromDate || toDate) {
-        const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
-        if (fromDate && recordDate < fromDate) return false;
-        if (toDate && recordDate > toDate) return false;
-      }
-      
-      return true;
-    });
-    
-    // Calculate totals from production records if any
-    const totalFinished = lotRecords.reduce((sum, r) => sum + r.finishedKg, 0);
-    const totalRejects = lotRecords.reduce((sum, r) => sum + r.rejectsKg, 0);
-    
-    return {
-      lot: lot.lotNumber,
-      brand: lot.brand,
-      date: new Date(lot.createdDate).toLocaleDateString(),
-      finished: totalFinished,
-      rejects: totalRejects,
-      status: lot.status,
-      available: lot.availableRawQuantity
-    };
-  });
+  // Extract unique lots
+  availableLots = [...new Set(filteredRecords.map(record => ({
+    lot: record.lot,
+    brand: record.brand,
+    date: new Date(record.timestamp).toLocaleDateString(),
+    finished: record.finishedKg,
+    rejects: record.rejectsKg
+  })))];
   
   renderLotOptions();
   window.formValidator.showToast(`Found ${availableLots.length} lots`, 'success');
@@ -3577,74 +2503,8 @@ function generateReportHTML(records, wastageData) {
   const totalFinished = records.reduce((sum, r) => sum + r.finishedKg, 0);
   const totalRejects = records.reduce((sum, r) => sum + r.rejectsKg, 0);
   const totalInput = records.reduce((sum, r) => sum + r.rawInput, 0);
-  // Calculate run type statistics
-const hullerRuns = records.filter(r => r.runType === 'huller').length;
-const repackingRuns = records.filter(r => r.runType === 'repack').length;
-const hullerOutput = records.filter(r => r.runType === 'huller').reduce((sum, r) => sum + r.finishedKg, 0);
-const repackingOutput = records.filter(r => r.runType === 'repack').reduce((sum, r) => sum + r.finishedKg, 0);
   const avgEfficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const totalWasteCost = wastageData.reduce((sum, w) => sum + w.estimatedCost, 0);
-  // Calculate unique containers
-const allContainers = new Set();
-records.forEach(record => {
-  if (record.containerNumbers && record.containerNumbers.length > 0) {
-    record.containerNumbers.forEach(container => allContainers.add(container));
-  }
-});
-function generateContainerSummaryRows(records) {
-  // Group records by lot to get unique container sets
-  const lotContainerMap = {};
-  
-  records.forEach(record => {
-    if (!lotContainerMap[record.lot]) {
-      lotContainerMap[record.lot] = {
-        brand: record.brand,
-        containers: new Set()
-      };
-    }
-    
-    if (record.containerNumbers && record.containerNumbers.length > 0) {
-      record.containerNumbers.forEach(container => {
-        lotContainerMap[record.lot].containers.add(container);
-      });
-    }
-  });
-  
-  // Generate rows
-  return Object.entries(lotContainerMap).map(([lotNumber, data]) => {
-    const containerArray = Array.from(data.containers);
-    const containerCount = containerArray.length;
-    
-    return `
-      <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">${lotNumber}</td>
-        <td style="padding: 0.75rem; border: 1px solid #ddd;">${data.brand}</td>
-        <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center; font-weight: 600; color: #0066cc;">
-          ${containerCount > 0 ? containerCount : 'None'}
-        </td>
-        <td style="padding: 0.75rem; border: 1px solid #ddd; line-height: 1.8;">
-          ${containerCount > 0 
-            ? containerArray.map(c => `<span style="background: #e3f2fd; padding: 2px 8px; border-radius: 4px; margin: 2px; display: inline-block;">${c}</span>`).join(' ')
-            : '<span style="color: #999;">No container numbers specified for this lot</span>'}
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-// Calculate total materials cost (not just waste)
-let totalMaterialsCost = 0;
-const bagPrice = window.appState.getItemPrice('vacuum_bags_10kg');
-const goldenBoxPrice = window.appState.getItemPrice('golden_hill_boxes');
-const extraBoxPrice = window.appState.getItemPrice('extra_boxes');
-
-records.forEach(record => {
-  const bagsUsedCost = (record.materials?.bagsUsed || 0) * bagPrice;
-  const boxesUsedCost = (record.materials?.boxesUsed || 0) * 
-    (record.brand === 'Golden Hill' ? goldenBoxPrice : extraBoxPrice);
-  totalMaterialsCost += bagsUsedCost + boxesUsedCost;
-});
-
-const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
   
   // Brand analysis
   const brandStats = {};
@@ -3674,7 +2534,6 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
           <p style="margin: 0.25rem 0;"><strong>Generated:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
           <p style="margin: 0.25rem 0;"><strong>Lots Analyzed:</strong> ${selectedLotsList.length}</p>
           <p style="margin: 0.25rem 0;"><strong>Total Records:</strong> ${records.length}</p>
-          <p style="margin: 0.25rem 0;"><strong>Total Containers Used:</strong> ${allContainers.size}</p>
         </div>
       </div>
     </div>
@@ -3693,22 +2552,10 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
         <div class="metric-value">${avgEfficiency}%</div>
         <div class="metric-label">Average Efficiency</div>
       </div>
-     <div class="metric-card">
-  <div class="metric-value">$${totalWasteCost.toFixed(0)}</div>
-  <div class="metric-label">Total Waste Cost</div>
-</div>
-<div class="metric-card">
-  <div class="metric-value">$${totalMaterialsCost.toFixed(0)}</div>
-  <div class="metric-label">Total Materials Cost</div>
-</div>
-<div class="metric-card">
-  <div class="metric-value">${hullerRuns}/${repackingRuns}</div>
-  <div class="metric-label">Huller/Repack Runs</div>
-</div>
-<div class="metric-card">
-  <div class="metric-value">${hullerOutput.toLocaleString()}/${repackingOutput.toLocaleString()}</div>
-  <div class="metric-label">Huller/Repack Output (kg)</div>
-</div>
+      <div class="metric-card">
+        <div class="metric-value">$${totalWasteCost.toFixed(0)}</div>
+        <div class="metric-label">Total Waste Cost</div>
+      </div>
     </div>
 
     <!-- Professional Charts Grid -->
@@ -3757,28 +2604,7 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
         ${generateProductionBarChart(records)}
       </div>
     </div>
-<!-- Run Type Analysis -->
-<div class="chart-container">
-  <div class="chart-title">Production by Run Type</div>
-  <div class="metrics-grid" style="margin: 1rem 0;">
-    <div class="metric-card" style="background: linear-gradient(135deg, #22c55e10 0%, #22c55e20 100%);">
-      <div class="metric-value" style="color: #22c55e;">${hullerRuns}</div>
-      <div class="metric-label">Huller Runs</div>
-      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
-        <strong>${hullerOutput.toLocaleString()} kg</strong> output<br>
-        <strong>${records.filter(r => r.runType === 'huller').reduce((sum, r) => sum + r.rejectsKg, 0).toLocaleString()} kg</strong> rejects
-      </div>
-    </div>
-    <div class="metric-card" style="background: linear-gradient(135deg, #3b82f610 0%, #3b82f620 100%);">
-      <div class="metric-value" style="color: #3b82f6;">${repackingRuns}</div>
-      <div class="metric-label">Repacking Runs</div>
-      <div style="margin-top: 0.5rem; font-size: 0.9rem;">
-        <strong>${repackingOutput.toLocaleString()} kg</strong> output<br>
-        <span style="color: #666;">No reject tracking</span>
-      </div>
-    </div>
-  </div>
-</div>
+
     ${wastageData.length > 0 ? `
       <!-- Wastage Cost Analysis -->
       <div class="chart-container">
@@ -3795,14 +2621,11 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
       <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
           <thead>
-           <thead>
-  <tr style="background: var(--primary); color: white;">
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Run Type</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Containers</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
+            <tr style="background: var(--primary); color: white;">
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
               <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">18-21 kg</th>
               <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">21-25 kg</th>
               <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
@@ -3814,16 +2637,9 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
             ${records.map(record => `
               <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; font-weight: 600; color: ${record.runType === 'huller' ? '#22c55e' : '#3b82f6'};">
-  ${record.runType === 'huller' ? 'Huller Run' : 'Repacking Only'}</td>
-<td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
-<td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
-<td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem; max-width: 300px;">
-  ${record.containerNumbers && record.containerNumbers.length > 0 
-    ? record.containerNumbers.join(', ')
-    : 'No containers specified'}
-</td>
-<td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg1821 || 0).toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg2125 || 0).toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;"><strong>${record.finishedKg.toLocaleString()}</strong></td>
@@ -3835,25 +2651,7 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
         </table>
       </div>
     </div>
-<!-- Container Summary Table -->
-    <div class="chart-container">
-      <div class="chart-title">Container Numbers by Lot</div>
-      <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-          <thead>
-            <tr style="background: #0066cc; color: white;">
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left; width: 25%;">Lot Number</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left; width: 15%;">Brand</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: center; width: 10%;">Container Count</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left; width: 50%;">Container Numbers</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${generateContainerSummaryRows(records)}
-          </tbody>
-        </table>
-      </div>
-    </div>
+
     ${wastageData.length > 0 ? `
       <div class="chart-container">
         <div class="chart-title">Wastage Details</div>
@@ -4418,26 +3216,20 @@ function renderPriceAuditTable(filteredData = null) {
   });
 }
 // Initialize
+// Initialize
 window.addEventListener('load', () => {
   setupProductionValidation();
   updateFormVisibility();
   updateSummary();
   renderInventory();
-  updateWastageAnalysis();
   renderEquipmentGrid();
   renderMaintenanceLog();
   renderWastageTable();
   initializeReportDates();
-  calculateLotTotals();
-  renderLots();
-  updateProductionLotDropdown();
   
   renderItemPricesTable();
   renderPriceAuditTable();
-  const wastageAnalysisPeriod = document.getElementById('wastageAnalysisPeriod');
-if (wastageAnalysisPeriod) {
-  wastageAnalysisPeriod.addEventListener('change', updateWastageAnalysis);
-}
+  
   const today = new Date();
   const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
   
@@ -4488,18 +3280,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
- // ===== NAVIGATION TO ADVANCED INVENTORY SYSTEM =====
-function redirectToAdvancedInventory() {
-  window.location.href = 'index.html#/inventory/pistachio';
-}
-
-function redirectToOrderManagement() {
-  window.location.href = 'index.html#/orders/pistachio';
-}
-
-function redirectToDashboard() {
-  window.location.href = 'index.html#/dashboard/pistachio';
-} 
 </script>
 </body>
 </html>
