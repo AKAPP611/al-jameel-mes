@@ -551,7 +551,51 @@
         </div>
         <button onclick="createLot()">Create Lot</button>
       </div>
-
+<!-- Edit Lot Form -->
+<div id="editLotSection" class="materials-section" style="display: none;">
+  <h3>Edit Lot</h3>
+  <div class="warning-box">
+    <strong>Note:</strong> You can only edit lots that have no production records.
+  </div>
+  <div class="form-grid">
+    <input type="hidden" id="editLotId">
+    <div class="form-group">
+      <label>Lot Number</label>
+      <input id="editLotNumber" type="text" placeholder="e.g., Lot-01-02-03-2024" required>
+    </div>
+    <div class="form-group">
+      <label>Brand</label>
+      <select id="editLotBrand">
+        <option>Golden Hill</option>
+        <option>Extra</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Total Containers</label>
+      <input id="editTotalContainers" type="number" min="1" value="1" onchange="calculateEditLotTotals()">
+    </div>
+    <div class="form-group">
+      <label>Bags per Container</label>
+      <input id="editBagsPerContainer" type="number" min="1" value="50" onchange="calculateEditLotTotals()">
+    </div>
+    <div class="form-group">
+      <label>Kg per Bag</label>
+      <input id="editKgPerBag" type="number" min="0.1" step="0.1" value="25" onchange="calculateEditLotTotals()">
+    </div>
+    <div class="form-group">
+      <label>Total Raw Quantity (kg)</label>
+      <input id="editTotalRawQuantity" type="number" readonly style="background: #f8f9fa;">
+    </div>
+    <div class="form-group" style="grid-column: 1 / -1;">
+      <label>Container Numbers (one per line or comma-separated)</label>
+      <textarea id="editContainerNumbers" placeholder="e.g., CONT-001, CONT-002, CONT-003"></textarea>
+    </div>
+  </div>
+  <div style="margin-top: 1rem;">
+    <button onclick="updateLot()">Update Lot</button>
+    <button onclick="cancelEditLot()" class="btn-secondary" style="margin-left: 1rem;">Cancel</button>
+  </div>
+</div>
       <!-- Active Lots Table -->
       <h3>Current Lots Status</h3>
       <div style="overflow-x: auto;">
@@ -568,6 +612,7 @@
     <th>Status</th>
     <th>Created</th>
     <th>Container Numbers</th>
+    <th>Actions</th>
   </tr>
 </thead>
           <tbody></tbody>
@@ -1858,7 +1903,145 @@ alert('Lot created successfully!');
   renderLots();
   updateProductionLotDropdown();
 }
+function calculateEditLotTotals() {
+  const containers = parseInt(document.getElementById('editTotalContainers').value) || 0;
+  const bagsPerContainer = parseInt(document.getElementById('editBagsPerContainer').value) || 0;
+  const kgPerBag = parseFloat(document.getElementById('editKgPerBag').value) || 0;
+  
+  const totalRawQuantity = containers * bagsPerContainer * kgPerBag;
+  document.getElementById('editTotalRawQuantity').value = totalRawQuantity;
+}
 
+function editLot(lotId) {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const lot = lots.find(l => l.id === lotId);
+  
+  if (!lot) {
+    window.formValidator.showToast('Lot not found', 'error');
+    return;
+  }
+  
+  // Check if lot has production records
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  const hasProduction = productionRecords.some(record => record.lotId === lotId);
+  
+  if (hasProduction) {
+    window.formValidator.showToast('Cannot edit lot with existing production records', 'error');
+    return;
+  }
+  
+  // Populate edit form
+  document.getElementById('editLotId').value = lot.id;
+  document.getElementById('editLotNumber').value = lot.lotNumber;
+  document.getElementById('editLotBrand').value = lot.brand;
+  document.getElementById('editTotalContainers').value = lot.totalContainers;
+  document.getElementById('editBagsPerContainer').value = lot.bagsPerContainer;
+  document.getElementById('editKgPerBag').value = lot.kgPerBag;
+  document.getElementById('editTotalRawQuantity').value = lot.totalRawQuantity;
+  document.getElementById('editContainerNumbers').value = lot.containerNumbers ? lot.containerNumbers.join(', ') : '';
+  
+  // Show edit form
+  document.getElementById('editLotSection').style.display = 'block';
+  document.getElementById('editLotSection').scrollIntoView({behavior: 'smooth'});
+}
+
+function updateLot() {
+  const lotId = document.getElementById('editLotId').value;
+  const lotNumber = document.getElementById('editLotNumber').value.trim();
+  const brand = document.getElementById('editLotBrand').value;
+  const totalContainers = parseInt(document.getElementById('editTotalContainers').value) || 0;
+  const bagsPerContainer = parseInt(document.getElementById('editBagsPerContainer').value) || 0;
+  const kgPerBag = parseFloat(document.getElementById('editKgPerBag').value) || 0;
+  const totalRawQuantity = parseFloat(document.getElementById('editTotalRawQuantity').value) || 0;
+  
+  if (!lotNumber || totalContainers <= 0 || bagsPerContainer <= 0 || kgPerBag <= 0) {
+    window.formValidator.showToast('Please fill all required fields with valid values', 'error');
+    return;
+  }
+  
+  // Check if lot number is unique (excluding current lot)
+  const lots = window.appState.getState('lots') || [];
+  const duplicateLot = lots.find(lot => lot.lotNumber === lotNumber && lot.id !== lotId);
+  if (duplicateLot) {
+    window.formValidator.showToast('Lot number already exists', 'error');
+    return;
+  }
+  
+  // Parse container numbers
+  const containerNumbersInput = document.getElementById('editContainerNumbers').value.trim();
+  const containerNumbers = containerNumbersInput
+    .split(/[,\n]+/)
+    .map(num => num.trim())
+    .filter(num => num.length > 0);
+  
+  // Update lot
+  window.appState.updateArrayItem('lots', lotId, (lot) => {
+    const usedRaw = lot.usedRawQuantity || 0;
+    
+    return {
+      ...lot,
+      lotNumber,
+      brand,
+      totalContainers,
+      bagsPerContainer,
+      kgPerBag,
+      totalRawQuantity,
+      availableRawQuantity: totalRawQuantity - usedRaw,
+      containerNumbers,
+      lastModified: new Date().toISOString()
+    };
+  });
+  
+  window.formValidator.showToast('Lot updated successfully!', 'success');
+  cancelEditLot();
+  renderLots();
+  updateProductionLotDropdown();
+}
+
+function cancelEditLot() {
+  document.getElementById('editLotSection').style.display = 'none';
+  document.getElementById('editLotId').value = '';
+}
+
+function deleteLot(lotId) {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Admin only', 'error');
+    return;
+  }
+  
+  const lots = window.appState.getState('lots') || [];
+  const lot = lots.find(l => l.id === lotId);
+  
+  if (!lot) {
+    window.formValidator.showToast('Lot not found', 'error');
+    return;
+  }
+  
+  // Check if lot has production records
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  const hasProduction = productionRecords.some(record => record.lotId === lotId);
+  
+  if (hasProduction) {
+    window.formValidator.showToast('Cannot delete lot with existing production records', 'error');
+    return;
+  }
+  
+  if (confirm(`Are you sure you want to delete lot "${lot.lotNumber}"? This action cannot be undone.`)) {
+    const updatedLots = lots.filter(l => l.id !== lotId);
+    window.appState.setState('lots', updatedLots);
+    
+    window.formValidator.showToast('Lot deleted successfully!', 'success');
+    renderLots();
+    updateProductionLotDropdown();
+  }
+}
 function renderLots() {
   const tbody = document.querySelector('#lotsTable tbody');
   if (!tbody) return;
@@ -1866,12 +2049,19 @@ function renderLots() {
   tbody.innerHTML = '';
   
   const lots = window.appState.getState('lots') || [];
+  const currentUser = window.appState.getState('currentUser');
+  
   lots.forEach(lot => {
     const progressPercent = lot.totalRawQuantity > 0 
       ? Math.round((lot.usedRawQuantity / lot.totalRawQuantity) * 100) 
       : 0;
     
     const statusColor = lot.status === 'Open' ? '#22c55e' : '#6b7280';
+    
+    // Check if lot can be edited/deleted (only if no production records exist)
+    const productionRecords = window.appState.getState('productionRecords') || [];
+    const hasProduction = productionRecords.some(record => record.lotId === lot.id);
+    const canModify = currentUser === 'admin' && !hasProduction;
     
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -1890,13 +2080,20 @@ function renderLots() {
       </td>
       <td style="color: ${statusColor}; font-weight: bold;">${lot.status}</td>
       <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
-<td style="max-width: 200px; font-size: 0.85rem;">
-  ${lot.containerNumbers && lot.containerNumbers.length > 0 
-    ? lot.containerNumbers.slice(0, 3).join(', ') + (lot.containerNumbers.length > 3 ? '...' : '')
-    : 'N/A'}
-</td>
-`;
-tbody.appendChild(row);
+      <td style="max-width: 200px; font-size: 0.85rem;">
+        ${lot.containerNumbers && lot.containerNumbers.length > 0 
+          ? lot.containerNumbers.slice(0, 3).join(', ') + (lot.containerNumbers.length > 3 ? '...' : '')
+          : 'N/A'}
+      </td>
+      <td>
+        ${currentUser === 'admin' ? `
+          <button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;" ${!canModify ? 'disabled' : ''}>Edit</button>
+          <button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;" ${!canModify ? 'disabled' : ''}>Delete</button>
+          ${!canModify ? '<br><small style="color: #666;">Has production records</small>' : ''}
+        ` : '-'}
+      </td>
+    `;
+    tbody.appendChild(row);
   });
 }
 
