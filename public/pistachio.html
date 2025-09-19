@@ -2086,12 +2086,14 @@ function renderLots() {
           : 'N/A'}
       </td>
       <td>
-        ${currentUser === 'admin' ? `
-          <button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;" ${!canModify ? 'disabled' : ''}>Edit</button>
-          <button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;" ${!canModify ? 'disabled' : ''}>Delete</button>
-          ${!canModify ? '<br><small style="color: #666;">Has production records</small>' : ''}
-        ` : '-'}
-      </td>
+  ${(() => {
+    const user = window.appState.getState('currentUser');
+    if (user === 'admin') {
+      return `<button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;">Edit</button><button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;">Delete</button>`;
+    }
+    return '-';
+  })()}
+</td>
     `;
     tbody.appendChild(row);
   });
