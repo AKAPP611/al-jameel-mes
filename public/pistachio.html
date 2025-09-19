@@ -2044,8 +2044,6 @@ function renderLots() {
   
   const lots = window.appState.getState('lots') || [];
   const currentUser = window.appState.getState('currentUser');
-  const canEdit = lot.status === 'Open';
-const canDelete = lot.usedRawQuantity === 0;
   
   lots.forEach(lot => {
     const progressPercent = lot.totalRawQuantity > 0 
@@ -2053,11 +2051,6 @@ const canDelete = lot.usedRawQuantity === 0;
       : 0;
     
     const statusColor = lot.status === 'Open' ? '#22c55e' : '#6b7280';
-    
-    // Check if lot can be edited/deleted (only if no production records exist)
-    const productionRecords = window.appState.getState('productionRecords') || [];
-    const hasProduction = productionRecords.some(record => record.lotId === lot.id);
-    const canModify = currentUser === 'admin' && !hasProduction;
     
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -2082,17 +2075,16 @@ const canDelete = lot.usedRawQuantity === 0;
     : 'N/A'}
 </td>
 <td>
-  ${currentUser === 'admin' ? `
-    <button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;" ${!canEdit ? 'disabled' : ''}>Edit</button>
-    <button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;" ${!canDelete ? 'disabled' : ''}>Delete</button>
-    ${!canEdit && !canDelete ? '<br><small style="color: #666;">Lot in use/completed</small>' : ''}
-  ` : '-'}
-</td>
-      <td>
   ${(() => {
     const user = window.appState.getState('currentUser');
     if (user === 'admin') {
-      return `<button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;">Edit</button><button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;">Delete</button>`;
+      const canEdit = lot.status === 'Open';
+      const canDelete = lot.usedRawQuantity === 0;
+      return `
+        <button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;" ${!canEdit ? 'disabled' : ''}>Edit</button>
+        <button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;" ${!canDelete ? 'disabled' : ''}>Delete</button>
+        ${!canEdit && !canDelete ? '<br><small style="color: #666;">Lot in use/completed</small>' : ''}
+      `;
     }
     return '-';
   })()}
