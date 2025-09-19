@@ -1927,14 +1927,11 @@ function editLot(lotId) {
     return;
   }
   
-  // Check if lot has production records
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  const hasProduction = productionRecords.some(record => record.lotId === lotId);
-  
-  if (hasProduction) {
-    window.formValidator.showToast('Cannot edit lot with existing production records', 'error');
-    return;
-  }
+  // Check if lot is completed/closed
+if (lot.status === 'Completed') {
+  window.formValidator.showToast('Cannot edit completed lots', 'error');
+  return;
+}
   
   // Populate edit form
   document.getElementById('editLotId').value = lot.id;
@@ -2024,14 +2021,11 @@ function deleteLot(lotId) {
     return;
   }
   
-  // Check if lot has production records
-  const productionRecords = window.appState.getState('productionRecords') || [];
-  const hasProduction = productionRecords.some(record => record.lotId === lotId);
-  
-  if (hasProduction) {
-    window.formValidator.showToast('Cannot delete lot with existing production records', 'error');
-    return;
-  }
+ // Check if lot has been used in production
+if (lot.usedRawQuantity > 0) {
+  window.formValidator.showToast('Cannot delete lot that has been used in production', 'error');
+  return;
+}
   
   if (confirm(`Are you sure you want to delete lot "${lot.lotNumber}"? This action cannot be undone.`)) {
     const updatedLots = lots.filter(l => l.id !== lotId);
@@ -2050,6 +2044,8 @@ function renderLots() {
   
   const lots = window.appState.getState('lots') || [];
   const currentUser = window.appState.getState('currentUser');
+  const canEdit = lot.status === 'Open';
+const canDelete = lot.usedRawQuantity === 0;
   
   lots.forEach(lot => {
     const progressPercent = lot.totalRawQuantity > 0 
@@ -2081,10 +2077,18 @@ function renderLots() {
       <td style="color: ${statusColor}; font-weight: bold;">${lot.status}</td>
       <td>${new Date(lot.createdDate).toLocaleDateString()}</td>
       <td style="max-width: 200px; font-size: 0.85rem;">
-        ${lot.containerNumbers && lot.containerNumbers.length > 0 
-          ? lot.containerNumbers.slice(0, 3).join(', ') + (lot.containerNumbers.length > 3 ? '...' : '')
-          : 'N/A'}
-      </td>
+  ${lot.containerNumbers && lot.containerNumbers.length > 0 
+    ? lot.containerNumbers.slice(0, 3).join(', ') + (lot.containerNumbers.length > 3 ? '...' : '')
+    : 'N/A'}
+</td>
+<td>
+  ${currentUser === 'admin' ? `
+    <button onclick="editLot('${lot.id}')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;" ${!canEdit ? 'disabled' : ''}>Edit</button>
+    <button onclick="deleteLot('${lot.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem;" ${!canDelete ? 'disabled' : ''}>Delete</button>
+    ${!canEdit && !canDelete ? '<br><small style="color: #666;">Lot in use/completed</small>' : ''}
+  ` : '-'}
+</td>
+`;
       <td>
   ${(() => {
     const user = window.appState.getState('currentUser');
