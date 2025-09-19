@@ -1184,112 +1184,248 @@
         </div>
       </div>
     </section>
-    <!-- Inventory Section -->
-    <section id="inventory" class="section">
-      <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
-      
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div>Vacuum Bags (10kg)</div>
-          <div class="stat-value" id="invVacuumBags">0</div>
-        </div>
-        <div class="stat-card">
-          <div>Golden Hill Boxes</div>
-          <div class="stat-value" id="invGoldenHillBoxes">0</div>
-        </div>
-        <div class="stat-card">
-          <div>Extra Boxes</div>
-          <div class="stat-value" id="invExtraBoxes">0</div>
-        </div>
-      </div>
-
-      <div class="materials-section">
-        <h3>Stock Adjustment</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Item</label>
-            <select id="invItem">
-              <option value="vacuumBags">Vacuum Bags (10kg)</option>
-              <option value="goldenHillBoxes">Golden Hill Boxes</option>
-              <option value="extraBoxes">Extra Boxes</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Action</label>
-            <select id="invAction">
-              <option value="add">Add Stock</option>
-              <option value="remove">Remove Stock</option>
-              <option value="set">Set Exact Amount</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Quantity</label>
-            <input id="invQuantity" type="number" min="0" step="1" value="0">
-          </div>
-          <div class="form-group">
-            <label>Notes</label>
-            <input id="invNotes" type="text" placeholder="Reason for adjustment">
-          </div>
-        </div>
-        <button onclick="adjustInventory()">Update Inventory</button>
-      </div>
-
-      <h3>Stock Movement Log</h3>
-      <div style="overflow-x: auto;">
-        <table id="inventoryTable">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Item</th>
-              <th>Action</th>
-              <th>Quantity</th>
-              <th>Result</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <h3>Wastage Analysis</h3>
-      <div class="materials-section">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Filter by Date Range</label>
-            <input id="wastageFromDate" type="date">
-          </div>
-          <div class="form-group">
-            <label>To Date</label>
-            <input id="wastageToDate" type="date">
-          </div>
-          <div class="form-group">
-            <label>&nbsp;</label>
-            <button onclick="filterWastageByDate()" style="width: 100%;">Filter Wastage</button>
-          </div>
-          <div class="form-group">
-            <label>&nbsp;</label>
-            <button onclick="showAllWastage()" style="width: 100%;" class="btn-secondary">Show All</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="overflow-x: auto;">
-        <table id="wastageTable">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Lot Number</th>
-              <th>Brand</th>
-              <th>Bags Wasted</th>
-              <th>Boxes Wasted</th>
-              <th>Total Waste Cost</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+   <!-- Inventory Section -->
+<section id="inventory" class="section">
+  <h2 style="margin-bottom: 1rem;">📦 Advanced Inventory Management</h2>
+  
+  <!-- Inventory Summary Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div>Raw Materials Value</div>
+      <div class="stat-value" id="invRawMaterialsValue">AED 0</div>
+    </div>
+    <div class="stat-card">
+      <div>Packaging Value</div>
+      <div class="stat-value" id="invPackagingValue">AED 0</div>
+    </div>
+    <div class="stat-card">
+      <div>Total Inventory Value</div>
+      <div class="stat-value" id="invTotalValue">AED 0</div>
+    </div>
+    <div class="stat-card">
+      <div>Low Stock Items</div>
+      <div class="stat-value" id="invLowStockCount">0</div>
+    </div>
   </div>
-</div>
+
+  <!-- Quick Actions Panel (Mobile-friendly) -->
+  <div class="materials-section" id="quickActionsPanel">
+    <h3>Quick Actions (Admin Only)</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Item</label>
+        <select id="invItem">
+          <optgroup label="Raw Materials">
+            <option value="rawPistachioInshell">Raw Pistachio (In-shell)</option>
+            <option value="rawPistachioCalifornia">Raw Pistachio (California)</option>
+            <option value="rawPistachioIranian">Raw Pistachio (Iranian)</option>
+          </optgroup>
+          <optgroup label="Packaging Materials">
+            <option value="vacuumBags">Vacuum Bags (10kg)</option>
+            <option value="goldenHillBoxes">Golden Hill Boxes</option>
+            <option value="extraBoxes">Extra Boxes</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Action</label>
+        <select id="invAction">
+          <option value="add">Add Stock</option>
+          <option value="remove">Remove Stock</option>
+          <option value="set">Set Exact Amount</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input id="invQuantity" type="number" min="0" step="1" value="0">
+      </div>
+      <div class="form-group">
+        <label>Batch/Lot Number</label>
+        <input id="invBatchNumber" type="text" placeholder="e.g., BATCH-2024-001">
+      </div>
+      <div class="form-group">
+        <label>Linked Lot/Order</label>
+        <input id="invLinkedLot" type="text" placeholder="e.g., Lot-01-02-03-2024">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input id="invNotes" type="text" placeholder="Reason for adjustment">
+      </div>
+    </div>
+    <button onclick="adjustInventory()">Update Inventory</button>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="materials-section">
+    <h3>Search & Filter</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Search Items</label>
+        <input id="invSearch" type="text" placeholder="Search by item name..." onkeyup="filterInventoryLog()">
+      </div>
+      <div class="form-group">
+        <label>Filter by Category</label>
+        <select id="invCategoryFilter" onchange="filterInventoryLog()">
+          <option value="all">All Categories</option>
+          <option value="raw_material">Raw Materials</option>
+          <option value="packaging">Packaging Materials</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Filter by Action</label>
+        <select id="invActionFilter" onchange="filterInventoryLog()">
+          <option value="all">All Actions</option>
+          <option value="add">Add Stock</option>
+          <option value="remove">Remove Stock</option>
+          <option value="set">Set Amount</option>
+          <option value="auto">Automatic</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date Range</label>
+        <input id="invDateFrom" type="date" onchange="filterInventoryLog()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Stock Levels -->
+  <h3>Current Stock Levels</h3>
+  <div style="overflow-x: auto;">
+    <table id="currentStockTable">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Category</th>
+          <th>Current Stock</th>
+          <th>Unit Price (AED)</th>
+          <th>Total Value (AED)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Stock Movement Log -->
+  <h3>Stock Movement Log</h3>
+  <div style="overflow-x: auto;">
+    <table id="inventoryTable">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Item</th>
+          <th>Category</th>
+          <th>Action</th>
+          <th>Quantity</th>
+          <th>Result</th>
+          <th>Value (AED)</th>
+          <th>Batch/Lot</th>
+          <th>Linked Lot/Order</th>
+          <th>User</th>
+          <th>Factory</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Enhanced Wastage Analysis -->
+  <div class="materials-section">
+    <h3>Enhanced Wastage Analysis</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Analysis Period</label>
+        <select id="wastageAnalysisPeriod" onchange="updateWastageAnalysis()">
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="365">Last Year</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
+      <div class="form-group" id="customWastageDateRange" style="display: none;">
+        <label>From Date</label>
+        <input id="wastageCustomFrom" type="date" onchange="updateWastageAnalysis()">
+      </div>
+      <div class="form-group" id="customWastageDateRange2" style="display: none;">
+        <label>To Date</label>
+        <input id="wastageCustomTo" type="date" onchange="updateWastageAnalysis()">
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button onclick="exportWastageReport()" class="btn-secondary">Export Wastage Report</button>
+      </div>
+    </div>
+    
+    <!-- Wastage KPIs -->
+    <div class="stats-grid" style="margin: 1rem 0;">
+      <div class="stat-card">
+        <div>Total Waste Cost</div>
+        <div class="stat-value" id="totalWasteCost">AED 0</div>
+      </div>
+      <div class="stat-card">
+        <div>Average Waste %</div>
+        <div class="stat-value" id="avgWastePercent">0%</div>
+      </div>
+      <div class="stat-card">
+        <div>Worst Performing Lot</div>
+        <div class="stat-value" id="worstLot" style="font-size: 1rem;">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="overflow-x: auto;">
+    <table id="enhancedWastageTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Lot Number</th>
+          <th>Brand</th>
+          <th>Input (kg)</th>
+          <th>Output (kg)</th>
+          <th>Waste (kg)</th>
+          <th>Waste %</th>
+          <th>Waste Cost (AED)</th>
+          <th>Efficiency</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Reporting Section -->
+  <div class="materials-section">
+    <h3>Inventory Reports</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Report Type</label>
+        <select id="reportType">
+          <option value="consumption">Monthly Consumption</option>
+          <option value="cost_analysis">Cost Analysis</option>
+          <option value="materials_vs_output">Materials vs Output</option>
+          <option value="stock_valuation">Stock Valuation</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Period</label>
+        <select id="reportPeriod">
+          <option value="current_month">Current Month</option>
+          <option value="last_month">Last Month</option>
+          <option value="last_3_months">Last 3 Months</option>
+          <option value="custom">Custom Period</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button onclick="generateInventoryReport()">Generate Report</button>
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button onclick="exportInventoryData()" class="btn-secondary">Export All Data</button>
+      </div>
+    </div>
+  </div>
+</section>
  
 <script>
 // ===== STATE MANAGEMENT =====
@@ -1301,17 +1437,41 @@ class AppState {
       inventoryLog: [],
       maintenanceLog: [],
       wastageLog: [],
-      itemPrices: [
-        {
-          id: 'vacuum_bags_10kg',
-          name: 'Vacuum Bags (10kg)',
-          unit: 'piece',
-          price: 2.50,
-          status: 'active',
-          category: 'packaging',
-          lastUpdated: new Date().toISOString(),
-          updatedBy: 'system'
-        },
+     itemPrices: [
+  // Raw Materials for Pistachio Factory
+  {
+    id: 'raw_pistachio_inshell',
+    name: 'Raw Pistachio (In-shell)',
+    unit: 'kg',
+    price: 12.50, // AED per kg
+    status: 'active',
+    category: 'raw_material',
+    supplier: 'Various',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+       {
+    id: 'raw_pistachio_california',
+    name: 'Raw Pistachio (California Grade)',
+    unit: 'kg',
+    price: 15.75,
+    status: 'active',
+    category: 'raw_material',
+    supplier: 'California Imports',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'raw_pistachio_iranian',
+    name: 'Raw Pistachio (Iranian Grade)',
+    unit: 'kg',
+    price: 14.25,
+    status: 'active',
+    category: 'raw_material',
+    supplier: 'Iranian Suppliers',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
         {
           id: 'golden_hill_boxes',
           name: 'Golden Hill Boxes',
@@ -1322,6 +1482,16 @@ class AppState {
           lastUpdated: new Date().toISOString(),
           updatedBy: 'system'
         },
+       {
+    id: 'vacuum_bags_10kg',
+    name: 'Vacuum Bags (10kg)',
+    unit: 'piece',
+    price: 2.50,
+    status: 'active',
+    category: 'packaging',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
         {
           id: 'extra_boxes',
           name: 'Extra Boxes',
@@ -1335,10 +1505,15 @@ class AppState {
       ],
       priceAuditLog: [],
       currentInventory: {
-        vacuumBags: 0,
-        goldenHillBoxes: 0,
-        extraBoxes: 0
-      },
+  // Raw Materials
+  rawPistachioInshell: 0,
+  rawPistachioCalifornia: 0,
+  rawPistachioIranian: 0,
+  // Packaging Materials
+  vacuumBags: 0,
+  goldenHillBoxes: 0,
+  extraBoxes: 0
+},
       equipment: [], // Will be populated below
       currentUser: null
     };
@@ -2416,36 +2591,58 @@ row.innerHTML = `
 
 // Inventory management
 function adjustInventory() {
+  const currentUser = window.appState.getState('currentUser');
+  if (currentUser !== 'admin') {
+    window.formValidator.showToast('Access denied: Only admins can adjust inventory', 'error');
+    return;
+  }
+  
   const item = document.getElementById('invItem').value;
   const action = document.getElementById('invAction').value;
   const quantity = parseInt(document.getElementById('invQuantity').value) || 0;
   const notes = document.getElementById('invNotes').value;
+  const batchNumber = document.getElementById('invBatchNumber').value;
+  const linkedLot = document.getElementById('invLinkedLot').value;
   
   if (quantity <= 0 && action !== 'set') {
     window.formValidator.showToast('Please enter a valid quantity', 'error');
     return;
   }
   
-  let itemName;
-  if (item === 'vacuumBags') itemName = 'Vacuum Bags (10kg)';
-  else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
-  else if (item === 'extraBoxes') itemName = 'Extra Boxes';
+  const itemData = getItemDetails(item);
+  if (!itemData) {
+    window.formValidator.showToast('Item not found', 'error');
+    return;
+  }
   
   const success = window.appState.updateInventory(item, action, quantity);
   
   if (success) {
     const result = window.appState.getState('currentInventory')[item];
+    const aedValue = result * itemData.price;
+    
     window.appState.addToArray('inventoryLog', {
       timestamp: new Date().toISOString(),
-      item: itemName,
+      item: itemData.name,
+      itemId: item,
+      category: itemData.category,
       action,
       quantity,
       result,
-      notes
+      aedValue: aedValue.toFixed(2),
+      notes,
+      batchNumber,
+      linkedLot,
+      user: currentUser,
+      factory: 'Pistachio'
     });
     
+    // Clear form
     document.getElementById('invQuantity').value = 0;
     document.getElementById('invNotes').value = '';
+    document.getElementById('invBatchNumber').value = '';
+    document.getElementById('invLinkedLot').value = '';
+    
     window.formValidator.showToast('Inventory updated successfully', 'success');
   } else {
     window.formValidator.showToast('Failed to update inventory', 'error');
@@ -2454,36 +2651,308 @@ function adjustInventory() {
   renderInventory();
 }
 
+function getItemDetails(itemId) {
+  const itemPrices = window.appState.getState('itemPrices') || [];
+  return itemPrices.find(item => item.id === itemId);
+}
+
 function renderInventory() {
   const currentInventory = window.appState.getState('currentInventory') || {};
-  document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags || 0;
-  document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes || 0;
-  document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes || 0;
+  const itemPrices = window.appState.getState('itemPrices') || [];
   
-  if (document.getElementById('currentBags')) {
-    document.getElementById('currentBags').textContent = currentInventory.vacuumBags || 0;
-    document.getElementById('currentGoldenBoxes').textContent = currentInventory.goldenHillBoxes || 0;
-    document.getElementById('currentExtraBoxes').textContent = currentInventory.extraBoxes || 0;
+  // Calculate values
+  let rawMaterialsValue = 0;
+  let packagingValue = 0;
+  let lowStockCount = 0;
+  
+  // Update current stock table
+  const currentStockTbody = document.querySelector('#currentStockTable tbody');
+  if (currentStockTbody) {
+    currentStockTbody.innerHTML = '';
+    
+    itemPrices.forEach(item => {
+      const stockKey = getStockKey(item.id);
+      const currentStock = currentInventory[stockKey] || 0;
+      const totalValue = currentStock * item.price;
+      
+      if (item.category === 'raw_material') {
+        rawMaterialsValue += totalValue;
+      } else {
+        packagingValue += totalValue;
+      }
+      
+      if (currentStock < 100) lowStockCount++; // Threshold can be adjusted
+      
+      const row = document.createElement('tr');
+      const statusColor = currentStock < 50 ? '#ef4444' : currentStock < 100 ? '#f59e0b' : '#22c55e';
+      const statusText = currentStock < 50 ? 'Critical' : currentStock < 100 ? 'Low' : 'Good';
+      
+      row.innerHTML = `
+        <td><strong>${item.name}</strong></td>
+        <td style="text-transform: capitalize;">${item.category.replace('_', ' ')}</td>
+        <td>${currentStock.toLocaleString()} ${item.unit}</td>
+        <td>AED ${item.price.toFixed(2)}</td>
+        <td><strong>AED ${totalValue.toFixed(2)}</strong></td>
+        <td style="color: ${statusColor}; font-weight: bold;">${statusText}</td>
+      `;
+      currentStockTbody.appendChild(row);
+    });
   }
   
+  // Update summary cards
+  const totalValue = rawMaterialsValue + packagingValue;
+  if (document.getElementById('invRawMaterialsValue')) {
+    document.getElementById('invRawMaterialsValue').textContent = `AED ${rawMaterialsValue.toFixed(0)}`;
+    document.getElementById('invPackagingValue').textContent = `AED ${packagingValue.toFixed(0)}`;
+    document.getElementById('invTotalValue').textContent = `AED ${totalValue.toFixed(0)}`;
+    document.getElementById('invLowStockCount').textContent = lowStockCount;
+  }
+  
+  // Show/hide quick actions based on user role
+  const currentUser = window.appState.getState('currentUser');
+  const quickActionsPanel = document.getElementById('quickActionsPanel');
+  if (quickActionsPanel) {
+    quickActionsPanel.style.display = currentUser === 'admin' ? 'block' : 'none';
+  }
+  
+  renderInventoryLog();
+  renderEnhancedWastageTable();
+}
+
+function getStockKey(itemId) {
+  const mapping = {
+    'raw_pistachio_inshell': 'rawPistachioInshell',
+    'raw_pistachio_california': 'rawPistachioCalifornia',
+    'raw_pistachio_iranian': 'rawPistachioIranian',
+    'vacuum_bags_10kg': 'vacuumBags',
+    'golden_hill_boxes': 'goldenHillBoxes',
+    'extra_boxes': 'extraBoxes'
+  };
+  return mapping[itemId] || itemId;
+}
+
+function renderInventoryLog(filteredData = null) {
   const tbody = document.querySelector('#inventoryTable tbody');
+  if (!tbody) return;
+  
+  const inventoryData = filteredData || window.appState.getState('inventoryLog') || [];
   tbody.innerHTML = '';
   
-  const inventoryLog = window.appState.getState('inventoryLog') || [];
-  inventoryLog.slice().reverse().forEach(log => {
+  inventoryData.slice().reverse().forEach(log => {
     const row = document.createElement('tr');
+    const actionColor = log.action === 'add' ? '#22c55e' : log.action === 'remove' ? '#ef4444' : '#3b82f6';
+    
     row.innerHTML = `
       <td>${new Date(log.timestamp).toLocaleString()}</td>
       <td>${log.item}</td>
-      <td>${log.action}</td>
+      <td style="text-transform: capitalize;">${(log.category || 'unknown').replace('_', ' ')}</td>
+      <td style="color: ${actionColor}; font-weight: bold; text-transform: capitalize;">${log.action}</td>
       <td>${log.quantity}</td>
       <td>${log.result}</td>
-      <td>${log.notes}</td>
+      <td><strong>AED ${log.aedValue || '0.00'}</strong></td>
+      <td>${log.batchNumber || '-'}</td>
+      <td>${log.linkedLot || '-'}</td>
+      <td>${log.user || '-'}</td>
+      <td>${log.factory || 'Pistachio'}</td>
+      <td>${log.notes || '-'}</td>
     `;
     tbody.appendChild(row);
   });
 }
+function filterInventoryLog() {
+  const searchTerm = document.getElementById('invSearch').value.toLowerCase();
+  const categoryFilter = document.getElementById('invCategoryFilter').value;
+  const actionFilter = document.getElementById('invActionFilter').value;
+  const dateFrom = document.getElementById('invDateFrom').value;
+  
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
+  
+  let filteredLog = inventoryLog.filter(log => {
+    // Search filter
+    if (searchTerm && !log.item.toLowerCase().includes(searchTerm)) {
+      return false;
+    }
+    
+    // Category filter
+    if (categoryFilter !== 'all' && log.category !== categoryFilter) {
+      return false;
+    }
+    
+    // Action filter
+    if (actionFilter !== 'all' && log.action !== actionFilter) {
+      return false;
+    }
+    
+    // Date filter
+    if (dateFrom) {
+      const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+      if (logDate < dateFrom) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+  
+  renderInventoryLog(filteredLog);
+}
 
+function renderEnhancedWastageTable() {
+  const tbody = document.querySelector('#enhancedWastageTable tbody');
+  if (!tbody) return;
+  
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  tbody.innerHTML = '';
+  
+  let totalWasteCost = 0;
+  let totalWastePercent = 0;
+  let worstWastePercent = 0;
+  let worstLot = '-';
+  
+  productionRecords.slice().reverse().forEach(record => {
+    const wasteKg = record.rejectsKg || 0;
+    const wastePercent = record.rawInput > 0 ? ((wasteKg / record.rawInput) * 100).toFixed(1) : 0;
+    const wasteCost = calculateWasteCostInAED(record);
+    
+    totalWasteCost += wasteCost;
+    totalWastePercent += parseFloat(wastePercent);
+    
+    if (parseFloat(wastePercent) > worstWastePercent) {
+      worstWastePercent = parseFloat(wastePercent);
+      worstLot = record.lot;
+    }
+    
+    const row = document.createElement('tr');
+    const wasteColor = wastePercent > 10 ? '#ef4444' : wastePercent > 5 ? '#f59e0b' : '#22c55e';
+    
+    row.innerHTML = `
+      <td>${new Date(record.timestamp).toLocaleDateString()}</td>
+      <td>${record.lot}</td>
+      <td>${record.brand}</td>
+      <td>${record.rawInput.toLocaleString()}</td>
+      <td>${record.finishedKg.toLocaleString()}</td>
+      <td>${wasteKg.toLocaleString()}</td>
+      <td style="color: ${wasteColor}; font-weight: bold;">${wastePercent}%</td>
+      <td style="color: ${wasteColor}; font-weight: bold;">AED ${wasteCost.toFixed(2)}</td>
+      <td>${record.efficiency}%</td>
+    `;
+    tbody.appendChild(row);
+  });
+  
+  // Update KPIs
+  const avgWastePercent = productionRecords.length > 0 ? 
+    (totalWastePercent / productionRecords.length).toFixed(1) : 0;
+  
+  if (document.getElementById('totalWasteCost')) {
+    document.getElementById('totalWasteCost').textContent = `AED ${totalWasteCost.toFixed(0)}`;
+    document.getElementById('avgWastePercent').textContent = `${avgWastePercent}%`;
+    document.getElementById('worstLot').textContent = worstLot;
+  }
+}
+
+function calculateWasteCostInAED(record) {
+  // Calculate waste cost based on raw material price
+  const rawMaterialPricePerKg = 12.50; // Average AED price per kg
+  const wasteKg = record.rejectsKg || 0;
+  return wasteKg * rawMaterialPricePerKg;
+}
+
+function updateWastageAnalysis() {
+  const period = document.getElementById('wastageAnalysisPeriod').value;
+  const customRangeElements = document.querySelectorAll('[id^="customWastageDate"]');
+  
+  customRangeElements.forEach(el => {
+    el.style.display = period === 'custom' ? 'block' : 'none';
+  });
+  
+  renderEnhancedWastageTable();
+}
+
+function generateInventoryReport() {
+  const reportType = document.getElementById('reportType').value;
+  const period = document.getElementById('reportPeriod').value;
+  
+  window.formValidator.showToast(`Generating ${reportType.replace('_', ' ')} report for ${period.replace('_', ' ')}...`, 'success');
+  
+  // Implementation for different report types would go here
+  // For now, showing a placeholder
+  setTimeout(() => {
+    alert(`${reportType.replace('_', ' ')} report generated successfully! This would normally open a detailed report.`);
+  }, 1000);
+}
+
+function exportInventoryData() {
+  const inventoryLog = window.appState.getState('inventoryLog') || [];
+  const csvContent = generateCSVFromInventoryData(inventoryLog);
+  downloadCSV(csvContent, 'pistachio_inventory_data.csv');
+}
+
+function exportWastageReport() {
+  const productionRecords = window.appState.getState('productionRecords') || [];
+  const csvContent = generateCSVFromWastageData(productionRecords);
+  downloadCSV(csvContent, 'pistachio_wastage_report.csv');
+}
+
+function generateCSVFromInventoryData(data) {
+  const headers = ['Timestamp', 'Item', 'Category', 'Action', 'Quantity', 'Result', 'AED Value', 'Batch', 'Linked Lot', 'User', 'Factory', 'Notes'];
+  const csvRows = [headers.join(',')];
+  
+  data.forEach(log => {
+    const row = [
+      log.timestamp,
+      log.item,
+      log.category || '',
+      log.action,
+      log.quantity,
+      log.result,
+      log.aedValue || '0.00',
+      log.batchNumber || '',
+      log.linkedLot || '',
+      log.user || '',
+      log.factory || 'Pistachio',
+      `"${log.notes || ''}"`
+    ];
+    csvRows.push(row.join(','));
+  });
+  
+  return csvRows.join('\n');
+}
+
+function generateCSVFromWastageData(data) {
+  const headers = ['Date', 'Lot', 'Brand', 'Input (kg)', 'Output (kg)', 'Waste (kg)', 'Waste %', 'Waste Cost (AED)', 'Efficiency %'];
+  const csvRows = [headers.join(',')];
+  
+  data.forEach(record => {
+    const wasteKg = record.rejectsKg || 0;
+    const wastePercent = record.rawInput > 0 ? ((wasteKg / record.rawInput) * 100).toFixed(1) : 0;
+    const wasteCost = calculateWasteCostInAED(record);
+    
+    const row = [
+      new Date(record.timestamp).toLocaleDateString(),
+      record.lot,
+      record.brand,
+      record.rawInput,
+      record.finishedKg,
+      wasteKg,
+      wastePercent,
+      wasteCost.toFixed(2),
+      record.efficiency
+    ];
+    csvRows.push(row.join(','));
+  });
+  
+  return csvRows.join('\n');
+}
+
+function downloadCSV(csvContent, filename) {
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.URL.revokeObjectURL(url);
+}
 // Equipment & Maintenance management (keeping your original functions but using state)
 function updateEquipmentStatus() {
   const equipmentCode = document.getElementById('equipmentSelect').value;
@@ -3880,12 +4349,12 @@ function renderPriceAuditTable(filteredData = null) {
   });
 }
 // Initialize
-// Initialize
 window.addEventListener('load', () => {
   setupProductionValidation();
   updateFormVisibility();
   updateSummary();
   renderInventory();
+  updateWastageAnalysis();
   renderEquipmentGrid();
   renderMaintenanceLog();
   renderWastageTable();
@@ -3896,7 +4365,10 @@ window.addEventListener('load', () => {
   
   renderItemPricesTable();
   renderPriceAuditTable();
-  
+  const wastageAnalysisPeriod = document.getElementById('wastageAnalysisPeriod');
+if (wastageAnalysisPeriod) {
+  wastageAnalysisPeriod.addEventListener('change', updateWastageAnalysis);
+}
   const today = new Date();
   const monthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
   
