@@ -613,22 +613,39 @@
   </div>
 </div>
 <h3>Final Goods Output</h3>
-<div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-  <div class="form-group">
-    <label>18-21 Size (kg)</label>
-    <input id="bags1821" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+<div class="materials-section">
+  <h4>18-21 Size Pistachios</h4>
+  <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+    <div class="form-group">
+      <label>10kg Vacuum Bags (Boxed) - kg</label>
+      <input id="size1821_10kg" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+    </div>
+    <div class="form-group">
+      <label>22.68kg Bags (No Box) - kg</label>
+      <input id="size1821_2268kg" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+    </div>
+    <div class="form-group">
+      <label>25kg Bags (No Box) - kg</label>
+      <input id="size1821_25kg" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+    </div>
   </div>
-  <div class="form-group">
-    <label>21-25 Size (kg)</label>
-    <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
-  </div>
-  <div class="form-group">
-    <label>22.68kg Bags (No Box)</label>
-    <input id="bags2268" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
-  </div>
-  <div class="form-group">
-    <label>25kg Bags (No Box)</label>
-    <input id="bags25" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+</div>
+
+<div class="materials-section">
+  <h4>21-25 Size Pistachios</h4>
+  <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+    <div class="form-group">
+      <label>10kg Vacuum Bags (Boxed) - kg</label>
+      <input id="size2125_10kg" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+    </div>
+    <div class="form-group">
+      <label>22.68kg Bags (No Box) - kg</label>
+      <input id="size2125_2268kg" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+    </div>
+    <div class="form-group">
+      <label>25kg Bags (No Box) - kg</label>
+      <input id="size2125_25kg" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+    </div>
   </div>
 </div>
       <!-- Materials -->
@@ -2014,13 +2031,49 @@ function updateSummary() {
     `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
 }
 
+function updateSummary() {
+  // Calculate 18-21 size totals
+  const size1821_10kg = parseInt(document.getElementById('size1821_10kg').value) || 0;
+  const size1821_2268kg = parseInt(document.getElementById('size1821_2268kg').value) || 0;
+  const size1821_25kg = parseInt(document.getElementById('size1821_25kg').value) || 0;
+  const total1821 = size1821_10kg + size1821_2268kg + size1821_25kg;
+  
+  // Calculate 21-25 size totals
+  const size2125_10kg = parseInt(document.getElementById('size2125_10kg').value) || 0;
+  const size2125_2268kg = parseInt(document.getElementById('size2125_2268kg').value) || 0;
+  const size2125_25kg = parseInt(document.getElementById('size2125_25kg').value) || 0;
+  const total2125 = size2125_10kg + size2125_2268kg + size2125_25kg;
+  
+  const finishedKg = total1821 + total2125;
+  
+  const runType = document.getElementById('runType').value;
+  let rejectsKg = 0;
+  
+  if (runType === 'huller') {
+    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
+                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
+    rejectsKg = rejectIds.reduce((sum, id) => {
+      return sum + (parseInt(document.getElementById(id).value) || 0);
+    }, 0);
+  }
+  
+  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
+  const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
+  
+  const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
+  const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
+  
+  document.getElementById('productionSummary').textContent = 
+    `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
+}
 function autoCalculateMaterials() {
-  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
-  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const totalKg = kg1821 + kg2125;
+  // Only calculate materials for 10kg vacuum bags (which go in boxes)
+  const kg1821_10kg = parseInt(document.getElementById('size1821_10kg').value) || 0;
+  const kg2125_10kg = parseInt(document.getElementById('size2125_10kg').value) || 0;
+  const totalKgInVacuumBags = kg1821_10kg + kg2125_10kg;
   
   // Each vacuum bag holds 10kg
-  const requiredBags = Math.ceil(totalKg / 10);
+  const requiredBags = Math.ceil(totalKgInVacuumBags / 10);
   
   // Each box typically holds 12 bags (adjust as needed)
   const requiredBoxes = Math.ceil(requiredBags / 12);
@@ -2028,7 +2081,7 @@ function autoCalculateMaterials() {
   // Auto-fill the materials fields
   document.getElementById('bagsUsed').value = requiredBags;
   document.getElementById('boxesUsed').value = requiredBoxes;
-}
+}  
 function clearForm() {
   document.querySelectorAll('#production input[type="number"]').forEach(input => {
     input.value = 0;
@@ -2050,11 +2103,17 @@ function submitProduction() {
     return;
   }
 
- const bags1821 = parseInt(document.getElementById('bags1821').value) || 0;
-const bags2125 = parseInt(document.getElementById('bags2125').value) || 0;
-const bags2268 = parseInt(document.getElementById('bags2268').value) || 0;
-const bags25 = parseInt(document.getElementById('bags25').value) || 0;
-const totalBags = bags1821 + bags2125 + bags2268 + bags25;
+// Get all packaging quantities
+const size1821_10kg = parseInt(document.getElementById('size1821_10kg').value) || 0;
+const size1821_2268kg = parseInt(document.getElementById('size1821_2268kg').value) || 0;
+const size1821_25kg = parseInt(document.getElementById('size1821_25kg').value) || 0;
+const size2125_10kg = parseInt(document.getElementById('size2125_10kg').value) || 0;
+const size2125_2268kg = parseInt(document.getElementById('size2125_2268kg').value) || 0;
+const size2125_25kg = parseInt(document.getElementById('size2125_25kg').value) || 0;
+
+const total1821 = size1821_10kg + size1821_2268kg + size1821_25kg;
+const total2125 = size2125_10kg + size2125_2268kg + size2125_25kg;
+const totalBags = total1821 + total2125;
   
   if (totalBags === 0) {
     window.formValidator.showToast('Please enter finished goods quantities', 'error');
@@ -2149,10 +2208,16 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   lot: selectedLot.lotNumber,
   containerNumbers: selectedLot.containerNumbers || [],
   rawInput,
-  kg1821: bags1821,
-  kg2125: bags2125,
-  kg2268: bags2268,
-  kg25: bags25,
+  kg1821: total1821,
+  kg2125: total2125,
+  packaging: {
+    size1821_10kg: size1821_10kg,
+    size1821_2268kg: size1821_2268kg,
+    size1821_25kg: size1821_25kg,
+    size2125_10kg: size2125_10kg,
+    size2125_2268kg: size2125_2268kg,
+    size2125_25kg: size2125_25kg
+  },
   totalKg: totalBags,
   finishedKg,
   rejectsKg,
@@ -2182,12 +2247,37 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   // Update inventory
   window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
   window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
-  // Update finished goods inventory
-if (bags2268 > 0) {
-  window.appState.updateInventory('bags2268kg', 'add', Math.ceil(bags2268 / 22.68));
+  // Update finished goods inventory for different bag types
+const total2268kg = size1821_2268kg + size2125_2268kg;
+const total25kg = size1821_25kg + size2125_25kg;
+
+if (total2268kg > 0) {
+  const bags2268Count = Math.ceil(total2268kg / 22.68);
+  window.appState.updateInventory('bags2268kg', 'add', bags2268Count);
+  
+  window.appState.addToArray('inventoryLog', {
+    timestamp: new Date().toISOString(),
+    item: '22.68kg Bags (No Box)',
+    action: 'add',
+    quantity: bags2268Count,
+    result: window.appState.getState('currentInventory').bags2268kg,
+    notes: `Auto: Production ${total2268kg}kg in ${bags2268Count} bags`
+  });
 }
-if (bags25 > 0) {
-  window.appState.updateInventory('bags25kg', 'add', Math.ceil(bags25 / 25));
+
+if (total25kg > 0) {
+  const bags25Count = Math.ceil(total25kg / 25);
+  window.appState.updateInventory('bags25kg', 'add', bags25Count);
+  
+  window.appState.addToArray('inventoryLog', {
+    timestamp: new Date().toISOString(),
+    item: '25kg Bags (No Box)',
+    action: 'add',
+    quantity: bags25Count,
+    result: window.appState.getState('currentInventory').bags25kg,
+    result: window.appState.getState('currentInventory').bags25kg,
+    notes: `Auto: Production ${total25kg}kg in ${bags25Count} bags`
+  });
 }
   // Add inventory log entries
   if (totalBagsNeeded > 0) {
