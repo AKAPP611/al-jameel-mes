@@ -622,6 +622,14 @@
     <label>21-25 Size (kg)</label>
     <input id="bags2125" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
   </div>
+  <div class="form-group">
+    <label>22.68kg Bags (No Box)</label>
+    <input id="bags2268" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+  </div>
+  <div class="form-group">
+    <label>25kg Bags (No Box)</label>
+    <input id="bags25" type="number" min="0" step="1" value="0" onchange="updateSummary(); autoCalculateMaterials();">
+  </div>
 </div>
       <!-- Materials -->
       <div class="materials-section">
@@ -1138,20 +1146,28 @@
     <section id="inventory" class="section">
       <h2 style="margin-bottom: 1rem;">📦 Inventory Management</h2>
       
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div>Vacuum Bags (10kg)</div>
-          <div class="stat-value" id="invVacuumBags">0</div>
-        </div>
-        <div class="stat-card">
-          <div>Golden Hill Boxes</div>
-          <div class="stat-value" id="invGoldenHillBoxes">0</div>
-        </div>
-        <div class="stat-card">
-          <div>Extra Boxes</div>
-          <div class="stat-value" id="invExtraBoxes">0</div>
-        </div>
-      </div>
+     <div class="stats-grid">
+  <div class="stat-card">
+    <div>Vacuum Bags (10kg)</div>
+    <div class="stat-value" id="invVacuumBags">0</div>
+  </div>
+  <div class="stat-card">
+    <div>Golden Hill Boxes</div>
+    <div class="stat-value" id="invGoldenHillBoxes">0</div>
+  </div>
+  <div class="stat-card">
+    <div>Extra Boxes</div>
+    <div class="stat-value" id="invExtraBoxes">0</div>
+  </div>
+  <div class="stat-card">
+    <div>22.68kg Bags</div>
+    <div class="stat-value" id="invBags2268">0</div>
+  </div>
+  <div class="stat-card">
+    <div>25kg Bags</div>
+    <div class="stat-value" id="invBags25">0</div>
+  </div>
+</div>
 
       <div class="materials-section">
         <h3>Stock Adjustment</h3>
@@ -1159,10 +1175,12 @@
           <div class="form-group">
             <label>Item</label>
             <select id="invItem">
-              <option value="vacuumBags">Vacuum Bags (10kg)</option>
-              <option value="goldenHillBoxes">Golden Hill Boxes</option>
-              <option value="extraBoxes">Extra Boxes</option>
-            </select>
+  <option value="vacuumBags">Vacuum Bags (10kg)</option>
+  <option value="goldenHillBoxes">Golden Hill Boxes</option>
+  <option value="extraBoxes">Extra Boxes</option>
+  <option value="bags2268kg">22.68kg Bags (No Box)</option>
+  <option value="bags25kg">25kg Bags (No Box)</option>
+</select>
           </div>
           <div class="form-group">
             <label>Action</label>
@@ -1252,43 +1270,65 @@ class AppState {
       maintenanceLog: [],
       wastageLog: [],
       itemPrices: [
-        {
-          id: 'vacuum_bags_10kg',
-          name: 'Vacuum Bags (10kg)',
-          unit: 'piece',
-          price: 2.50,
-          status: 'active',
-          category: 'packaging',
-          lastUpdated: new Date().toISOString(),
-          updatedBy: 'system'
-        },
-        {
-          id: 'golden_hill_boxes',
-          name: 'Golden Hill Boxes',
-          unit: 'piece', 
-          price: 1.25,
-          status: 'active',
-          category: 'packaging',
-          lastUpdated: new Date().toISOString(),
-          updatedBy: 'system'
-        },
-        {
-          id: 'extra_boxes',
-          name: 'Extra Boxes',
-          unit: 'piece',
-          price: 1.00,
-          status: 'active', 
-          category: 'packaging',
-          lastUpdated: new Date().toISOString(),
-          updatedBy: 'system'
-        }
-      ],
+  {
+    id: 'vacuum_bags_10kg',
+    name: 'Vacuum Bags (10kg)',
+    unit: 'piece',
+    price: 2.50,
+    status: 'active',
+    category: 'packaging',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'golden_hill_boxes',
+    name: 'Golden Hill Boxes',
+    unit: 'piece', 
+    price: 1.25,
+    status: 'active',
+    category: 'packaging',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'extra_boxes',
+    name: 'Extra Boxes',
+    unit: 'piece',
+    price: 1.00,
+    status: 'active', 
+    category: 'packaging',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'bags_22_68kg',
+    name: '22.68kg Bags (No Box)',
+    unit: 'piece',
+    price: 15.00,
+    status: 'active',
+    category: 'finished_goods',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  },
+  {
+    id: 'bags_25kg',
+    name: '25kg Bags (No Box)',
+    unit: 'piece',
+    price: 16.50,
+    status: 'active',
+    category: 'finished_goods',
+    lastUpdated: new Date().toISOString(),
+    updatedBy: 'system'
+  }
+],
       priceAuditLog: [],
-      currentInventory: {
-        vacuumBags: 0,
-        goldenHillBoxes: 0,
-        extraBoxes: 0
-      },
+     currentInventory: {
+  vacuumBags: 0,
+  goldenHillBoxes: 0,
+  extraBoxes: 0,
+  bags2268kg: 0,
+  bags25kg: 0
+},
       equipment: [], // Will be populated below
       currentUser: null
     };
@@ -1948,7 +1988,9 @@ function updateInventoryDisplay() {
 function updateSummary() {
   const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
   const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const finishedKg = kg1821 + kg2125;
+  const kg2268 = parseInt(document.getElementById('bags2268').value) || 0;
+  const kg25 = parseInt(document.getElementById('bags25').value) || 0;
+  const finishedKg = kg1821 + kg2125 + kg2268 + kg25;
   
   const runType = document.getElementById('runType').value;
   let rejectsKg = 0;
@@ -2008,9 +2050,11 @@ function submitProduction() {
     return;
   }
 
-  const bags1821 = parseInt(document.getElementById('bags1821').value) || 0;
-  const bags2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const totalBags = bags1821 + bags2125;
+ const bags1821 = parseInt(document.getElementById('bags1821').value) || 0;
+const bags2125 = parseInt(document.getElementById('bags2125').value) || 0;
+const bags2268 = parseInt(document.getElementById('bags2268').value) || 0;
+const bags25 = parseInt(document.getElementById('bags25').value) || 0;
+const totalBags = bags1821 + bags2125 + bags2268 + bags25;
   
   if (totalBags === 0) {
     window.formValidator.showToast('Please enter finished goods quantities', 'error');
@@ -2032,7 +2076,7 @@ if (rawInput > selectedLot.availableRawQuantity) {
   return;
 }
 
-// New validation: Check if output matches input
+// Check if output matches input - show confirmation for mismatches
 const runType = document.getElementById('runType').value;
 let rejectsKg = 0;
 if (runType === 'huller') {
@@ -2047,8 +2091,22 @@ const totalOutput = totalBags + rejectsKg;
 const tolerance = 5; // Allow 5kg tolerance for measurement differences
 
 if (Math.abs(rawInput - totalOutput) > tolerance) {
-  window.formValidator.showToast(`Output (${totalOutput}kg) must match input (${rawInput}kg). Difference: ${Math.abs(rawInput - totalOutput)}kg`, 'error');
-  return;
+  const difference = Math.abs(rawInput - totalOutput);
+  const mismatchType = totalOutput > rawInput ? 'higher' : 'lower';
+  
+  const confirmMessage = `Input/Output Mismatch Detected:\n\n` +
+    `• Raw Input: ${rawInput.toLocaleString()} kg\n` +
+    `• Total Output: ${totalOutput.toLocaleString()} kg\n` +
+    `• Difference: ${difference} kg (output is ${mismatchType})\n\n` +
+    `This mismatch is normal in production due to material variations.\n\n` +
+    `Would you like to continue with this submission?`;
+  
+  if (!confirm(confirmMessage)) {
+    return; // User chose not to continue
+  }
+  
+  // User confirmed, so we'll continue with submission
+  window.formValidator.showToast(`Production submitted with ${difference}kg mismatch noted`, 'success');
 }
   
   const brand = selectedLot.brand; // Use lot's brand
@@ -2089,10 +2147,12 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   runType,
   brand: brand,
   lot: selectedLot.lotNumber,
-  containerNumbers: selectedLot.containerNumbers || [],  // Add this line
+  containerNumbers: selectedLot.containerNumbers || [],
   rawInput,
   kg1821: bags1821,
   kg2125: bags2125,
+  kg2268: bags2268,
+  kg25: bags25,
   totalKg: totalBags,
   finishedKg,
   rejectsKg,
@@ -2122,7 +2182,13 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   // Update inventory
   window.appState.updateInventory('vacuumBags', 'remove', totalBagsNeeded);
   window.appState.updateInventory(boxType, 'remove', totalBoxesNeeded);
-  
+  // Update finished goods inventory
+if (bags2268 > 0) {
+  window.appState.updateInventory('bags2268kg', 'add', Math.ceil(bags2268 / 22.68));
+}
+if (bags25 > 0) {
+  window.appState.updateInventory('bags25kg', 'add', Math.ceil(bags25 / 25));
+}
   // Add inventory log entries
   if (totalBagsNeeded > 0) {
     window.appState.addToArray('inventoryLog', {
@@ -2226,9 +2292,11 @@ function adjustInventory() {
   }
   
   let itemName;
-  if (item === 'vacuumBags') itemName = 'Vacuum Bags (10kg)';
-  else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
-  else if (item === 'extraBoxes') itemName = 'Extra Boxes';
+if (item === 'vacuumBags') itemName = 'Vacuum Bags (10kg)';
+else if (item === 'goldenHillBoxes') itemName = 'Golden Hill Boxes';
+else if (item === 'extraBoxes') itemName = 'Extra Boxes';
+else if (item === 'bags2268kg') itemName = '22.68kg Bags (No Box)';
+else if (item === 'bags25kg') itemName = '25kg Bags (No Box)';
   
   const success = window.appState.updateInventory(item, action, quantity);
   
@@ -2258,6 +2326,8 @@ function renderInventory() {
   document.getElementById('invVacuumBags').textContent = currentInventory.vacuumBags || 0;
   document.getElementById('invGoldenHillBoxes').textContent = currentInventory.goldenHillBoxes || 0;
   document.getElementById('invExtraBoxes').textContent = currentInventory.extraBoxes || 0;
+  document.getElementById('invBags2268').textContent = currentInventory.bags2268kg || 0;
+  document.getElementById('invBags25').textContent = currentInventory.bags25kg || 0;
   
   if (document.getElementById('currentBags')) {
     document.getElementById('currentBags').textContent = currentInventory.vacuumBags || 0;
