@@ -401,21 +401,191 @@
     }
 
     /* Print-specific styles */
-    @media print {
-      .chart-container {
-        box-shadow: none;
-        border: 1px solid #ddd;
-      }
-      
-      .chart-grid {
-        page-break-inside: avoid;
-      }
-      
-      .pie-chart-container,
-      .bar-chart-container {
-        page-break-inside: avoid;
-      }
-    }
+    /* Enhanced Print-specific styles */
+@media print {
+  /* General print layout */
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: white;
+  }
+  
+  /* Hide non-essential elements */
+  .nav-buttons,
+  button,
+  input[type="button"],
+  .btn-secondary {
+    display: none !important;
+  }
+  
+  /* Report content adjustments */
+  .report-content {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Chart containers */
+  .chart-container {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: white;
+  }
+  
+  /* Fix chart grid for print */
+  .chart-grid {
+    display: block;
+    page-break-inside: avoid;
+  }
+  
+  .chart-grid .chart-container {
+    display: inline-block;
+    width: 48%;
+    margin: 1%;
+    vertical-align: top;
+  }
+  
+  /* Pie chart specific fixes */
+  .pie-chart-container {
+    page-break-inside: avoid;
+    text-align: center;
+  }
+  
+  .pie-chart-container svg {
+    max-width: 200px;
+    height: auto;
+  }
+  
+  /* Bar chart fixes */
+  .bar-chart-container {
+    page-break-inside: avoid;
+  }
+  
+  .bar-item {
+    margin-bottom: 0.5rem;
+    page-break-inside: avoid;
+  }
+  
+  /* Table improvements */
+  table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 10pt;
+  }
+  
+  table, th, td {
+    border: 1px solid #000;
+  }
+  
+  thead {
+    display: table-header-group;
+    page-break-inside: avoid;
+  }
+  
+  tbody tr {
+    page-break-inside: avoid;
+  }
+  
+  th {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    font-weight: bold;
+  }
+  
+  /* Metrics grid for print */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+    page-break-inside: avoid;
+  }
+  
+  .metric-card {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    text-align: center;
+    background: white;
+  }
+  
+  .metric-value {
+    font-size: 18pt;
+    font-weight: bold;
+  }
+  
+  /* Page breaks */
+  .chart-container:nth-child(3n) {
+    page-break-after: auto;
+  }
+  
+  /* Report header adjustments */
+  .report-header {
+    background: #f8f9fa !important;
+    color: #000 !important;
+    border: 2px solid #a32034;
+    margin-bottom: 1rem;
+    page-break-inside: avoid;
+  }
+  
+  /* Container summary table */
+  .chart-container:has(table) {
+    page-break-before: auto;
+  }
+  
+  /* Legend fixes */
+  .chart-legend {
+    font-size: 9pt;
+    margin-top: 0.5rem;
+  }
+  
+  .legend-item {
+    margin: 0.2rem;
+    font-size: 9pt;
+  }
+  
+  /* Chart titles */
+  .chart-title {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #000;
+  }
+}
+
+/* Print button styling when visible */
+@media screen {
+  .print-only {
+    display: none;
+  }
+}
+
+@media print {
+  .print-only {
+    display: block;
+  }
+  .no-print {
+    display: none;
+  }
+}
+  /* Print preparation styles */
+body.printing {
+  overflow: hidden;
+}
+
+body.printing .chart-container {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+body.printing .metrics-grid {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
   </style>
 </head>
 <body>
@@ -3098,8 +3268,9 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
     '21-25': records.reduce((sum, r) => sum + (r.kg2125 || 0), 0)
   };
 
-  const reportHTML = `
-    <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #a32034 0%, #d5a333 100%); color: white; border-radius: 0.5rem;">
+ const reportHTML = `
+  <div class="print-report-wrapper">
+  <div class="report-header" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #a32034 0%, #d5a333 100%); color: white; border-radius: 0.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
           <h1 style="margin: 0; font-size: 2rem;">Al Jameel MES</h1>
@@ -3139,9 +3310,9 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
     </div>
 
     <!-- Professional Charts Grid -->
-    <div class="chart-grid">
-      <!-- Production Distribution Pie Chart -->
-      <div class="chart-container">
+<div class="chart-grid">
+  <!-- Production Distribution Pie Chart -->
+  <div class="chart-container print-friendly-chart">
         <div class="chart-title">Production Distribution</div>
         <div class="pie-chart-container">
          ${generatePieChart([
@@ -3296,8 +3467,8 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
     <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; text-align: center; border-top: 3px solid var(--primary);">
       <p style="margin: 0; color: var(--primary); font-weight: 600;">Al Jameel MES - Pistachio Production Management System</p>
       <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #6c757d;">Generated: ${new Date().toLocaleString()} | Confidential Report</p>
-    </div>
-  `;
+    </div> </div> <!-- End print-report-wrapper -->
+`;
   
   reportContent.innerHTML = reportHTML;
 }
@@ -3374,12 +3545,14 @@ function generatePieChart(data, size = 200) {
     }
   });
   
-  return `
-    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="margin: 0 auto; display: block;">
-      ${paths}
-    </svg>
-    <div class="chart-legend">${legends}</div>
-  `;
+ return `
+  <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" 
+       style="margin: 0 auto; display: block; max-width: 100%; height: auto;"
+       xmlns="http://www.w3.org/2000/svg">
+    ${paths}
+  </svg>
+  <div class="chart-legend">${legends}</div>
+`;
 }
 
 function generateBarChart(data) {
@@ -3547,7 +3720,18 @@ function generateWastageChart(wastageData) {
 }
 
 function printReport() {
-  window.print();
+  // Add print-specific class to body
+  document.body.classList.add('printing');
+  
+  // Small delay to ensure styles are applied
+  setTimeout(() => {
+    window.print();
+    
+    // Remove print class after printing
+    setTimeout(() => {
+      document.body.classList.remove('printing');
+    }, 1000);
+  }, 100);
 }
 
 // Initialize report dates
