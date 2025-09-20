@@ -2253,43 +2253,45 @@ const total25kg = size1821_25kg + size2125_25kg;
 
 if (total2268kg > 0) {
   const bags2268Count = Math.ceil(total2268kg / 22.68);
-  window.appState.updateInventory('bags2268kg', 'add', bags2268Count);
+  
+  // Check if we have enough bags in inventory
+  if (bags2268Count > currentInventory.bags2268kg) {
+    window.formValidator.showToast(`Insufficient 22.68kg bags! Required: ${bags2268Count}, Available: ${currentInventory.bags2268kg}`, 'error');
+    return;
+  }
+  
+  window.appState.updateInventory('bags2268kg', 'remove', bags2268Count);
   
   window.appState.addToArray('inventoryLog', {
     timestamp: new Date().toISOString(),
     item: '22.68kg Bags (No Box)',
-    action: 'add',
+    action: 'remove',
     quantity: bags2268Count,
     result: window.appState.getState('currentInventory').bags2268kg,
-    notes: `Auto: Production ${total2268kg}kg in ${bags2268Count} bags`
+    notes: `Auto: Used ${bags2268Count} bags for production of ${total2268kg}kg`
   });
 }
 
 if (total25kg > 0) {
   const bags25Count = Math.ceil(total25kg / 25);
-  window.appState.updateInventory('bags25kg', 'add', bags25Count);
+  
+  // Check if we have enough bags in inventory
+  if (bags25Count > currentInventory.bags25kg) {
+    window.formValidator.showToast(`Insufficient 25kg bags! Required: ${bags25Count}, Available: ${currentInventory.bags25kg}`, 'error');
+    return;
+  }
+  
+  window.appState.updateInventory('bags25kg', 'remove', bags25Count);
   
   window.appState.addToArray('inventoryLog', {
     timestamp: new Date().toISOString(),
     item: '25kg Bags (No Box)',
-    action: 'add',
+    action: 'remove',
     quantity: bags25Count,
     result: window.appState.getState('currentInventory').bags25kg,
-    result: window.appState.getState('currentInventory').bags25kg,
-    notes: `Auto: Production ${total25kg}kg in ${bags25Count} bags`
+    notes: `Auto: Used ${bags25Count} bags for production of ${total25kg}kg`
   });
 }
-  // Add inventory log entries
-  if (totalBagsNeeded > 0) {
-    window.appState.addToArray('inventoryLog', {
-      timestamp: new Date().toISOString(),
-      item: 'Vacuum Bags (10kg)',
-      action: 'remove',
-      quantity: totalBagsNeeded,
-      result: window.appState.getState('currentInventory').vacuumBags,
-      notes: 'Auto: Production submission'
-    });
-  }
   
   if (totalBoxesNeeded > 0) {
     const boxTypeName = brand === 'Golden Hill' ? 'Golden Hill Boxes' : 'Extra Boxes';
