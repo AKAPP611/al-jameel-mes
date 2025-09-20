@@ -461,14 +461,56 @@
   }
   
   /* Bar chart fixes */
-  .bar-chart-container {
-    page-break-inside: avoid;
-  }
-  
-  .bar-item {
-    margin-bottom: 0.5rem;
-    page-break-inside: avoid;
-  }
+.bar-chart-container {
+  page-break-inside: avoid;
+}
+
+.bar-item {
+  margin-bottom: 0.75rem;
+  page-break-inside: avoid;
+}
+
+/* Critical: Preserve bar styling in print */
+.bar-track {
+  background: #e9ecef !important;
+  height: 24px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  border: 1px solid #ccc !important;
+}
+
+.bar-fill {
+  height: 100% !important;
+  border-radius: 12px !important;
+  transition: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  padding-right: 0.5rem !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  /* Ensure background colors print */
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Force bar backgrounds to print */
+.bar-fill[style*="background"] {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Specific bar styling preservation */
+.bar-label {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 0.25rem !important;
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+}
   
   /* Table improvements */
   table {
