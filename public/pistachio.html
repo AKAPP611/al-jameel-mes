@@ -588,18 +588,25 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Run Type</label>
-          <select id="runType" onchange="updateFormVisibility()">
-            <option value="huller">Huller Run</option>
-            <option value="repack">Repacking Only</option>
-          </select>
-        </div>
+  <label>Run Type</label>
+  <select id="runType" onchange="updateFormVisibility()">
+    <option value="huller">Huller Run</option>
+    <option value="repack">Repacking Only</option>
+  </select>
+</div>
 
-        <div class="form-group">
-          <label>Raw Input (kg)</label>
-          <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
-        </div>
-      </div>
+<div class="form-group">
+  <label>Shift</label>
+  <select id="productionShift" required>
+    <option value="day">Day Shift</option>
+    <option value="night">Night Shift</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Raw Input (kg)</label>
+  <input id="rawInput" type="number" min="0" step="1" value="0" onchange="updateSummary()">
+</div>
 
       <!-- Lot Info Display -->
      <div id="lotInfoDisplay" class="materials-section" style="display: none;">
@@ -736,9 +743,11 @@
       <div style="overflow-x: auto;">
         <table id="recordsTable">
          <thead>
+<thead>
   <tr>
     <th>Timestamp</th>
     <th>Run Type</th>
+    <th>Shift</th>
     <th>Brand</th>
     <th>Lot</th>
     <th>Raw Input (kg)</th>
@@ -2086,6 +2095,8 @@ function clearForm() {
   document.querySelectorAll('#production input[type="number"]').forEach(input => {
     input.value = 0;
   });
+  // Reset shift to day shift
+  document.getElementById('productionShift').value = 'day';
   updateSummary();
 }
 
@@ -2137,6 +2148,7 @@ if (rawInput > selectedLot.availableRawQuantity) {
 
 // Check if output matches input - show confirmation for mismatches
 const runType = document.getElementById('runType').value;
+const shift = document.getElementById('productionShift').value;
 let rejectsKg = 0;
 if (runType === 'huller') {
   const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
@@ -2204,6 +2216,7 @@ if (Math.abs(rawInput - totalOutput) > tolerance) {
   lotId: lotId,
   lotNumber: selectedLot.lotNumber,
   runType,
+  shift,
   brand: brand,
   lot: selectedLot.lotNumber,
   containerNumbers: selectedLot.containerNumbers || [],
@@ -2353,9 +2366,13 @@ const materialGain = totalOutput - record.rawInput;
 const gainPercent = record.rawInput > 0 ? ((materialGain / record.rawInput) * 100).toFixed(1) : 0;
 const gainColor = materialGain > 0 ? '#22c55e' : '#ef4444';
 
+const shiftDisplay = record.shift === 'day' ? 'Day' : 'Night';
+const shiftColor = record.shift === 'day' ? '#f59e0b' : '#3b82f6';
+
 row.innerHTML = `
   <td>${new Date(record.timestamp).toLocaleString()}</td>
   <td>${record.runType}</td>
+  <td style="color: ${shiftColor}; font-weight: bold;">${shiftDisplay}</td>
   <td>${record.brand}</td>
   <td>${record.lot}</td>
   <td>${record.rawInput}</td>
@@ -3187,27 +3204,31 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
            <thead>
   <tr style="background: var(--primary); color: white;">
     <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Date</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Containers</th>
-    <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">18-21 kg</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">21-25 kg</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Rejects</th>
-              <th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Efficiency</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Shift</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Lot</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Brand</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: left;">Containers</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Raw Input</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">18-21 kg</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">21-25 kg</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Finished</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Rejects</th>
+<th style="padding: 0.75rem; border: 1px solid #ddd; text-align: right;">Efficiency</th>
             </tr>
           </thead>
           <tbody>
             ${records.map(record => `
               <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">${new Date(record.timestamp).toLocaleDateString()}</td>
+<td style="padding: 0.5rem; border: 1px solid #ddd; color: ${record.shift === 'day' ? '#f59e0b' : '#3b82f6'}; font-weight: bold;">${record.shift === 'day' ? 'Day' : 'Night'}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.lot}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd;">${record.brand}</td>
 <td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.85rem; max-width: 300px;">
   ${record.containerNumbers && record.containerNumbers.length > 0 
     ? record.containerNumbers.join(', ')
     : 'No containers specified'}
+</td>
+<td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
 </td>
 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg1821 || 0).toLocaleString()}</td>
