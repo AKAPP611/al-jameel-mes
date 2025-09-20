@@ -3127,10 +3127,10 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
       <div class="chart-container">
         <div class="chart-title">Production Distribution</div>
         <div class="pie-chart-container">
-          ${generatePieChart([
-            { label: 'Finished Product', value: totalFinished, color: '#22c55e' },
-            { label: 'Rejects', value: totalRejects, color: '#ef4444' }
-          ], 200)}
+         ${generatePieChart([
+  { label: 'Finished Product', value: totalFinished, color: '#22c55e' },
+  { label: 'Rejects', value: totalRejects, color: '#ef4444' }
+].filter(item => item.value > 0), 200)}
         </div>
       </div>
 
@@ -3139,12 +3139,12 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
         <div class="chart-title">Brand Distribution</div>
         <div class="pie-chart-container">
           ${generatePieChart(
-            Object.entries(brandStats).map(([brand, stats], index) => ({
-              label: brand,
-              value: stats.finished,
-              color: index === 0 ? '#a32034' : '#d5a333'
-            })), 200
-          )}
+  Object.entries(brandStats).map(([brand, stats], index) => ({
+    label: brand,
+    value: stats.finished,
+    color: ['#a32034', '#d5a333', '#22c55e', '#3b82f6'][index] || '#6b7280'
+  })).filter(item => item.value > 0), 200
+)}
         </div>
       </div>
     </div>
@@ -3285,8 +3285,28 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
 function generatePieChart(data, size = 200) {
   if (!data || data.length === 0) return '<div class="chart-placeholder">No data available</div>';
   
-  const total = data.reduce((sum, item) => sum + item.value, 0);
+  // Filter out zero values
+  const filteredData = data.filter(item => item.value > 0);
+  if (filteredData.length === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  const total = filteredData.reduce((sum, item) => sum + item.value, 0);
   if (total === 0) return '<div class="chart-placeholder">No data to display</div>';
+  
+  // Handle single item case
+  if (filteredData.length === 1) {
+    const item = filteredData[0];
+    return `
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="margin: 0 auto; display: block;">
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 10}" fill="${item.color}" stroke="#fff" stroke-width="2" opacity="0.9"/>
+      </svg>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${item.color};"></div>
+          <span>${item.label}: ${item.value.toLocaleString()} (100%)</span>
+        </div>
+      </div>
+    `;
+  }
   
   const radius = size / 2 - 10;
   const centerX = size / 2;
@@ -3296,7 +3316,7 @@ function generatePieChart(data, size = 200) {
   let paths = '';
   let legends = '';
   
-  data.forEach((item, index) => {
+  filteredData.forEach((item, index) => {
     if (item.value > 0) {
       const percentage = (item.value / total) * 100;
       const angle = (item.value / total) * 360;
