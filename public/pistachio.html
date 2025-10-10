@@ -1153,7 +1153,7 @@ body.printing .metrics-grid {
             <input id="problemDescription" type="text" placeholder="Describe the issue or maintenance needed">
           </div>
           <div class="form-group">
-            <label>Maintenance Cost ($)</label>
+           <label>Maintenance Cost (AED)</label>
             <input id="maintenanceCost" type="number" min="0" step="0.01" value="0">
           </div>
         </div>
@@ -1187,7 +1187,7 @@ body.printing .metrics-grid {
               <th>Priority</th>
               <th>Status Change</th>
               <th>Problem</th>
-              <th>Cost ($)</th>
+              <th>Cost (AED)</th>
               <th>Downtime (hrs)</th>
             </tr>
           </thead>
@@ -1272,7 +1272,7 @@ body.printing .metrics-grid {
               <tr>
                 <th>Item Name</th>
                 <th>Unit</th>
-                <th>Unit Price ($)</th>
+                <th>Unit Price (AED)</th>
                 <th>Status</th>
                 <th>Last Updated</th>
                 <th>Updated By</th>
@@ -1299,7 +1299,7 @@ body.printing .metrics-grid {
               <input id="itemUnit" type="text" required placeholder="e.g., piece, kg, box">
             </div>
             <div class="form-group">
-              <label>Unit Price ($)</label>
+              <label>Unit Price (AED)</label>
               <input id="itemPrice" type="number" min="0" step="0.01" required placeholder="0.00">
             </div>
             <div class="form-group">
@@ -2950,7 +2950,7 @@ function renderMaintenanceLog() {
       <td style="color: ${log.priority <= 3 ? '#ef4444' : '#22c55e'}; font-weight: bold;">P${log.priority || 'N/A'}</td>
       <td>${log.statusChange}</td>
       <td>${log.problem}</td>
-      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.cost > 0 ? 'AED ' + log.cost.toFixed(2) : '-'}</td>
       <td>${log.downtime > 0 ? log.downtime : '-'}</td>
     `;
     tbody.appendChild(row);
@@ -3030,7 +3030,7 @@ function exportMaintenanceReport() {
     <div class="summary">
       <h3>Summary</h3>
       <p><strong>Total Equipment with Maintenance:</strong> ${Object.keys(equipmentCosts).length}</p>
-      <p><strong>Total Maintenance Cost:</strong> $${grandTotal.toFixed(2)}</p>
+      <p><strong>Total Maintenance Cost:</strong> AED ${grandTotal.toFixed(2)}</p>
       <p><strong>Total Activities:</strong> ${filtered.filter(log => log.cost > 0).length}</p>
     </div>
   `;
@@ -3044,7 +3044,7 @@ function exportMaintenanceReport() {
       reportHTML += `
         <div class="equipment-section">
           <div class="equipment-title">${equipment} (Priority ${data.priority})</div>
-          <div class="total-cost">Total Cost: $${data.totalCost.toFixed(2)}</div>
+          <div class="total-cost">Total Cost: AED ${data.totalCost.toFixed(2)}</div>
           <table>
             <thead>
               <tr>
@@ -3060,7 +3060,7 @@ function exportMaintenanceReport() {
         reportHTML += `
           <tr>
             <td>${activity.date}</td>
-            <td>$${activity.cost.toFixed(2)}</td>
+            <td>AED ${activity.cost.toFixed(2)}</td>
             <td>${activity.problem}</td>
           </tr>
         `;
@@ -3134,7 +3134,7 @@ function renderWastageTable(filteredData = null) {
       <td>${waste.brand}</td>
       <td>${waste.bagsWasted}</td>
       <td>${waste.boxesWasted}</td>
-      <td>$${waste.estimatedCost.toFixed(2)}</td>
+      <td>AED ${waste.estimatedCost.toFixed(2)}</td>
     `;
     tbody.appendChild(row);
   });
@@ -3148,7 +3148,7 @@ function renderWastageTable(filteredData = null) {
       <td colspan="3">TOTAL</td>
       <td>${totalBagsWasted}</td>
       <td>${totalBoxesWasted}</td>
-      <td>$${totalCost.toFixed(2)}</td>
+      <td>AED ${totalCost.toFixed(2)}</td>
     `;
     tbody.appendChild(summaryRow);
   }
@@ -3422,11 +3422,11 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
         <div class="metric-label">Average Efficiency</div>
       </div>
      <div class="metric-card">
-  <div class="metric-value">$${totalWasteCost.toFixed(0)}</div>
+  <div class="metric-value">AED ${totalWasteCost.toFixed(0)}</div>
   <div class="metric-label">Total Waste Cost</div>
 </div>
 <div class="metric-card">
-  <div class="metric-value">$${totalMaterialsCost.toFixed(0)}</div>
+  <div class="metric-value">AED ${totalMaterialsCost.toFixed(0)}</div>
   <div class="metric-label">Total Materials Cost</div>
 </div>
     </div>
@@ -3577,7 +3577,7 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
                   <td style="padding: 0.5rem; border: 1px solid #ddd;">${waste.brand}</td>
                   <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${waste.bagsWasted}</td>
                   <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${waste.boxesWasted}</td>
-                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600; color: #dc3545;">$${waste.estimatedCost.toFixed(2)}</td>
+                  <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; font-weight: 600; color: #dc3545;">AED ${waste.estimatedCost.toFixed(2)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -3890,7 +3890,7 @@ function renderItemPricesTable() {
     row.innerHTML = `
       <td><strong>${item.name}</strong></td>
       <td>${item.unit}</td>
-      <td>$${item.price.toFixed(2)}</td>
+      <td>AED ${item.price.toFixed(2)}</td>
       <td style="color: ${statusColor}; font-weight: bold;">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</td>
       <td>${new Date(item.lastUpdated).toLocaleDateString()}</td>
       <td>${item.updatedBy}</td>
@@ -4138,8 +4138,8 @@ function renderPriceAuditTable(filteredData = null) {
       <td>${new Date(log.timestamp).toLocaleString()}</td>
       <td>${log.itemName}</td>
       <td style="text-transform: capitalize;">${log.action.replace('_', ' ')}</td>
-      <td>$${log.oldPrice.toFixed(2)}</td>
-      <td>$${log.newPrice.toFixed(2)}</td>
+      <td>AED ${log.oldPrice.toFixed(2)}</td>
+      <td>AED ${log.newPrice.toFixed(2)}</td>
       <td style="color: ${changeColor}; font-weight: bold;">
         ${log.change > 0 ? '+' : ''}${log.change.toFixed(2)} 
         ${log.changePercent != 0 ? `(${log.changePercent > 0 ? '+' : ''}${log.changePercent}%)` : ''}
