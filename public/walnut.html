@@ -1018,7 +1018,7 @@
             <input id="problemDescription" type="text" placeholder="Describe the issue or maintenance needed">
           </div>
           <div class="form-group">
-            <label>Maintenance Cost ($)</label>
+            <label>Maintenance Cost (AED)</label>
             <input id="maintenanceCost" type="number" min="0" step="0.01" value="0">
           </div>
         </div>
@@ -1052,7 +1052,7 @@
               <th>Priority</th>
               <th>Status Change</th>
               <th>Problem</th>
-              <th>Cost ($)</th>
+              <th>Cost (AED)</th>
               <th>Downtime (hrs)</th>
             </tr>
           </thead>
@@ -1139,7 +1139,7 @@
               <tr>
                 <th>Item Name</th>
                 <th>Unit</th>
-                <th>Unit Price ($)</th>
+                <th>Unit Price (AED)</th>
                 <th>Status</th>
                 <th>Last Updated</th>
                 <th>Updated By</th>
@@ -1166,7 +1166,7 @@
               <input id="itemUnit" type="text" required placeholder="e.g., piece, kg, box">
             </div>
             <div class="form-group">
-              <label>Unit Price ($)</label>
+              <label>Unit Price (AED)</label>
               <input id="itemPrice" type="number" min="0" step="0.01" required placeholder="0.00">
             </div>
             <div class="form-group">
@@ -2985,7 +2985,7 @@ function renderMaintenanceTable() {
       <td style="color: ${log.priority <= 3 ? '#ef4444' : '#22c55e'}; font-weight: bold;">P${log.priority || 'N/A'}</td>
       <td>${log.statusChange}</td>
       <td>${log.problem}</td>
-      <td>${log.cost > 0 ? '$' + log.cost.toFixed(2) : '-'}</td>
+      <td>${log.cost > 0 ? 'AED ' + log.cost.toFixed(2) : '-'}</td>
       <td>${log.downtime > 0 ? log.downtime : '-'}</td>
     `;
     tbody.appendChild(row);
@@ -3364,18 +3364,18 @@ function generateContainerTable(records) {
               <tr>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">5kg Pouches</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.pouches5kgUsed.toLocaleString()}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}5kg_pouch`).toFixed(2)}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${pouchCosts.pouches5kgUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">AED ${getItemPrice(`${brandPrefix}5kg_pouch`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">AED ${pouchCosts.pouches5kgUsed.toFixed(2)}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.pouches5kgWasted.toLocaleString()}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${pouchCosts.pouches5kgWasted.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">AED ${pouchCosts.pouches5kgWasted.toFixed(2)}</td>
               </tr>
               <tr>
                 <td style="padding: 0.5rem; border: 1px solid #ddd;">10kg Pouches</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${materialsAnalysis.pouches10kgUsed.toLocaleString()}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${getItemPrice(`${brandPrefix}10kg_pouch`).toFixed(2)}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">$${pouchCosts.pouches10kgUsed.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">AED ${getItemPrice(`${brandPrefix}10kg_pouch`).toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">AED ${pouchCosts.pouches10kgUsed.toFixed(2)}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">${materialsAnalysis.pouches10kgWasted.toLocaleString()}</td>
-                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">$${pouchCosts.pouches10kgWasted.toFixed(2)}</td>
+                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right; color: #ef4444;">AED ${pouchCosts.pouches10kgWasted.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>
@@ -3447,14 +3447,14 @@ function generateContainerTable(records) {
               <strong>Total Boxes Wasted:</strong> ${totalBoxesWasted.toLocaleString()} units
             </p>
             <p style="margin: 0.5rem 0; font-weight: 600; color: #856404;">
-              <strong>Total Wastage Cost:</strong> $${totalBoxWastageCost.toFixed(2)}
+              <strong>Total Wastage Cost:</strong> AED ${totalBoxWastageCost.toFixed(2)}
             </p>
           </div>
           <div style="font-size: 0.9rem; color: #856404;">
-            <p style="margin: 0.25rem 0;">Half Kernel: ${materialsAnalysis.halfKernelBoxesWasted} boxes ($${boxCosts.halfKernelWasted.toFixed(2)})</p>
-            <p style="margin: 0.25rem 0;">Quarter: ${materialsAnalysis.quarterBoxesWasted} boxes ($${boxCosts.quarterWasted.toFixed(2)})</p>
-            <p style="margin: 0.25rem 0;">Large Pieces: ${materialsAnalysis.largePiecesBoxesWasted} boxes ($${boxCosts.largePiecesWasted.toFixed(2)})</p>
-            <p style="margin: 0.25rem 0;">Amber: ${materialsAnalysis.amberBoxesWasted} boxes ($${boxCosts.amberWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Half Kernel: ${materialsAnalysis.halfKernelBoxesWasted} boxes (AED ${boxCosts.halfKernelWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Quarter: ${materialsAnalysis.quarterBoxesWasted} boxes (AED ${boxCosts.quarterWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Large Pieces: ${materialsAnalysis.largePiecesBoxesWasted} boxes (AED ${boxCosts.largePiecesWasted.toFixed(2)})</p>
+            <p style="margin: 0.25rem 0;">Amber: ${materialsAnalysis.amberBoxesWasted} boxes (AED ${boxCosts.amberWasted.toFixed(2)})</p>
           </div>
         </div>
       </div>
@@ -3688,7 +3688,7 @@ function renderItemPricesTable() {
     row.innerHTML = `
       <td><strong>${item.name}</strong></td>
       <td>${item.unit}</td>
-      <td>${item.price.toFixed(2)}</td>
+      <td>AED ${item.price.toFixed(2)}</td>
       <td style="color: ${statusColor}; font-weight: bold;">${item.status.charAt(0).toUpperCase() + item.status.slice(1)}</td>
       <td>${new Date(item.lastUpdated).toLocaleDateString()}</td>
       <td>${item.updatedBy}</td>
