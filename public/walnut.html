@@ -1819,7 +1819,8 @@ function clearForm() {
   document.querySelectorAll('#production input[type="number"]').forEach(input => {
     input.value = 0;
   });
-  document.getElementById('lotNo').value = '';
+  // Don't clear lot selection - keep it for convenience
+  // document.getElementById('productionLot').value = '';
   
   // Clear wastage fields specifically
   document.getElementById('halfKernelBoxesWasted').value = 0;
@@ -2008,7 +2009,11 @@ function submitProduction() {
   const rawFormat = document.getElementById('rawFormat').value;
   const lotNo = selectedLot.lotNumber;
   const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
-  
+  // Check if raw input exceeds available lot quantity
+  if (rawInput > selectedLot.availableRawQuantity) {
+    window.formValidator.showToast(`Insufficient raw material in lot. Available: ${selectedLot.availableRawQuantity} kg`, 'error');
+    return;
+  }
   // Get product type quantities
   const halfKernel = parseFloat(document.getElementById('halfKernel').value) || 0;
   const quarter = parseFloat(document.getElementById('quarter').value) || 0;
@@ -2253,10 +2258,12 @@ window.appState.updateArrayItem('lots', lotId, (lot) => {
         `• Large Pieces: ${largePiecesBoxesUsed} boxes (${largePieces}kg ÷ 10)\n` +
         `• Amber: ${amberBoxesUsed} boxes (${amber}kg ÷ 10)`);
         
-  clearForm();
+ clearForm();
   updateDashboard();
   renderRecords();
   renderInventory();
+  renderLots();
+  updateProductionLotDropdown();
 }
 // Add this function right after updateDashboard()
 function renderEquipmentIssues() {
