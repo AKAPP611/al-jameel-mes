@@ -712,6 +712,14 @@ body.printing .metrics-grid {
         </div>
       </div>
       <p>KPIs update automatically when you submit production records.</p>
+      
+      <!-- Equipment Issues Alert -->
+      <div id="equipmentIssuesSection" style="margin-top: 2rem; display: none;">
+        <h3 style="color: #ef4444; margin-bottom: 1rem;">⚠️ Equipment Issues</h3>
+        <div id="equipmentIssuesGrid" class="stats-grid">
+          <!-- Equipment issue cards will be populated here -->
+        </div>
+      </div>
     </section>
 <!-- Lot Management Section -->
     <section id="lotmanagement" class="section">
@@ -2001,6 +2009,7 @@ function handleLogin(event) {
     showAdminControls();
     
     updateDashboard();
+    renderEquipmentIssues();
     renderLots();
     renderRecords();
     renderInventory();
@@ -2559,12 +2568,82 @@ function updateDashboard() {
   const efficiency = totalInput > 0 ? Math.round((totalFinished / totalInput) * 100) : 0;
   const rejectRate = totalInput > 0 ? Math.round((totalRejects / totalInput) * 1000) / 10 : 0;
   
-  document.getElementById('kpiActiveLots').textContent = activeLots;
+ document.getElementById('kpiActiveLots').textContent = activeLots;
   document.getElementById('kpiFinished').textContent = totalFinished;
   document.getElementById('kpiEff').textContent = efficiency;
   document.getElementById('kpiReject').textContent = rejectRate.toFixed(1);
+  
+  // Update equipment issues display
+  renderEquipmentIssues();
 }
-
+// Add this function right after updateDashboard()
+function renderEquipmentIssues() {
+  const equipment = window.appState.getState('equipment');
+  const issueEquipment = equipment.filter(e => e.status !== 'operational');
+  
+  const issuesSection = document.getElementById('equipmentIssuesSection');
+  const issuesGrid = document.getElementById('equipmentIssuesGrid');
+  
+  if (issueEquipment.length === 0) {
+    issuesSection.style.display = 'none';
+    return;
+  }
+  
+  issuesSection.style.display = 'block';
+  
+  const statusColors = {
+    maintenance: '#f59e0b',
+    attention: '#f97316',
+    down: '#ef4444',
+    offline: '#6b7280'
+  };
+  
+  const statusLabels = {
+    maintenance: 'Maintenance Due',
+    attention: 'Needs Attention',
+    down: 'Down/Broken',
+    offline: 'Offline'
+  };
+  
+  // Sort by priority (lower number = higher priority)
+  issueEquipment.sort((a, b) => a.priority - b.priority);
+  
+  // Show only the most critical issues (limit to 6 for dashboard)
+  const criticalIssues = issueEquipment.slice(0, 6);
+  
+  issuesGrid.innerHTML = criticalIssues.map(eq => `
+    <div class="stat-card" style="border: 2px solid ${statusColors[eq.status]}; background: ${statusColors[eq.status]}10;">
+      <div style="font-weight: bold; font-size: 1.2rem; color: ${statusColors[eq.status]};">
+        ${eq.code}
+      </div>
+      <div style="margin: 0.5rem 0; font-weight: 600;">
+        ${eq.name}
+      </div>
+      <div style="color: ${statusColors[eq.status]}; font-weight: bold;">
+        ${statusLabels[eq.status]}
+      </div>
+      <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+        Priority ${eq.priority}
+      </div>
+      ${eq.problem ? `<div style="font-size: 0.8rem; color: #999; margin-top: 0.5rem; font-style: italic;">"${eq.problem}"</div>` : ''}
+    </div>
+  `).join('');
+  
+  if (issueEquipment.length > 6) {
+    issuesGrid.innerHTML += `
+      <div class="stat-card" style="border: 2px dashed #6b7280; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+          <div style="font-size: 1.5rem; color: #6b7280; margin-bottom: 0.5rem;">+${issueEquipment.length - 6}</div>
+          <div style="color: #6b7280;">more issues</div>
+          <button onclick="showSection('maintenance'); document.querySelector('.nav-btn:nth-child(6)').classList.add('active');" 
+                  style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.9rem;">
+            View All
+          </button>
+        </div>
+      </div>
+    `;
+  }
+}
 // Records rendering
 function renderRecords() {
   const tbody = document.querySelector('#recordsTable tbody');
@@ -2719,6 +2798,7 @@ function updateEquipmentStatus() {
   window.formValidator.showToast('Equipment status updated successfully!', 'success');
   renderEquipmentGrid();
   renderMaintenanceLog();
+  renderEquipmentIssues(); // Add this line to update dashboard
 }
 
 function filterEquipment() {
