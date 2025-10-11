@@ -92,8 +92,21 @@ jobs:
             --content "public/**/*.{html,js,jsx,ts,tsx}" \
             --rejected --stdout > purgecss-report.txt || true
 
-      - name: Ensure report placeholders exist
+           - name: Ensure report placeholders exist
         run: |
-          [ -f orphan-assets.txt ] || echo "None" > orphan-assets.txt
-          [ -f madge-orphans.txt ] || echo "No output (step failed to run)" > madge-orphans.txt
-          [ -f purgecss-report.txt ] || echo "No output (step fa
+          if [ ! -f orphan-assets.txt ]; then echo None > orphan-assets.txt; fi
+          if [ ! -f madge-orphans.txt ]; then echo 'No output (step failed to run)' > madge-orphans.txt; fi
+          if [ ! -f purgecss-report.txt ]; then echo 'No output (step failed to run)' > purgecss-report.txt; fi
+          if [ ! -f top-assets.txt ]; then echo 'No output (step failed to run)' > top-assets.txt; fi
+
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-reports
+          path: |
+            orphan-assets.txt
+            madge-orphans.txt
+            purgecss-report.txt
+            top-assets.txt
