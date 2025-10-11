@@ -884,23 +884,6 @@ a, button, input, select, [role="button"] {
   margin-bottom: 1rem;
   display: block;
 }
-
-/* ===== Master Inventory Overview Button Enhancement ===== */
-.master-inventory-section {
-  text-align: center; 
-  margin: 2rem 0; 
-  padding: 1.5rem; 
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
-  border-radius: 1rem; 
-  border: 2px solid #22c55e;
-}
-
-.master-inventory-btn {
-  font-size: 1.2rem; 
-  padding: 1rem 2rem; 
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); 
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-}
 .text-center {
   text-align: center;
 }
