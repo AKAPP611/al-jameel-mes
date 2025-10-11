@@ -363,22 +363,6 @@ async function render() {
             MaterialsView(mount, { t });
           }
           break;
-        // ADDED: New inventory routes for pistachio factory
-       case '#/inventory/overview':
-{
-  // Master inventory overview for all factories
-  const { MasterInventoryView } = await loadView('./views/master-inventory-view.js');
-  MasterInventoryView(mount, { t });
-}
-break;
-
-case '#/inventory/overview':
-{
-  // Master inventory overview for all factories
-  const { MasterInventoryView } = await loadView('./views/master-inventory-view.js');
-  MasterInventoryView(mount, { t });
-}
-break;
 
 case '#/inventory/pistachio':
 {
