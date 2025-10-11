@@ -963,8 +963,7 @@ body.printing .metrics-grid {
       <div style="overflow-x: auto;">
         <table id="recordsTable">
          <thead>
-<thead>
-  <tr>
+          <tr>
     <th>Timestamp</th>
     <th>Run Type</th>
     <th>Shift</th>
@@ -2231,36 +2230,7 @@ function updateLotInfo() {
 function updateInventoryDisplay() {
   renderInventory();
 }
-
-function updateSummary() {
-  const kg1821 = parseInt(document.getElementById('bags1821').value) || 0;
-  const kg2125 = parseInt(document.getElementById('bags2125').value) || 0;
-  const kg2268 = parseInt(document.getElementById('bags2268').value) || 0;
-  const kg25 = parseInt(document.getElementById('bags25').value) || 0;
-  const finishedKg = kg1821 + kg2125 + kg2268 + kg25;
   
-  const runType = document.getElementById('runType').value;
-  let rejectsKg = 0;
-  
-  if (runType === 'huller') {
-    const rejectIds = ['rejNonSplit', 'rejLightStain', 'rejAdheringHull', 'rejDarkStain', 
-                      'rejShellSplit', 'rejUndersize', 'rejLooseShell', 'rejLooseKernel', 'rejDust'];
-    rejectsKg = rejectIds.reduce((sum, id) => {
-      return sum + (parseInt(document.getElementById(id).value) || 0);
-    }, 0);
-  }
-  
-  const rawInput = parseInt(document.getElementById('rawInput').value) || 0;
-  const totalInput = rawInput > 0 ? rawInput : finishedKg + rejectsKg;
-  
-  // ADD THESE TWO MISSING LINES:
-  const efficiency = totalInput > 0 ? Math.round((finishedKg / totalInput) * 100) : 0;
-  const rejectRate = totalInput > 0 ? Math.round((rejectsKg / totalInput) * 1000) / 10 : 0;
-  
-  document.getElementById('productionSummary').textContent = 
-    `Finished: ${finishedKg} kg • Rejects: ${rejectsKg} kg • Efficiency: ${efficiency}% • Reject Rate: ${rejectRate}%`;
-}
-
 function updateSummary() {
   // Calculate 18-21 size totals
   const size1821_10kg = parseInt(document.getElementById('size1821_10kg').value) || 0;
@@ -3520,8 +3490,6 @@ const totalCostIncludingWaste = totalMaterialsCost + totalWasteCost;
   ${record.containerNumbers && record.containerNumbers.length > 0 
     ? record.containerNumbers.join(', ')
     : 'No containers specified'}
-</td>
-<td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
 </td>
 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${record.rawInput.toLocaleString()}</td>
                 <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: right;">${(record.kg1821 || 0).toLocaleString()}</td>
