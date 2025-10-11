@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '20'
 
-      # Make sure a package.json exists so npm can add dev deps cleanly
+      # Make sure package.json exists
       - name: Init package.json (if missing)
         run: |
           if [ ! -f package.json ]; then
@@ -78,7 +78,6 @@ jobs:
           fs.writeFileSync('top-assets.txt', top, 'utf8');
           EOF
 
-      # ---- Scans (never fail the job) ----
       - name: Run orphan asset scan
         run: node scripts/find-orphans.mjs || true
 
@@ -92,13 +91,12 @@ jobs:
             --content "public/**/*.{html,js,jsx,ts,tsx}" \
             --rejected --stdout > purgecss-report.txt || true
 
-           - name: Ensure report placeholders exist
+      - name: Ensure report placeholders exist
         run: |
           if [ ! -f orphan-assets.txt ]; then echo None > orphan-assets.txt; fi
           if [ ! -f madge-orphans.txt ]; then echo 'No output (step failed to run)' > madge-orphans.txt; fi
           if [ ! -f purgecss-report.txt ]; then echo 'No output (step failed to run)' > purgecss-report.txt; fi
           if [ ! -f top-assets.txt ]; then echo 'No output (step failed to run)' > top-assets.txt; fi
-
 
       - name: Upload reports
         if: always()
