@@ -1,0 +1,96 @@
+name: Asset Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install audit tools
+        run: npm i -D fast-glob madge purgecss
+
+      - name: Save audit script
+        run: |
+          mkdir -p scripts
+          cat > scripts/find-orphans.mjs << 'EOF'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import fg from 'fast-glob';
+
+          // Adjust folders if needed
+          const ROOTS = ['public'];
+
+          const codeGlobs = ROOTS.map(r => `${r}/**/*.{html,htm,js,jsx,ts,tsx,css}`);
+          const assetGlobs = ROOTS.map(r => `${r}/**/*.{css,js,map,png,jpg,jpeg,svg,webp,gif,ico,woff,woff2,ttf,mp4,mp3}`);
+
+          const codeFiles = await fg(codeGlobs, { dot:false });
+          const assetFiles = await fg(assetGlobs, { dot:false });
+
+          let corpus = '';
+          for (const f of codeFiles) {
+            try { corpus += fs.readFileSync(f, 'utf8') + '\n'; } catch {}
+          }
+
+          const referenced = new Set();
+          const norm = p => p.replaceAll('\\','/');
+
+          function candidateKeys(p) {
+            const n = norm(p);
+            const keys = [n];
+            const afterPublic = n.replace(/^.*?public\//,'');
+            if (afterPublic !== n) keys.push(afterPublic);
+            keys.push(path.posix.basename(n));
+            return [...new Set(keys)];
+          }
+
+          for (const a of assetFiles) {
+            const keys = candidateKeys(a);
+            if (keys.some(k => corpus.includes(k))) referenced.add(a);
+          }
+
+          const orphans = assetFiles.filter(a => !referenced.has(a));
+          const sizes = assetFiles.map(p => ({ p, s: fs.statSync(p).size }))
+            .sort((a,b) => b.s - a.s)
+            .slice(0, 30);
+
+          fs.writeFileSync('orphan-assets.txt',
+            (orphans.length ? orphans.sort().join('\n') : 'None'), 'utf8');
+
+          let top = 'Size(KB)\tPath\n';
+          for (const {p,s} of sizes) top += `${(s/1024).toFixed(1)}\t${p}\n`;
+          fs.writeFileSync('top-assets.txt', top, 'utf8');
+          EOF
+
+      - name: Run orphan asset scan
+        run: node scripts/find-orphans.mjs
+
+      - name: JS module orphan scan (madge)
+        run: npx madge public --extensions js,jsx,ts,tsx --orphans | tee madge-orphans.txt
+
+      - name: Unused CSS report (purgecss)
+        run: |
+          npx purgecss \
+            --css "public/**/*.css" \
+            --content "public/**/*.{html,js,jsx,ts,tsx}" \
+            --rejected --stdout > purgecss-report.txt
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-reports
+          path: |
+            orphan-assets.txt
+            madge-orphans.txt
+            purgecss-report.txt
+            top-assets.txt
