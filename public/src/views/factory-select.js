@@ -55,15 +55,6 @@ export function FactorySelectView(mount) {
         <p class="section-sub">Pick a workspace to get started.</p>
       </div>
       
-      <!-- Master Inventory Overview Button -->
-      <div class="text-center" style="margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1rem; border: 2px solid #22c55e;">
-        <button class="btn" onclick="goTo('#/inventory/overview')" style="font-size: 1.2rem; padding: 1rem 2rem; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
-          📦 Master Inventory Overview
-        </button>
-        <p style="margin: 0.75rem 0 0 0; color: var(--muted); font-size: 0.95rem; font-weight: 500;">
-          Centralized warehouse management across all factories
-        </p>
-      </div>
       
       <div id="factoryGrid" class="grid grid-3" role="list">
         <div class="skel skel-card"></div>
