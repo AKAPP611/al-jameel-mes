@@ -1,4 +1,4 @@
-name: Asset Audit
+name: Asset Audit (robust)
 
 on:
   workflow_dispatch:
@@ -17,6 +17,13 @@ jobs:
         with:
           node-version: '20'
 
+      # Make sure a package.json exists so npm can add dev deps cleanly
+      - name: Init package.json (if missing)
+        run: |
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+
       - name: Install audit tools
         run: npm i -D fast-glob madge purgecss
 
@@ -28,8 +35,7 @@ jobs:
           import path from 'node:path';
           import fg from 'fast-glob';
 
-          // Adjust folders if needed
-          const ROOTS = ['public'];
+          const ROOTS = ['public']; // adjust if your code isn't in /public
 
           const codeGlobs = ROOTS.map(r => `${r}/**/*.{html,htm,js,jsx,ts,tsx,css}`);
           const assetGlobs = ROOTS.map(r => `${r}/**/*.{css,js,map,png,jpg,jpeg,svg,webp,gif,ico,woff,woff2,ttf,mp4,mp3}`);
@@ -72,25 +78,22 @@ jobs:
           fs.writeFileSync('top-assets.txt', top, 'utf8');
           EOF
 
+      # ---- Scans (never fail the job) ----
       - name: Run orphan asset scan
-        run: node scripts/find-orphans.mjs
+        run: node scripts/find-orphans.mjs || true
 
       - name: JS module orphan scan (madge)
-        run: npx madge public --extensions js,jsx,ts,tsx --orphans | tee madge-orphans.txt
+        run: npx madge public --extensions js,jsx,ts,tsx --orphans | tee madge-orphans.txt || true
 
       - name: Unused CSS report (purgecss)
         run: |
           npx purgecss \
             --css "public/**/*.css" \
             --content "public/**/*.{html,js,jsx,ts,tsx}" \
-            --rejected --stdout > purgecss-report.txt
+            --rejected --stdout > purgecss-report.txt || true
 
-      - name: Upload reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: audit-reports
-          path: |
-            orphan-assets.txt
-            madge-orphans.txt
-            purgecss-report.txt
-            top-assets.txt
+      - name: Ensure report placeholders exist
+        run: |
+          [ -f orphan-assets.txt ] || echo "None" > orphan-assets.txt
+          [ -f madge-orphans.txt ] || echo "No output (step failed to run)" > madge-orphans.txt
+          [ -f purgecss-report.txt ] || echo "No output (step fa
