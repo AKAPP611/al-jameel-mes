@@ -1,9 +1,0 @@
-{
-  "final_goods": [
-    { "brand": "Golden Hill", "size": "18-21" },
-    { "brand": "Golden Hill", "size": "21-25" },
-    { "brand": "Extra",       "size": "18-21" },
-    { "brand": "Extra",       "size": "21-25" }
-  ],
-  "runs": ["Golden Hill Huller Run", "Extra Huller Run"]
-}
